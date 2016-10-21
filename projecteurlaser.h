@@ -1,0 +1,56 @@
+#ifndef PROJECTEURLASER_H
+#define PROJECTEURLASER_H
+
+#include <QMainWindow>
+
+#include <QFileDialog>
+
+#include "image.h"
+#include "wininfo.h"
+
+namespace Ui {
+class ProjecteurLaser;
+}
+
+class ProjecteurLaser : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit ProjecteurLaser(QWidget *parent = 0);
+    ~ProjecteurLaser();
+
+private slots:
+    void on_actionFileNew_triggered();
+
+    void on_actionFileOpen_triggered();
+
+    void on_actionFileSave_triggered();
+
+    void on_actionFileClose_triggered();
+
+    void on_actionSerialConnect_triggered();
+
+    void on_actionSerialDisconnect_triggered();
+
+    void on_actionSerialSettings_triggered();
+
+    void on_actionHelp_triggered();
+
+    void on_actionAbout_triggered();
+
+    void on_actionImageCompute_triggered();
+
+    void on_actionImageCalibrate_triggered();
+
+private:
+    Ui::ProjecteurLaser *ui;
+
+    Image image;
+
+    QString typeFichier;
+
+//    Serial serial;
+};
+
+#endif // PROJECTEURLASER_H
