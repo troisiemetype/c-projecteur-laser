@@ -8,6 +8,8 @@
 #include "computeimage.h"
 #include "image.h"
 #include "serial.h"
+#include "serialconfig.h"
+#include "serialsettings.h"
 #include "wininfo.h"
 
 namespace Ui {

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,12 +17,17 @@ SOURCES += main.cpp\
            image.cpp \
            wininfo.cpp \
     computeimage.cpp \
-    serial.cpp
+    serial.cpp \
+    serialsettings.cpp \
+    serialconfig.cpp
 
 HEADERS  += projecteurlaser.h \
             image.h \
             wininfo.h \
     computeimage.h \
-    serial.h
+    serial.h \
+    serialsettings.h \
+    serialconfig.h
 
-FORMS    += projecteurlaser.ui
+FORMS    += projecteurlaser.ui \
+    serialsettings.ui

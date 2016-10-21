@@ -11,6 +11,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->progressLabel->hide();
 
     serial = Serial();
+
 }
 
 ProjecteurLaser::~ProjecteurLaser()
@@ -94,7 +95,8 @@ void ProjecteurLaser::on_actionSerialDisconnect_triggered()
 
 void ProjecteurLaser::on_actionSerialSettings_triggered()
 {
-
+    SerialSettings serialSettings(this);
+    serialSettings.exec();
 }
 
 void ProjecteurLaser::on_actionHelp_triggered()
