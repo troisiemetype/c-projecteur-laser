@@ -16,11 +16,13 @@ SOURCES += main.cpp\
            projecteurlaser.cpp \
            image.cpp \
            wininfo.cpp \
-    computeimage.cpp
+    computeimage.cpp \
+    serial.cpp
 
 HEADERS  += projecteurlaser.h \
             image.h \
             wininfo.h \
-    computeimage.h
+    computeimage.h \
+    serial.h
 
 FORMS    += projecteurlaser.ui

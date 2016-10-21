@@ -9,6 +9,8 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->centralWidget->hide();
     ui->progressBar->hide();
     ui->progressLabel->hide();
+
+    serial = Serial();
 }
 
 ProjecteurLaser::~ProjecteurLaser()
@@ -48,6 +50,8 @@ void ProjecteurLaser::on_actionFileNew_triggered()
         ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
         ui->distanceLineEdit->setText(QString::number(image.getDistance()));
         ui->speedLineEdit->setText(QString::number(image.getSpeed()));
+
+        computeImage = ComputeImage(image);
     }
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
@@ -105,7 +109,16 @@ void ProjecteurLaser::on_actionAbout_triggered()
 
 void ProjecteurLaser::on_actionImageCompute_triggered()
 {
+    serial.emptyCoord();
 
+    ui->progressLabel->show();
+    ui->progressLabel->setText(tr("Calcul en cours..."));
+    ui->progressBar->show();
+
+    computeImage.computeCoords(serial.getDataArray(), ui->progressBar);
+
+    ui->progressLabel->hide();
+    ui->progressBar->hide();
 }
 
 void ProjecteurLaser::on_actionImageCalibrate_triggered()

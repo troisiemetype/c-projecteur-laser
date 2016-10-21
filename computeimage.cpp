@@ -1,8 +1,5 @@
 #include "computeimage.h"
 
-using namespace std;
-
-
 ComputeImage::ComputeImage()
 {
 
@@ -27,6 +24,7 @@ ComputeImage::ComputeImage(Image file)
     image = file.getNegative();
     widthPix = file.getWidthPix();
     heightPix = file.getHeightPix();
+    size = widthPix * heightPix;
     widthMm = file.getWidthMm();
     heightMm = file.getHeightMm();
     //TODO: distance and speed values need to be updated when modified in the GUI.
@@ -78,7 +76,7 @@ void ComputeImage::updateMaxSize()
 //that will be sent to the laser.
 //This string is like:
 //data = IidLlvalueXxvalueYyvalueSspeed
-void ComputeImage::computeCoords(QVector<QString>* serialData)
+void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* progressBar)
 {
     //Get the last distance value and compute angle pos for every pixel.
     updateMaxSize();
@@ -88,6 +86,7 @@ void ComputeImage::computeCoords(QVector<QString>* serialData)
     int debut = time(&timer);
 
     int index = 0;
+    double percent = 0;
 
     for(int j = 0; j<heightPix; j++)
     {
@@ -120,6 +119,9 @@ void ComputeImage::computeCoords(QVector<QString>* serialData)
             dataToSend += QString::number(pix);
             serialData->push_back(dataToSend);
         }
+
+        percent = (double)index * 100 / size;
+        progressBar->setValue(ceil(percent));
     }
     int duree = time(&timer) - debut;
     QString message = "Position values computed in ";
@@ -180,7 +182,7 @@ void ComputeImage::computeAngles()
     message += QString::number(duree);
     message += " seconds";
 
-    WinInfo::info(message);
+   // WinInfo::info(message);
 
 }
 

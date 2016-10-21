@@ -5,7 +5,9 @@
 
 #include <QFileDialog>
 
+#include "computeimage.h"
 #include "image.h"
+#include "serial.h"
 #include "wininfo.h"
 
 namespace Ui {
@@ -46,7 +48,9 @@ private slots:
 private:
     Ui::ProjecteurLaser *ui;
 
+    ComputeImage computeImage;
     Image image;
+    Serial serial;
 
     QString typeFichier;
 

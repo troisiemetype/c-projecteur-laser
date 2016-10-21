@@ -2,14 +2,18 @@
 #define COMPUTEIMAGE_H
 
 #include <iostream>
+#include <vector>
 #include <cmath>
 #include <ctime>
 
+#include <QCoreApplication>
+#include <QProgressBar>
 #include <QString>
-#include <QVector>
 
 #include "image.h"
 #include "wininfo.h"
+
+using namespace std;
 
 class ComputeImage
 {
@@ -19,7 +23,7 @@ public:
     ComputeImage(Image);
 
     void updateMaxSize();
-    void computeCoords(QVector<QString>*);
+    void computeCoords(vector<QString>*, QProgressBar*);
     void computeAngles();
 
     int getMinDistance();
@@ -42,6 +46,7 @@ private:
     int maxSizeY;
     int halfMaxSizeX;
     int halfMaxSizeY;
+    int size;
 
     //Values that store the max angle of the scan.
     double maxAngleX;
@@ -52,8 +57,8 @@ private:
     double pi;
 
     //two tables to stores the angles values of each pixel.
-    QVector<int> angleValueX;
-    QVector<int> angleValueY;
+    vector<int> angleValueX;
+    vector<int> angleValueY;
 
 };
 
