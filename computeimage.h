@@ -1,10 +1,10 @@
 #ifndef COMPUTEIMAGE_H
 #define COMPUTEIMAGE_H
 
-#include <iostream>
-#include <vector>
 #include <cmath>
 #include <ctime>
+#include <iostream>
+#include <vector>
 
 #include <QCoreApplication>
 #include <QProgressBar>

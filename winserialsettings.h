@@ -2,7 +2,9 @@
 #define SERIALSETTINGS_H
 
 #include <QDialog>
+#include <QStringList>
 
+#include "serial.h"
 #include "serialconfig.h"
 
 namespace Ui {

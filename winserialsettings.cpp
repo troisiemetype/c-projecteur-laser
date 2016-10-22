@@ -33,7 +33,9 @@ WinSerialSettings::~WinSerialSettings()
 
 void WinSerialSettings::on_serialUpdateList_clicked()
 {
-
+    QStringList portNames = Serial::getPortNames();
+    ui->serialPortLineEdit->clear();
+    ui->serialPortLineEdit->addItems(portNames);
 }
 
 void WinSerialSettings::on_buttonBox_accepted()

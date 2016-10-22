@@ -85,12 +85,18 @@ void ProjecteurLaser::on_actionFileClose_triggered()
 
 void ProjecteurLaser::on_actionSerialConnect_triggered()
 {
+    if(ui->actionSerialConnect->isChecked())
+    {
+        serial.open();
+    } else {
+        serial.close();
+    }
 
 }
 
 void ProjecteurLaser::on_actionSerialDisconnect_triggered()
 {
-
+    serial.close();
 }
 
 void ProjecteurLaser::on_actionSerialSettings_triggered()

@@ -23,6 +23,7 @@ public:
     //getters for availables values
     QString getString(QString);
     int getIndex(QString);
+    int getValue(QString);
     bool getBool(QString);
 
     QStringList getList(QString);
