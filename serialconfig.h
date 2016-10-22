@@ -1,9 +1,14 @@
 #ifndef SERIALCONFIG_H
 #define SERIALCONFIG_H
 
+#include <QRegExp>
 #include <QSerialPort>
 #include <QSettings>
 #include <QStringList>
+
+#include <iostream>
+
+#include "wininfo.h"
 
 using namespace std;
 
@@ -12,28 +17,30 @@ class SerialConfig
 public:
     SerialConfig();
 
+    void read();
     void save(QString, QString, QString, QString, QString, bool);
 
     //getters for availables values
-    QStringList getBaudrates();
-    QStringList getDataBits();
-    QStringList getParities();
-    QStringList getStopBits();
+    QString getString(QString);
+    int getIndex(QString);
+    bool getBool(QString);
 
-    //getters from the set values
-    QString getPort();
-    int getBaudrate();
-    int getDataBit();
-    int getParity();
-    int getStopBit();
-    bool getFloControlXon();
+    QStringList getList(QString);
 
 private:
     QSettings *settings;
     QStringList baudrates;
     QStringList dataBits;
     QStringList parities;
-    QStringList StopBits;
+    QStringList stopBits;
+    bool flowControl;
+
+    QString activePort;
+    int activeBaudrate;
+    int activeDataBits;
+    int activeParity;
+    int activeStopBits;
+    bool activeFlowControl;
 
 };
 

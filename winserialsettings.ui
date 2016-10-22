@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SerialSettings</class>
- <widget class="QDialog" name="SerialSettings">
+ <class>WinSerialSettings</class>
+ <widget class="QDialog" name="WinSerialSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -36,7 +36,7 @@
      <item row="1" column="1">
       <widget class="QComboBox" name="serialBaudrateLineEdit">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -50,7 +50,7 @@
      <item row="2" column="1">
       <widget class="QComboBox" name="serialDataBitsLineEdit">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -64,7 +64,7 @@
      <item row="3" column="1">
       <widget class="QComboBox" name="serialParityLineEdit">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -78,7 +78,7 @@
      <item row="4" column="1">
       <widget class="QComboBox" name="serialStopBitsLineEdit">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -92,10 +92,10 @@
      <item row="5" column="1">
       <widget class="QCheckBox" name="serialFlowControlXonLineEdit">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="checkable">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -138,7 +138,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SerialSettings</receiver>
+   <receiver>WinSerialSettings</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -154,7 +154,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SerialSettings</receiver>
+   <receiver>WinSerialSettings</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

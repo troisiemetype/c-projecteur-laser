@@ -95,8 +95,8 @@ void ProjecteurLaser::on_actionSerialDisconnect_triggered()
 
 void ProjecteurLaser::on_actionSerialSettings_triggered()
 {
-    SerialSettings serialSettings(this);
-    serialSettings.exec();
+    WinSerialSettings winSerialSettings(this);
+    winSerialSettings.exec();
 }
 
 void ProjecteurLaser::on_actionHelp_triggered()

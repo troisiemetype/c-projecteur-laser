@@ -9,7 +9,7 @@
 #include "image.h"
 #include "serial.h"
 #include "serialconfig.h"
-#include "serialsettings.h"
+#include "winserialsettings.h"
 #include "wininfo.h"
 
 namespace Ui {

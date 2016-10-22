@@ -16,18 +16,18 @@ SOURCES += main.cpp\
            projecteurlaser.cpp \
            image.cpp \
            wininfo.cpp \
-    computeimage.cpp \
-    serial.cpp \
-    serialsettings.cpp \
-    serialconfig.cpp
+           computeimage.cpp \
+           serial.cpp \
+           serialconfig.cpp \
+           winserialsettings.cpp
 
 HEADERS  += projecteurlaser.h \
             image.h \
             wininfo.h \
-    computeimage.h \
-    serial.h \
-    serialsettings.h \
-    serialconfig.h
+            computeimage.h \
+            serial.h \
+            serialconfig.h \
+            winserialsettings.h
 
 FORMS    += projecteurlaser.ui \
-    serialsettings.ui
+            winserialsettings.ui

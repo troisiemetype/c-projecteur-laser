@@ -6,16 +6,16 @@
 #include "serialconfig.h"
 
 namespace Ui {
-class SerialSettings;
+class WinSerialSettings;
 }
 
-class SerialSettings : public QDialog
+class WinSerialSettings : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SerialSettings(QWidget *parent = 0);
-    ~SerialSettings();
+    explicit WinSerialSettings(QWidget *parent = 0);
+    ~WinSerialSettings();
 
 private slots:
     void on_serialUpdateList_clicked();
@@ -23,7 +23,7 @@ private slots:
     void on_buttonBox_accepted();
 
 private:
-    Ui::SerialSettings *ui;
+    Ui::WinSerialSettings *ui;
 
     SerialConfig *serialConfig;
 };
