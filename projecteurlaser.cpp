@@ -87,9 +87,16 @@ void ProjecteurLaser::on_actionSerialConnect_triggered()
 {
     if(ui->actionSerialConnect->isChecked())
     {
-        serial.open();
+        int ouvert = serial.open();
+        if(!ouvert){
+            ui->actionSerialConnect->setChecked(false);
+        }
+        if(ouvert && serial.isCompute()){
+            ui->actionSendData->setEnabled(true);
+        }
     } else {
         serial.close();
+        ui->actionSendData->setEnabled(false);
     }
 
 }
@@ -127,9 +134,18 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 
     ui->progressLabel->hide();
     ui->progressBar->hide();
+
+    if(serial.isOpen()){
+        ui->actionSendData->setEnabled(true);
+    }
 }
 
 void ProjecteurLaser::on_actionImageCalibrate_triggered()
 {
 
+}
+
+void ProjecteurLaser::on_actionSendData_triggered()
+{
+    serial.sendData();
 }

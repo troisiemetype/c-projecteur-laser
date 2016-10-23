@@ -3,6 +3,7 @@
 Serial::Serial()
 {
     serial = new QSerialPort();
+    opened = false;
 }
 
 Serial::~Serial()
@@ -26,8 +27,10 @@ bool Serial::open()
 
     if(serial->open(QIODevice::ReadWrite))
     {
+        opened = true;
         return true;
     } else {
+        opened = false;
         return false;
     }
 
@@ -35,12 +38,23 @@ bool Serial::open()
 
 void Serial::close()
 {
+    opened = false;
     serial->close();
 }
 
 void Serial::sendData()
 {
+    dataSize = dataToSend.size();
 
+    for(int i = 0; i < dataSize; i++){
+        string strToSend = dataToSend.at(i).toStdString();
+        char *charToSend = new char[strToSend.size() + 1];
+        strcpy(charToSend, strToSend.c_str());
+        serial->write(charToSend);
+
+    }
+
+    WinInfo::info("Image sent in...");
 }
 
 void Serial::addCoord(QString coord)
@@ -61,6 +75,22 @@ void Serial::addBoxSupport(QString coord)
 void Serial::emptyCoord()
 {
     dataToSend.clear();
+}
+
+bool Serial::isOpen()
+{
+    return opened;
+}
+
+bool Serial::isCompute()
+{
+    if(dataToSend.size() == 0)
+    {
+        return 0;
+    } else {
+        return 1;
+    }
+
 }
 
 vector<QString>* Serial::getDataArray()

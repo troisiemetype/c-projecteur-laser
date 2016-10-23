@@ -8,6 +8,7 @@
 #include <QStringList>
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "serialconfig.h"
@@ -33,6 +34,9 @@ public:
 
     void emptyCoord();
 
+    bool isOpen();
+    bool isCompute();
+
     //getters for used values
     vector<QString>* getDataArray();
     vector<QString>* getBoxImageArray();
@@ -49,6 +53,8 @@ private:
     vector<QString> dataBoxImage;
     vector<QString> dataBoxSupport;
 
+    bool opened;
+    int dataSize;
 
 };
 

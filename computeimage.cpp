@@ -85,13 +85,24 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
     time_t timer;
     int debut = time(&timer);
 
-    int index = 0;
+//    int index = 0;
     double percent = 0;
 
     for(int j = 0; j<heightPix; j++)
     {
 
         //uchar * line = image.scanLine(j);
+
+
+        QString dataToSend = "X";
+        dataToSend += QString::number(angleValueX[0]);
+        dataToSend += "Y";
+        dataToSend += QString::number(angleValueY[j]);
+        dataToSend += "L0";
+        dataToSend += "M0";
+        dataToSend += '\n';
+        serialData->push_back(dataToSend);
+
 
         for(int i = 0; i<widthPix; i++)
         {
@@ -103,25 +114,32 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
             //TODO: verify the last value computed: if a pix value is 0
             // and the previous one was something else, it must be set to 0
             // to cut the laser.
+            percent = ((double)j * widthPix + i) * 100 / size;
+            progressBar->setValue(ceil(percent));
+
             if(pix == 0)
             {
                 continue;
             }
 
             //Build the strings to be sent to the laser by serial.
-            QString dataToSend = "I";
-            dataToSend += QString::number(index++);
-            dataToSend += "X";
+//            QString dataToSend = "I";
+//            dataToSend += QString::number(index++);
+            QString dataToSend = "X";
             dataToSend += QString::number(angleValueX[i]);
             dataToSend += "Y";
             dataToSend += QString::number(angleValueY[j]);
             dataToSend += "L";
             dataToSend += QString::number(pix);
+            dataToSend += "M1";
+            dataToSend += "S10000";
+            dataToSend += '\n';
             serialData->push_back(dataToSend);
         }
 
-        percent = (double)index * 100 / size;
-        progressBar->setValue(ceil(percent));
+        serialData->push_back("L0M0\n");
+
+
     }
     int duree = time(&timer) - debut;
     QString message = "Position values computed in ";

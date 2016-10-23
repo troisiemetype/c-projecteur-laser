@@ -47,6 +47,8 @@ private slots:
 
     void on_actionImageCalibrate_triggered();
 
+    void on_actionSendData_triggered();
+
 private:
     Ui::ProjecteurLaser *ui;
 
