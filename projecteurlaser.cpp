@@ -142,10 +142,33 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 
 void ProjecteurLaser::on_actionImageCalibrate_triggered()
 {
-
+    computeImage.computeSupport(serial.getBoxSupportArray());
+    serial.sendSupport();
 }
 
 void ProjecteurLaser::on_actionSendData_triggered()
 {
     serial.sendData();
+}
+
+void ProjecteurLaser::on_supportWidthLineEdit_returnPressed()
+{
+    image.setSupportWidth(ui->supportWidthLineEdit->text().toInt());
+}
+
+void ProjecteurLaser::on_supportHeightLineEdit_returnPressed()
+{
+    image.setSupportHeight(ui->supportHeightLineEdit->text().toInt());
+
+}
+
+void ProjecteurLaser::on_distanceLineEdit_returnPressed()
+{
+    image.setDistance(ui->distanceLineEdit->text().toInt());
+
+}
+
+void ProjecteurLaser::on_speedLineEdit_returnPressed()
+{
+    image.setSpeed(ui->speedLineEdit->text().toInt());
 }

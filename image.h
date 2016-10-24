@@ -32,6 +32,14 @@ public:
     int getHeightMm();
     int getDistance();
     int getSpeed();
+    int getSupportWidth();
+    int getSupportHeight();
+
+    //setters
+    void setSupportWidth(int);
+    void setSupportHeight(int);
+    void setDistance(int);
+    void setSpeed(int);
 
 private:
     bool setGray();
@@ -48,6 +56,9 @@ private:
 
     int distance;
     int speed;
+
+    int supportWidth;
+    int supportHeight;
 
     bool saved;
 

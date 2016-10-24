@@ -16,6 +16,9 @@ Image::Image(QString const& file)
     widthMm = 1000 * width / image.dotsPerMeterX();
     heightMm = 1000 * height / image.dotsPerMeterY();
 
+    supportWidth = widthMm;
+    supportHeight = heightMm;
+
     setGray();
     negative = image;
     negative.invertPixels();
@@ -93,6 +96,37 @@ int Image::getSpeed()
 {
     return speed;
 }
+
+int Image::getSupportWidth()
+{
+    return supportWidth;
+}
+
+int Image::getSupportHeight()
+{
+    return supportHeight;
+}
+
+void Image::setSupportWidth(int value)
+{
+
+}
+
+void Image::setSupportHeight(int value)
+{
+
+}
+
+void Image::setDistance(int value)
+{
+
+}
+
+void Image::setSpeed(int value)
+{
+
+}
+
 
 //convert the image into black and white
 //TODO: give the choice between a gray image and black and white (dotted) image.

@@ -16,7 +16,7 @@ bool Serial::open()
     serialConfig = SerialConfig();
 
     serial->setPortName(serialConfig.getString("port"));
-    serial->setBaudRate(115200);
+    serial->setBaudRate(57600);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
     serial->setStopBits(QSerialPort::OneStop);
@@ -44,7 +44,16 @@ void Serial::close()
 
 void Serial::sendData()
 {
-    dataSize = dataToSend.size();
+/*    string adresse = "sortie_serial.txt";
+    ofstream sortieSerial(adresse);
+
+    if(!sortieSerial)
+    {
+        WinInfo::info("ouverture impossible");
+    }
+*/
+
+ /*   dataSize = dataToSend.size();
 
     for(int i = 0; i < dataSize; i++){
         string strToSend = dataToSend.at(i).toStdString();
@@ -52,9 +61,31 @@ void Serial::sendData()
         strcpy(charToSend, strToSend.c_str());
         serial->write(charToSend);
 
+//        sortieSerial << charToSend;
+
+    }
+    */
+    for(int i = 0; i < dataSize; i++){
+        QByteArray strToSend = QByteArray();
+        strToSend.append(dataToSend.at(i));
+        serial->write(strToSend);
     }
 
-    WinInfo::info("Image sent in...");
+//    WinInfo::info("Image sent...");
+}
+
+void Serial::sendSupport()
+{
+    for(int j = 0; j < 200 ; j++)
+    {
+        for(int i = 0; i < 4; i++){
+            QByteArray strToSend = QByteArray();
+            strToSend.append(dataBoxSupport.at(i));
+            serial->write(strToSend);
+
+        }
+    }
+
 }
 
 void Serial::addCoord(QString coord)

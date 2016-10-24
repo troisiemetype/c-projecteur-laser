@@ -2,8 +2,10 @@
 #define COMPUTEIMAGE_H
 
 #include <cmath>
+#include <cstring>
 #include <ctime>
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 #include <QCoreApplication>
@@ -24,6 +26,7 @@ public:
 
     void updateMaxSize();
     void computeCoords(vector<QString>*, QProgressBar*);
+    void computeSupport(vector<QString>*);
     void computeAngles();
 
     int getMinDistance();
@@ -38,6 +41,8 @@ private:
     int heightMm;
     int speed;
     int distance;
+    int supportWidth;
+    int supportHeight;
     int minDistance;
     double ratioPixMm;
 

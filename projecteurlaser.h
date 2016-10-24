@@ -49,6 +49,14 @@ private slots:
 
     void on_actionSendData_triggered();
 
+    void on_supportWidthLineEdit_returnPressed();
+
+    void on_supportHeightLineEdit_returnPressed();
+
+    void on_distanceLineEdit_returnPressed();
+
+    void on_speedLineEdit_returnPressed();
+
 private:
     Ui::ProjecteurLaser *ui;
 

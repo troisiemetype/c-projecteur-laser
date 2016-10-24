@@ -60,7 +60,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="widthPixelsLabel">
           <property name="text">
-           <string>Width, pixels</string>
+           <string>Image width, pixels</string>
           </property>
          </widget>
         </item>
@@ -80,7 +80,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="heightPixelsLabel">
           <property name="text">
-           <string>Height, pixels</string>
+           <string>Image height, pixels</string>
           </property>
          </widget>
         </item>
@@ -90,7 +90,7 @@
         <item row="2" column="0">
          <widget class="QLabel" name="widthMmLabel">
           <property name="text">
-           <string>Width, mm</string>
+           <string>Image width, mm</string>
           </property>
          </widget>
         </item>
@@ -100,21 +100,21 @@
         <item row="3" column="0">
          <widget class="QLabel" name="heightMmLabel">
           <property name="text">
-           <string>Height, mm</string>
+           <string>Image height, mm</string>
           </property>
          </widget>
         </item>
         <item row="3" column="1">
          <widget class="QLineEdit" name="heightMmLineEdit"/>
         </item>
-        <item row="4" column="0">
+        <item row="6" column="0">
          <widget class="QLabel" name="distanceLabel">
           <property name="text">
            <string>Distance</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
+        <item row="6" column="1">
          <widget class="QLineEdit" name="distanceLineEdit">
           <property name="minimumSize">
            <size>
@@ -130,15 +130,35 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
+        <item row="7" column="0">
          <widget class="QLabel" name="speedLabel">
           <property name="text">
            <string>Speed</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
+        <item row="7" column="1">
          <widget class="QLineEdit" name="speedLineEdit"/>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="supportWidthLabel">
+          <property name="text">
+           <string>Support width, mm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="supportHeightLabel">
+          <property name="text">
+           <string>Support height, mm</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="supportWidthLineEdit"/>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="supportHeightLineEdit"/>
         </item>
        </layout>
       </item>
@@ -275,6 +295,9 @@
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionFileClose">
    <property name="text">
@@ -344,6 +367,16 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>widthPixelsLineEdit</tabstop>
+  <tabstop>heightPixelsLineEdit</tabstop>
+  <tabstop>widthMmLineEdit</tabstop>
+  <tabstop>heightMmLineEdit</tabstop>
+  <tabstop>supportWidthLineEdit</tabstop>
+  <tabstop>supportHeightLineEdit</tabstop>
+  <tabstop>distanceLineEdit</tabstop>
+  <tabstop>speedLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

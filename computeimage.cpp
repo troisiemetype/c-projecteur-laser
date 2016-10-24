@@ -16,7 +16,7 @@ ComputeImage::ComputeImage(Image file)
     maxAngleY = 20 * pi / 180;
 
     //Prepare the tan of the scan max angle.
-    //With python it speeds up the calulus, but it seems C++ doesn't care!
+    //With python it speeds up the calculus, but it seems C++ doesn't care!
     tanXScan = tan(maxAngleX);
     tanYScan = tan(maxAngleY);
 
@@ -32,6 +32,9 @@ ComputeImage::ComputeImage(Image file)
     //distance = file.getDistance();
     //Temporary distance value for tests.
     distance = 900;
+
+    supportWidth = file.getSupportWidth();
+    supportHeight = file.getSupportHeight();
 
     //compute the minimum distance from laser to support,
     //given image size and angle value.
@@ -75,7 +78,7 @@ void ComputeImage::updateMaxSize()
 //Look at each pixel value of the image to create a string
 //that will be sent to the laser.
 //This string is like:
-//data = IidLlvalueXxvalueYyvalueSspeed
+//data = IidLlvalueXxvalueYyvalueSspeede.getSe.getS
 void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* progressBar)
 {
     //Get the last distance value and compute angle pos for every pixel.
@@ -88,13 +91,11 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
 //    int index = 0;
     double percent = 0;
 
+    QString dataToSend = "";
+
     for(int j = 0; j<heightPix; j++)
     {
-
-        //uchar * line = image.scanLine(j);
-
-
-        QString dataToSend = "X";
+        dataToSend = "X";
         dataToSend += QString::number(angleValueX[0]);
         dataToSend += "Y";
         dataToSend += QString::number(angleValueY[j]);
@@ -102,6 +103,10 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
         dataToSend += "M0";
         dataToSend += '\n';
         serialData->push_back(dataToSend);
+        //uchar * line = image.scanLine(j);
+
+//        cout << "début boucle" << endl;
+//        cout << dataToSend.toStdString();
 
 
         for(int i = 0; i<widthPix; i++)
@@ -125,28 +130,99 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
             //Build the strings to be sent to the laser by serial.
 //            QString dataToSend = "I";
 //            dataToSend += QString::number(index++);
-            QString dataToSend = "X";
+            dataToSend = "X";
             dataToSend += QString::number(angleValueX[i]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[j]);
+//            dataToSend += "Y";
+//            dataToSend += QString::number(angleValueY[j]);
             dataToSend += "L";
             dataToSend += QString::number(pix);
-            dataToSend += "M1";
-            dataToSend += "S10000";
+            dataToSend += "M0";
+            dataToSend += "S";
+            dataToSend += "5000";
             dataToSend += '\n';
             serialData->push_back(dataToSend);
+//            cout << dataToSend.toStdString();
         }
 
         serialData->push_back("L0M0\n");
 
-
     }
+
+/*
+    string adresse = "sortie_compute.txt";
+    ofstream sortieCompute(adresse);
+
+    if(!sortieCompute)
+    {
+        WinInfo::info("ouverture impossible");
+    }
+
+    int taille = serialData->size();
+    for(int i = 0; i < 2100; i++)
+    {
+        sortieCompute << serialData->at(i).toStdString();
+    }
+
+*/
     int duree = time(&timer) - debut;
     QString message = "Position values computed in ";
     message += QString::number(duree);
     message += " seconds";
 
-    WinInfo::info(message);
+//    WinInfo::info(message);
+
+}
+
+void ComputeImage::computeSupport(vector<QString> *serialData)
+{
+    double angleValue = 0;
+    double angleRatio = 0;
+    double halfSize = 0;
+    int widthValue = 0;
+    int heightValue = 0;
+
+    halfSize = (supportWidth / 2) * ratioPixMm;
+    angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
+    angleRatio = angleValue / maxAngleX;
+    widthValue = angleMaxValue * angleRatio;
+
+    halfSize = (supportHeight / 2) * ratioPixMm;
+    angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
+    angleRatio = angleValue / maxAngleY;
+    heightValue = angleMaxValue * angleRatio;
+
+    QString dataToSend = "L255";
+    dataToSend += "X";
+    dataToSend += QString::number(widthValue);
+    dataToSend += "M0";
+    dataToSend += "L255";
+    dataToSend += "\n";
+
+    serialData->push_back(dataToSend);
+
+    dataToSend = "Y";
+    dataToSend += QString::number(heightValue);
+    dataToSend += "M0";
+    dataToSend += "L255";
+    dataToSend += "\n";
+
+    serialData->push_back(dataToSend);
+
+    dataToSend = "X";
+    dataToSend += QString::number(-widthValue);
+    dataToSend += "M0";
+    dataToSend += "L255";
+    dataToSend += "\n";
+
+    serialData->push_back(dataToSend);
+
+    dataToSend = "Y";
+    dataToSend += QString::number(-heightValue);
+    dataToSend += "M0";
+    dataToSend += "L255";
+    dataToSend += "\n";
+
+    serialData->push_back(dataToSend);
 
 }
 

@@ -1,12 +1,15 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include <QByteArray>
 #include <QList>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QString>
 #include <QStringList>
 
+#include <cstring>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -27,6 +30,7 @@ public:
     void close();
 
     void sendData();
+    void sendSupport();
 
     void addCoord(QString);
     void addBoxImage(QString);
