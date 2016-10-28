@@ -16,12 +16,24 @@ Image::Image(QString const& file)
     widthMm = 1000 * width / image.dotsPerMeterX();
     heightMm = 1000 * height / image.dotsPerMeterY();
 
+    ratio = (double)width / height;
+
+    //default support size = image size.
     supportWidth = widthMm;
     supportHeight = heightMm;
 
-    setGray();
-    negative = image;
+    blackWhiteMode = 0;
+    blackWhiteStep = 128;
+
+    negative = setGray(image, blackWhiteMode);
     negative.invertPixels();
+
+    if(image.height() > image.width())
+    {
+        thumbnail = image.scaledToHeight(500);
+    } else {
+        thumbnail = image.scaledToWidth(500);
+    }
 
     saved = 0;
 }
@@ -43,23 +55,19 @@ bool Image::close()
 
 QPixmap Image::getPixmap()
 {
-    if(image.height() > image.width())
-    {
-        thumbnail = image.scaledToHeight(500);
-    } else {
-        thumbnail = image.scaledToWidth(500);
-    }
     //thumbnail = thumbnail.convertToFormat(QImage::Format_Mono);
 
+    thumbnailBW = setGray(thumbnail, blackWhiteMode);
+
     QPixmap pixmap;
-    pixmap.convertFromImage(thumbnail);
+    pixmap.convertFromImage(thumbnailBW);
 
     return pixmap;
 }
 
 QImage Image::getNegative()
 {
-    return negative;
+    return setGray(image, blackWhiteMode);
 }
 
 bool Image::isSaved()
@@ -109,55 +117,46 @@ int Image::getSupportHeight()
 
 void Image::setSupportWidth(int value)
 {
-
+    supportWidth = value;
+    supportHeight = value / ratio;
 }
 
 void Image::setSupportHeight(int value)
 {
-
+    supportHeight = value;
+    supportWidth = value * ratio;
 }
 
 void Image::setDistance(int value)
 {
-
+    distance = value;
 }
 
 void Image::setSpeed(int value)
 {
+    speed = value;
+}
+
+void Image::setMode(int value)
+{
+    blackWhiteMode = value;
+    negative = setGray(image, blackWhiteMode);
+    negative.invertPixels();
 
 }
 
-
 //convert the image into black and white
 //TODO: give the choice between a gray image and black and white (dotted) image.
-bool Image::setGray()
+QImage Image::setGray(QImage image, int mode)
 {
-    //First test if it's not already blackand white
-    if(image.allGray())
+    if(mode == 0)
     {
-        return 0;
-    } else {
-        //Then compute the average on each pixel
-
-        /*
-        for(int i=0; i<height; i++)
-        {
-            for(int j=0; j<width; j++)
-            {
-                QRgb color = image.pixel(j, i);
-                int gray = qGray(color);
-                image.setPixel(j, i, qRgb(gray, gray, gray));
-//                image.setPixel(j, i, qGray(image.pixel(j, i)));
-            }
-        }
-        */
-
-        for(int i=0; i<height; i++)
+        for(int i=0; i<image.height(); i++)
         {
             //TODO: See why scanLine() gives a different color than access by pixel().
             //uchar * line = image.scanLine(i);
 
-            for(int j=0; j<width; j++)
+            for(int j=0; j<image.width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
                 QRgb color = image.pixel(j, i);
@@ -166,10 +165,34 @@ bool Image::setGray()
                 //image.setPixel(j, i, qGray(image.pixel(j, i)));
             }
         }
+        return image;
 
+    } else if(mode == 1){
+//        image.convertToFormat(QImage::Format_Mono);
+//        return image;
+        for(int i=0; i<image.height(); i++)
+        {
+            //TODO: See why scanLine() gives a different color than access by pixel().
+            //uchar * line = image.scanLine(i);
 
-        return 1;
+            for(int j=0; j<image.width(); j++)
+            {
+                //QRgb color = (QRgb)*(line + j * 4);
+                QRgb color = image.pixel(j, i);
+                int gray = qGray(color);
+                if(gray > blackWhiteStep){
+                    image.setPixel(j, i, qRgb(255, 255, 255));
+                    //image.setPixel(j, i, qGray(image.pixel(j, i)));
+                } else {
+                    image.setPixel(j, i, qRgb(0, 0, 0));
+                }
+            }
+        }
+        return image;
     }
 
 }
 
+void Image::setStep(int value){
+    blackWhiteStep = value;
+}

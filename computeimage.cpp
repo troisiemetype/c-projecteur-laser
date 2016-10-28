@@ -31,7 +31,7 @@ ComputeImage::ComputeImage(Image file)
     speed = file.getSpeed();
     //distance = file.getDistance();
     //Temporary distance value for tests.
-    distance = 900;
+    distance = 400;
 
     supportWidth = file.getSupportWidth();
     supportHeight = file.getSupportHeight();
@@ -51,14 +51,14 @@ ComputeImage::ComputeImage(Image file)
     } else {
         ratioPixMm = double(heightMm) / heightPix;
     }
-
+/*
     cout << "ratio pix/mm: " << ratioPixMm << endl;
     cout << "width mm: " << widthMm << endl;
     cout << "distance: " << distance << endl;
     cout << "width pix: " << widthPix << endl;
     cout << "max angle X: " << maxAngleX << endl;
     cout << "max pos: " << angleMaxValue << endl;
-
+*/
 
 }
 
@@ -71,7 +71,7 @@ void ComputeImage::updateMaxSize()
     halfMaxSizeY = distance * tanYScan;
     maxSizeX = 2 * halfMaxSizeX;
     maxSizeY = 2 * halfMaxSizeY;
-    cout << "max size X: " << maxSizeX << endl;
+//    cout << "max size X: " << maxSizeX << endl;
 
 }
 
@@ -128,17 +128,17 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
             }
 
             //Build the strings to be sent to the laser by serial.
-//            QString dataToSend = "I";
-//            dataToSend += QString::number(index++);
-            dataToSend = "X";
+            dataToSend = "I";
+            dataToSend += QString::number((double)j * widthPix + i);
+            dataToSend += "X";
             dataToSend += QString::number(angleValueX[i]);
 //            dataToSend += "Y";
 //            dataToSend += QString::number(angleValueY[j]);
             dataToSend += "L";
             dataToSend += QString::number(pix);
-            dataToSend += "M0";
+            dataToSend += "M1";
             dataToSend += "S";
-            dataToSend += "5000";
+            dataToSend += "10000";
             dataToSend += '\n';
             serialData->push_back(dataToSend);
 //            cout << dataToSend.toStdString();

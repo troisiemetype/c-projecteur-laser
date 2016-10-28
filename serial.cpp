@@ -16,7 +16,7 @@ bool Serial::open()
     serialConfig = SerialConfig();
 
     serial->setPortName(serialConfig.getString("port"));
-    serial->setBaudRate(57600);
+    serial->setBaudRate(115200);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
     serial->setStopBits(QSerialPort::OneStop);
@@ -53,8 +53,8 @@ void Serial::sendData()
     }
 */
 
- /*   dataSize = dataToSend.size();
-
+    dataSize = dataToSend.size();
+/*
     for(int i = 0; i < dataSize; i++){
         string strToSend = dataToSend.at(i).toStdString();
         char *charToSend = new char[strToSend.size() + 1];
@@ -67,8 +67,22 @@ void Serial::sendData()
     */
     for(int i = 0; i < dataSize; i++){
         QByteArray strToSend = QByteArray();
-        strToSend.append(dataToSend.at(i));
+        strToSend.append(dataToSend.at(i).toLatin1());
         serial->write(strToSend);
+/*        if(serial->waitForReadyRead(10000)){
+            char *data;
+            serial->readLine(data, 50);
+
+            cout << data << endl;
+        }
+*/
+/*
+        if(serial->waitForBytesWritten(10))
+        {
+
+        } else {
+            cout << "paquet " << i << " non envoyé" << endl;
+        }*/
     }
 
 //    WinInfo::info("Image sent...");
@@ -82,7 +96,6 @@ void Serial::sendSupport()
             QByteArray strToSend = QByteArray();
             strToSend.append(dataBoxSupport.at(i));
             serial->write(strToSend);
-
         }
     }
 

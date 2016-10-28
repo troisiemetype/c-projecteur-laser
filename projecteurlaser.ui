@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>536</width>
-    <height>357</height>
+    <height>378</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,28 +64,12 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="widthPixelsLineEdit">
-          <property name="frame">
-           <bool>true</bool>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="clearButtonEnabled">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0">
          <widget class="QLabel" name="heightPixelsLabel">
           <property name="text">
            <string>Image height, pixels</string>
           </property>
          </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="heightPixelsLineEdit"/>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="widthMmLabel">
@@ -130,16 +114,6 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="speedLabel">
-          <property name="text">
-           <string>Speed</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QLineEdit" name="speedLineEdit"/>
-        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="supportWidthLabel">
           <property name="text">
@@ -160,7 +134,55 @@
         <item row="5" column="1">
          <widget class="QLineEdit" name="supportHeightLineEdit"/>
         </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="widthPixelsLabelEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="heightPixelsLabelEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="blackWhiteLabel">
+          <property name="text">
+           <string>Black and white</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="speedLabel">
+          <property name="text">
+           <string>Speed</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QLineEdit" name="speedLineEdit"/>
+        </item>
+        <item row="8" column="1">
+         <widget class="QCheckBox" name="blackWhiteCheckEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QSlider" name="horizontalSlider">
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="Line" name="line_2">
@@ -368,14 +390,11 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>widthPixelsLineEdit</tabstop>
-  <tabstop>heightPixelsLineEdit</tabstop>
   <tabstop>widthMmLineEdit</tabstop>
   <tabstop>heightMmLineEdit</tabstop>
   <tabstop>supportWidthLineEdit</tabstop>
   <tabstop>supportHeightLineEdit</tabstop>
   <tabstop>distanceLineEdit</tabstop>
-  <tabstop>speedLineEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>

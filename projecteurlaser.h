@@ -57,6 +57,10 @@ private slots:
 
     void on_speedLineEdit_returnPressed();
 
+    void on_blackWhiteCheckEdit_toggled(bool checked);
+
+    void on_horizontalSlider_sliderReleased();
+
 private:
     Ui::ProjecteurLaser *ui;
 

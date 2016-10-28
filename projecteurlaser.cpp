@@ -10,6 +10,8 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->progressBar->hide();
     ui->progressLabel->hide();
 
+    move(50, 50);
+
     serial = Serial();
 
 }
@@ -41,16 +43,20 @@ void ProjecteurLaser::on_actionFileNew_triggered()
 
         //Create the image object, get it's pixmap
         image = Image(file);
+        computeImage = ComputeImage(image);
 
         ui->imageLabel->setPixmap(image.getPixmap());
 
         //And get all the values to be displayed in the GUI.
-        ui->widthPixelsLineEdit->setText(QString::number(image.getWidthPix()));
-        ui->heightPixelsLineEdit->setText(QString::number(image.getHeightPix()));
+        ui->widthPixelsLabelEdit->setText(QString::number(image.getWidthPix()));
+        ui->heightPixelsLabelEdit->setText(QString::number(image.getHeightPix()));
         ui->widthMmLineEdit->setText(QString::number(image.getWidthMm()));
         ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
+        ui->supportWidthLineEdit->setText(QString::number(image.getSupportWidth()));
+        ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
         ui->distanceLineEdit->setText(QString::number(image.getDistance()));
         ui->speedLineEdit->setText(QString::number(image.getSpeed()));
+        ui->blackWhiteCheckEdit->setChecked(true);
 
         computeImage = ComputeImage(image);
     }
@@ -124,6 +130,8 @@ void ProjecteurLaser::on_actionAbout_triggered()
 
 void ProjecteurLaser::on_actionImageCompute_triggered()
 {
+    computeImage = ComputeImage(image);
+
     serial.emptyCoord();
 
     ui->progressLabel->show();
@@ -154,21 +162,48 @@ void ProjecteurLaser::on_actionSendData_triggered()
 void ProjecteurLaser::on_supportWidthLineEdit_returnPressed()
 {
     image.setSupportWidth(ui->supportWidthLineEdit->text().toInt());
+    QString str = QString::number(image.getSupportHeight());
+    ui->supportHeightLineEdit->setText(str);
+    ui->actionSendData->setEnabled(false);
 }
 
 void ProjecteurLaser::on_supportHeightLineEdit_returnPressed()
 {
     image.setSupportHeight(ui->supportHeightLineEdit->text().toInt());
-
+    QString str = QString::number(image.getSupportWidth());
+    ui->supportWidthLineEdit->setText(str);
+    ui->actionSendData->setEnabled(false);
 }
 
 void ProjecteurLaser::on_distanceLineEdit_returnPressed()
 {
     image.setDistance(ui->distanceLineEdit->text().toInt());
+    ui->actionSendData->setEnabled(false);
 
 }
 
 void ProjecteurLaser::on_speedLineEdit_returnPressed()
 {
     image.setSpeed(ui->speedLineEdit->text().toInt());
+    ui->actionSendData->setEnabled(false);
+}
+
+void ProjecteurLaser::on_blackWhiteCheckEdit_toggled(bool checked)
+{
+    if(checked){
+        image.setMode(0);
+    } else {
+        image.setMode(1);
+    }
+
+    ui->imageLabel->setPixmap(image.getPixmap());
+    computeImage = ComputeImage(image);
+}
+
+void ProjecteurLaser::on_horizontalSlider_sliderReleased()
+{
+    int seuil = ui->horizontalSlider->value();
+    image.setStep(seuil);
+    cout << seuil << endl;
+    ui->imageLabel->setPixmap(image.getPixmap());
 }

@@ -40,16 +40,24 @@ public:
     void setSupportHeight(int);
     void setDistance(int);
     void setSpeed(int);
+    void setMode(int);
+
+    void setStep(int);
 
 private:
-    bool setGray();
+    QImage setGray(QImage, int);
 
     QImage image;
     QImage negative;
     QImage thumbnail;
+    QImage thumbnailBW;
+
+    int blackWhiteMode;
+    int blackWhiteStep;
 
     int width;
     int height;
+    double ratio;
 
     int widthMm;
     int heightMm;
