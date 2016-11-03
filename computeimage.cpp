@@ -101,6 +101,8 @@ void ComputeImage::updateMaxSize()
 //data = IidLlvalueXxvalueYyvalueSspeede.getSe.getS
 void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* progressBar)
 {
+    _serialData = serialData;
+
     //Get the last distance value and compute angle pos for every pixel.
     updateMaxSize();
     computeAngles();
@@ -113,235 +115,55 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
 
     QString dataToSend = "";
 
+    int angle = 70;
+
     int mode = 1;
 
-    //balayage horizontal
-    if(mode == 1){
-        for(int j = 0; j<heightPix; j++)
-        {
-            dataToSend = "X";
-            dataToSend += QString::number(angleValueX[0]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[j]);
-            dataToSend += "L0";
-            dataToSend += "M0";
-            dataToSend += '\n';
-            serialData->push_back(dataToSend);
-            //uchar * line = image.scanLine(j);
+    if (angle <= 90 && angle > 45){
 
-    //        cout << "début boucle" << endl;
-    //        cout << dataToSend.toStdString();
-
-
-            for(int i = 0; i<widthPix; i++)
-            {
-                QRgb pix = qBlue(image.pixel(i, j));
-                //TODO: See how to add a value to the pointer "cleanly".
-                //QRgb pix = (QRgb)*(line + j * 4);
-
-                //Pixels that are white don't need to be compute
-                //TODO: verify the last value computed: if a pix value is 0
-                // and the previous one was something else, it must be set to 0
-                // to cut the laser.
-                percent = ((double)j * widthPix + i) * 100 / size;
-                progressBar->setValue(ceil(percent));
-
-                if(pix == 0)
-                {
-                    continue;
-                }
-
-                //Build the strings to be sent to the laser by serial.
-    //            dataToSend = "I";
-    //            dataToSend += QString::number((double)j * widthPix + i);
-                dataToSend = "X";
-                dataToSend += QString::number(angleValueX[i]);
-                dataToSend += "Y";
-                dataToSend += QString::number(angleValueY[j]);
-                dataToSend += "L";
-                dataToSend += QString::number(pix);
-    //            dataToSend += "M0";
-    //            dataToSend += "S";
-    //            dataToSend += "2000";
-                dataToSend += '\n';
-                serialData->push_back(dataToSend);
-                serialData->push_back("L0\n");
-    //            cout << dataToSend.toStdString();
-            }
-
-            serialData->push_back("L0M0\n");
+        for (int i = 0; i < heightPix; i++){
+            bresenham(i, 0, 0, angle);
         }
+
+        if (angle != 90){
+            for (int i = 0; i < widthPix; i++){
+                bresenham(heightPix - 1, 0, i, angle);
+            }
+        }
+
+    } else if (angle <= 45 && angle >= 0){
+
+        for (int i = 0; i < heightPix; i++){
+            bresenham(0, widthPix, i, angle);
+        }
+
+        if (angle != 0){
+            for (int i = 0; i < widthPix; i++){
+                bresenham(i, widthPix, heightPix - 1, angle);
+            }
+        }
+
+    } else if (angle < 0 && angle >= -45){
+
+        for (int i = heightPix - 1; i >= 0; i--){
+            bresenham(0, widthPix, i, angle);
+        }
+        for (int i = 0; i < widthPix; i++){
+            bresenham(i, widthPix, 0, angle);
+        }
+
+
+    } else if (angle < -45 && angle >= -90){
+
+        for (int i = heightPix - 1; i >= 0; i--){
+            bresenham(i, heightPix - 1, 0, angle);
+        }
+        for (int i = 0; i < widthPix; i++){
+            bresenham(0, heightPix - 1, 0, angle);
+        }
+
     }
 
-    //balayage vertical
-    if(mode == 2){
-        for(int i = 0; i<widthPix; i++)
-        {
-            dataToSend = "X";
-            dataToSend += QString::number(angleValueX[i]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[0]);
-            dataToSend += "L0";
-            dataToSend += "M0";
-            dataToSend += '\n';
-            serialData->push_back(dataToSend);
-
-            for(int j = 0; j<heightPix; j++)
-            {
-                QRgb pix = qBlue(image.pixel(i, j));
-//                    percent = ((double)j * widthPix + i) * 100 / size;
-//                    progressBar->setValue(ceil(percent));
-
-                percent = (j + heightPix * (double)i) * 100 / size;
-                progressBar->setValue(ceil(percent));
-
-                if(pix == 0)
-                {
-                    continue;
-                }
-
-                dataToSend = "X";
-                dataToSend += QString::number(angleValueX[i]);
-                dataToSend += "Y";
-                dataToSend += QString::number(angleValueY[j]);
-                dataToSend += "L";
-                dataToSend += QString::number(pix);
-                dataToSend += '\n';
-                serialData->push_back(dataToSend);
-                serialData->push_back("L0\n");
-            }
-
-            //serialData->push_back("L0M0\n");
-        }
-    }
-
-    //balayage diagonales descendantes
-    if (mode == 3){
-        for(int j = heightPix - 1; j >= 0; j--){
-            for (int i = 0; i<widthPix; i++){
-                int k = i + j;
-
-                if( k > heightPix - 1){break;}
-
-                QRgb pix = qBlue(image.pixel(i, k));
-                if(pix == 0)
-                {
-                    continue;
-                }
-
-                dataToSend = "X";
-                dataToSend += QString::number(angleValueX[i]);
-                dataToSend += "Y";
-                dataToSend += QString::number(angleValueY[k]);
-                dataToSend += "L";
-                dataToSend += QString::number(pix);
-                dataToSend += '\n';
-                serialData->push_back(dataToSend);
-                serialData->push_back("L0\n");
-
-            }
-            serialData->push_back("L0\n");
-
-
-        }
-        for (int i = 1; i<widthPix; i++){
-            for(int j = 0; j<heightPix; j++){
-                int k = i + j;
-
-                if( k >= widthPix){break;}
-
-                QRgb pix = qBlue(image.pixel(k, j));
-                if(pix == 0)
-                {
-                    continue;
-                }
-
-                dataToSend = "X";
-                dataToSend += QString::number(angleValueX[k]);
-                dataToSend += "Y";
-                dataToSend += QString::number(angleValueY[j]);
-                dataToSend += "L";
-                dataToSend += QString::number(pix);
-                dataToSend += '\n';
-                serialData->push_back(dataToSend);
-                serialData->push_back("L0\n");
-            }
-            serialData->push_back("L0\n");
-
-        }
-    }
-
-    //balayage diagonales ascendantes.
-    if (mode == 4){
-        for(int j = 0; j < heightPix; j++){
-            for (int i = 0; i<widthPix; i++){
-                int k = j - i;
-
-                if( k < 0){break;}
-
-                QRgb pix = qBlue(image.pixel(i, k));
-                if(pix == 0)
-                {
-                    continue;
-                }
-
-                dataToSend = "X";
-                dataToSend += QString::number(angleValueX[i]);
-                dataToSend += "Y";
-                dataToSend += QString::number(angleValueY[k]);
-                dataToSend += "L";
-                dataToSend += QString::number(pix);
-                dataToSend += '\n';
-                serialData->push_back(dataToSend);
-                serialData->push_back("L0\n");
-
-            }
-            serialData->push_back("L0\n");
-
-
-        }
-        for (int i = 1; i<widthPix; i++){
-            for(int j = heightPix - 1; j >= 0; j--){
-                int k = i + heightPix - j;
-
-                if( k >= widthPix){break;}
-
-                QRgb pix = qBlue(image.pixel(k, j));
-                if(pix == 0)
-                {
-                    continue;
-                }
-
-                dataToSend = "X";
-                dataToSend += QString::number(angleValueX[k]);
-                dataToSend += "Y";
-                dataToSend += QString::number(angleValueY[j]);
-                dataToSend += "L";
-                dataToSend += QString::number(pix);
-                dataToSend += '\n';
-                serialData->push_back(dataToSend);
-                serialData->push_back("L0\n");
-            }
-            serialData->push_back("L0\n");
-
-        }
-    }
-/*
-    string adresse = "sortie_compute.txt";
-    ofstream sortieCompute(adresse);
-
-    if(!sortieCompute)
-    {
-        WinInfo::info("ouverture impossible");
-    }
-
-    int taille = serialData->size();
-    for(int i = 0; i < 2100; i++)
-    {
-        sortieCompute << serialData->at(i).toStdString();
-    }
-
-*/
     int duree = time(&timer) - debut;
     QString message = "Position values computed in ";
     message += QString::number(duree);
@@ -455,6 +277,95 @@ void ComputeImage::computeAngles()
     message += " seconds";
 
    // WinInfo::info(message);
+
+}
+
+//compute the points with Bresenham algorithm
+//Each of the four octant is computed differently and handles overflows
+void ComputeImage::bresenham(int start, int end, int pos, int angle){
+
+    QString dataToSend = "";
+
+    //computing for second octant
+    if (angle <= 90 && angle > 45){
+        double tanAngle = tan((90 - angle) * pi / 180);
+        double error = -0.5;
+
+        for (int i = start; i >= end; i--){
+            error += tanAngle;
+            if (error > 0){
+                pos++;
+                error--;
+            }
+
+            if (pos >= widthPix){
+                break;
+            }
+
+            QRgb pix = qBlue(image.pixel(pos, i));
+            if(pix == 0)
+            {
+                continue;
+            }
+            dataToSend = "X";
+            dataToSend += QString::number(angleValueX[pos]);
+            dataToSend += "Y";
+            dataToSend += QString::number(angleValueY[i]);
+            dataToSend += "L";
+            dataToSend += QString::number(pix);
+            dataToSend += '\n';
+            _serialData->push_back(dataToSend);
+            _serialData->push_back("L0\n");
+        }
+    //Computing for first octant
+    } else if (angle <=45 && angle >=0){
+        double tanAngle = tan(angle * pi / 180);
+        double error = -0.5;
+
+        for (int i = start; i <= end; i++){
+            error += tanAngle;
+            if (error < 0){
+                pos--;
+                error--;
+            }
+
+            if (pos < 0){
+                break;
+            }
+        }
+    //Computing for height octant
+    } else if (angle < 0 && angle >= -45){
+        double tanAngle = tan(angle * pi / 180);
+        double error = -0.5;
+
+        for (int i = start; i <= end; i++){
+            error -= tanAngle;
+            if (error > 0){
+                pos++;
+                error--;
+            }
+
+            if (pos >= heightPix){
+                break;
+            }
+        }
+    //Computing for seventh octant
+    } else if (angle < -45 && angle >= -90){
+        double tanAngle = tan((-90 - angle) * pi / 180);
+        double error = -0.5;
+
+        for (int i = start; i <= end; i++){
+            error -= tanAngle;
+            if (error > 0){
+                pos++;
+                error--;
+            }
+
+            if (pos > widthPix){
+                break;
+            }
+        }
+    }
 
 }
 

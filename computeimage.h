@@ -45,11 +45,12 @@ public:
     void updateMaxSize();
     void computeCoords(vector<QString>*, QProgressBar*);
     void computeSupport(vector<QString>*);
-    void computeAngles();
 
     int getMinDistance();
 
 private:
+    void computeAngles();
+    void bresenham(int, int, int, int);
 
     //Copies of the image values
     QImage image;
@@ -82,6 +83,9 @@ private:
     //two tables to stores the angles values of each pixel.
     vector<int> angleValueX;
     vector<int> angleValueY;
+
+    //pointer to the serial buffer
+    vector<QString>* _serialData;
 
 };
 
