@@ -1,3 +1,21 @@
+/*
+ * This program is intended to control a laser projector
+ * Copyright (C) 2016  Pierre-Loup Martin
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "computeimage.h"
 
 ComputeImage::ComputeImage()
@@ -5,6 +23,9 @@ ComputeImage::ComputeImage()
 
 }
 
+//Create a new computeImage object.
+//This copies the values it needs from the image that is opened.
+//Each time the image is updated the computeImage object is created again.
 ComputeImage::ComputeImage(Image file)
 {
     //initialisation of vars and constants.
@@ -27,7 +48,6 @@ ComputeImage::ComputeImage(Image file)
     size = widthPix * heightPix;
     widthMm = file.getWidthMm();
     heightMm = file.getHeightMm();
-    //TODO: distance and speed values need to be updated when modified in the GUI.
     speed = file.getSpeed();
     //distance = file.getDistance();
     //Temporary distance value for tests.
@@ -93,61 +113,219 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
 
     QString dataToSend = "";
 
-    for(int j = 0; j<heightPix; j++)
-    {
-        dataToSend = "X";
-        dataToSend += QString::number(angleValueX[0]);
-        dataToSend += "Y";
-        dataToSend += QString::number(angleValueY[j]);
-        dataToSend += "L0";
-        dataToSend += "M0";
-        dataToSend += '\n';
-        serialData->push_back(dataToSend);
-        //uchar * line = image.scanLine(j);
+    int mode = 1;
 
-//        cout << "début boucle" << endl;
-//        cout << dataToSend.toStdString();
-
-
-        for(int i = 0; i<widthPix; i++)
+    //balayage horizontal
+    if(mode == 1){
+        for(int j = 0; j<heightPix; j++)
         {
-            QRgb pix = qBlue(image.pixel(i, j));
-            //TODO: See how to add a value to the pointer "cleanly".
-            //QRgb pix = (QRgb)*(line + j * 4);
-
-            //Pixels that are white don't need to be compute
-            //TODO: verify the last value computed: if a pix value is 0
-            // and the previous one was something else, it must be set to 0
-            // to cut the laser.
-            percent = ((double)j * widthPix + i) * 100 / size;
-            progressBar->setValue(ceil(percent));
-
-            if(pix == 0)
-            {
-                continue;
-            }
-
-            //Build the strings to be sent to the laser by serial.
-            dataToSend = "I";
-            dataToSend += QString::number((double)j * widthPix + i);
-            dataToSend += "X";
-            dataToSend += QString::number(angleValueX[i]);
-//            dataToSend += "Y";
-//            dataToSend += QString::number(angleValueY[j]);
-            dataToSend += "L";
-            dataToSend += QString::number(pix);
-            dataToSend += "M1";
-            dataToSend += "S";
-            dataToSend += "10000";
+            dataToSend = "X";
+            dataToSend += QString::number(angleValueX[0]);
+            dataToSend += "Y";
+            dataToSend += QString::number(angleValueY[j]);
+            dataToSend += "L0";
+            dataToSend += "M0";
             dataToSend += '\n';
             serialData->push_back(dataToSend);
-//            cout << dataToSend.toStdString();
+            //uchar * line = image.scanLine(j);
+
+    //        cout << "début boucle" << endl;
+    //        cout << dataToSend.toStdString();
+
+
+            for(int i = 0; i<widthPix; i++)
+            {
+                QRgb pix = qBlue(image.pixel(i, j));
+                //TODO: See how to add a value to the pointer "cleanly".
+                //QRgb pix = (QRgb)*(line + j * 4);
+
+                //Pixels that are white don't need to be compute
+                //TODO: verify the last value computed: if a pix value is 0
+                // and the previous one was something else, it must be set to 0
+                // to cut the laser.
+                percent = ((double)j * widthPix + i) * 100 / size;
+                progressBar->setValue(ceil(percent));
+
+                if(pix == 0)
+                {
+                    continue;
+                }
+
+                //Build the strings to be sent to the laser by serial.
+    //            dataToSend = "I";
+    //            dataToSend += QString::number((double)j * widthPix + i);
+                dataToSend = "X";
+                dataToSend += QString::number(angleValueX[i]);
+                dataToSend += "Y";
+                dataToSend += QString::number(angleValueY[j]);
+                dataToSend += "L";
+                dataToSend += QString::number(pix);
+    //            dataToSend += "M0";
+    //            dataToSend += "S";
+    //            dataToSend += "2000";
+                dataToSend += '\n';
+                serialData->push_back(dataToSend);
+                serialData->push_back("L0\n");
+    //            cout << dataToSend.toStdString();
+            }
+
+            serialData->push_back("L0M0\n");
         }
-
-        serialData->push_back("L0M0\n");
-
     }
 
+    //balayage vertical
+    if(mode == 2){
+        for(int i = 0; i<widthPix; i++)
+        {
+            dataToSend = "X";
+            dataToSend += QString::number(angleValueX[i]);
+            dataToSend += "Y";
+            dataToSend += QString::number(angleValueY[0]);
+            dataToSend += "L0";
+            dataToSend += "M0";
+            dataToSend += '\n';
+            serialData->push_back(dataToSend);
+
+            for(int j = 0; j<heightPix; j++)
+            {
+                QRgb pix = qBlue(image.pixel(i, j));
+//                    percent = ((double)j * widthPix + i) * 100 / size;
+//                    progressBar->setValue(ceil(percent));
+
+                percent = (j + heightPix * (double)i) * 100 / size;
+                progressBar->setValue(ceil(percent));
+
+                if(pix == 0)
+                {
+                    continue;
+                }
+
+                dataToSend = "X";
+                dataToSend += QString::number(angleValueX[i]);
+                dataToSend += "Y";
+                dataToSend += QString::number(angleValueY[j]);
+                dataToSend += "L";
+                dataToSend += QString::number(pix);
+                dataToSend += '\n';
+                serialData->push_back(dataToSend);
+                serialData->push_back("L0\n");
+            }
+
+            //serialData->push_back("L0M0\n");
+        }
+    }
+
+    //balayage diagonales descendantes
+    if (mode == 3){
+        for(int j = heightPix - 1; j >= 0; j--){
+            for (int i = 0; i<widthPix; i++){
+                int k = i + j;
+
+                if( k > heightPix - 1){break;}
+
+                QRgb pix = qBlue(image.pixel(i, k));
+                if(pix == 0)
+                {
+                    continue;
+                }
+
+                dataToSend = "X";
+                dataToSend += QString::number(angleValueX[i]);
+                dataToSend += "Y";
+                dataToSend += QString::number(angleValueY[k]);
+                dataToSend += "L";
+                dataToSend += QString::number(pix);
+                dataToSend += '\n';
+                serialData->push_back(dataToSend);
+                serialData->push_back("L0\n");
+
+            }
+            serialData->push_back("L0\n");
+
+
+        }
+        for (int i = 1; i<widthPix; i++){
+            for(int j = 0; j<heightPix; j++){
+                int k = i + j;
+
+                if( k >= widthPix){break;}
+
+                QRgb pix = qBlue(image.pixel(k, j));
+                if(pix == 0)
+                {
+                    continue;
+                }
+
+                dataToSend = "X";
+                dataToSend += QString::number(angleValueX[k]);
+                dataToSend += "Y";
+                dataToSend += QString::number(angleValueY[j]);
+                dataToSend += "L";
+                dataToSend += QString::number(pix);
+                dataToSend += '\n';
+                serialData->push_back(dataToSend);
+                serialData->push_back("L0\n");
+            }
+            serialData->push_back("L0\n");
+
+        }
+    }
+
+    //balayage diagonales ascendantes.
+    if (mode == 4){
+        for(int j = 0; j < heightPix; j++){
+            for (int i = 0; i<widthPix; i++){
+                int k = j - i;
+
+                if( k < 0){break;}
+
+                QRgb pix = qBlue(image.pixel(i, k));
+                if(pix == 0)
+                {
+                    continue;
+                }
+
+                dataToSend = "X";
+                dataToSend += QString::number(angleValueX[i]);
+                dataToSend += "Y";
+                dataToSend += QString::number(angleValueY[k]);
+                dataToSend += "L";
+                dataToSend += QString::number(pix);
+                dataToSend += '\n';
+                serialData->push_back(dataToSend);
+                serialData->push_back("L0\n");
+
+            }
+            serialData->push_back("L0\n");
+
+
+        }
+        for (int i = 1; i<widthPix; i++){
+            for(int j = heightPix - 1; j >= 0; j--){
+                int k = i + heightPix - j;
+
+                if( k >= widthPix){break;}
+
+                QRgb pix = qBlue(image.pixel(k, j));
+                if(pix == 0)
+                {
+                    continue;
+                }
+
+                dataToSend = "X";
+                dataToSend += QString::number(angleValueX[k]);
+                dataToSend += "Y";
+                dataToSend += QString::number(angleValueY[j]);
+                dataToSend += "L";
+                dataToSend += QString::number(pix);
+                dataToSend += '\n';
+                serialData->push_back(dataToSend);
+                serialData->push_back("L0\n");
+            }
+            serialData->push_back("L0\n");
+
+        }
+    }
 /*
     string adresse = "sortie_compute.txt";
     ofstream sortieCompute(adresse);
@@ -181,12 +359,12 @@ void ComputeImage::computeSupport(vector<QString> *serialData)
     int widthValue = 0;
     int heightValue = 0;
 
-    halfSize = (supportWidth / 2) * ratioPixMm;
+    halfSize = (supportWidth / 2);
     angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
     angleRatio = angleValue / maxAngleX;
     widthValue = angleMaxValue * angleRatio;
 
-    halfSize = (supportHeight / 2) * ratioPixMm;
+    halfSize = (supportHeight / 2);
     angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
     angleRatio = angleValue / maxAngleY;
     heightValue = angleMaxValue * angleRatio;

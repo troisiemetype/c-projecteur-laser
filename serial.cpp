@@ -1,5 +1,24 @@
+/*
+ * This program is intended to control a laser projector
+ * Copyright (C) 2016  Pierre-Loup Martin
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "serial.h"
 
+//Create a new serial object.
 Serial::Serial()
 {
     serial = new QSerialPort();
@@ -11,6 +30,8 @@ Serial::~Serial()
 
 }
 
+//Try to open a serial link.
+//TODO: it should use the values from the .INI file.
 bool Serial::open()
 {
     serialConfig = SerialConfig();
@@ -42,6 +63,9 @@ void Serial::close()
     serial->close();
 }
 
+//Send the data to the laser.
+//TODO: see how to make this realtime (so we can see a progressbar and diplay infos at the end)
+//      Maybe (probably) use some multithreading.
 void Serial::sendData()
 {
 /*    string adresse = "sortie_serial.txt";
@@ -54,40 +78,15 @@ void Serial::sendData()
 */
 
     dataSize = dataToSend.size();
-/*
-    for(int i = 0; i < dataSize; i++){
-        string strToSend = dataToSend.at(i).toStdString();
-        char *charToSend = new char[strToSend.size() + 1];
-        strcpy(charToSend, strToSend.c_str());
-        serial->write(charToSend);
 
-//        sortieSerial << charToSend;
-
-    }
-    */
     for(int i = 0; i < dataSize; i++){
         QByteArray strToSend = QByteArray();
-        strToSend.append(dataToSend.at(i).toLatin1());
+        strToSend.append(dataToSend.at(i));
         serial->write(strToSend);
-/*        if(serial->waitForReadyRead(10000)){
-            char *data;
-            serial->readLine(data, 50);
-
-            cout << data << endl;
-        }
-*/
-/*
-        if(serial->waitForBytesWritten(10))
-        {
-
-        } else {
-            cout << "paquet " << i << " non envoyé" << endl;
-        }*/
     }
-
-//    WinInfo::info("Image sent...");
 }
 
+//Send the rectangle area of the support.
 void Serial::sendSupport()
 {
     for(int j = 0; j < 200 ; j++)
