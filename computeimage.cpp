@@ -115,48 +115,50 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
 
     QString dataToSend = "";
 
-    int angle = 70;
+    int angle = 0;
 
     int mode = 1;
 
     if (angle <= 90 && angle > 45){
 
-        for (int i = 0; i < heightPix; i++){
-            bresenham(i, 0, 0, angle);
+        if (angle != 90){
+            for (int i = 0; i < heightPix; i++){
+                bresenham(i, 0, 0, angle);
+            }
         }
 
-        if (angle != 90){
-            for (int i = 0; i < widthPix; i++){
-                bresenham(heightPix - 1, 0, i, angle);
-            }
+        for (int i = 0; i < widthPix; i++){
+            bresenham(heightPix - 1, 0, i, angle);
         }
 
     } else if (angle <= 45 && angle >= 0){
 
         for (int i = 0; i < heightPix; i++){
-            bresenham(0, widthPix, i, angle);
+            bresenham(0, widthPix - 1, i, angle);
         }
 
         if (angle != 0){
             for (int i = 0; i < widthPix; i++){
-                bresenham(i, widthPix, heightPix - 1, angle);
+                bresenham(i, widthPix - 1, heightPix - 1, angle);
             }
         }
 
     } else if (angle < 0 && angle >= -45){
 
         for (int i = heightPix - 1; i >= 0; i--){
-            bresenham(0, widthPix, i, angle);
+            bresenham(0, widthPix - 1, i, angle);
         }
         for (int i = 0; i < widthPix; i++){
-            bresenham(i, widthPix, 0, angle);
+            bresenham(i, widthPix - 1, 0, angle);
         }
 
 
     } else if (angle < -45 && angle >= -90){
 
-        for (int i = heightPix - 1; i >= 0; i--){
-            bresenham(i, heightPix - 1, 0, angle);
+        if (angle != -90){
+            for (int i = heightPix - 1; i >= 0; i--){
+                bresenham(i, heightPix - 1, 0, angle);
+            }
         }
         for (int i = 0; i < widthPix; i++){
             bresenham(0, heightPix - 1, 0, angle);
@@ -303,10 +305,12 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
 
             QRgb pix = qBlue(image.pixel(pos, i));
+
             if(pix == 0)
             {
                 continue;
             }
+
             dataToSend = "X";
             dataToSend += QString::number(angleValueX[pos]);
             dataToSend += "Y";
@@ -320,18 +324,36 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     //Computing for first octant
     } else if (angle <=45 && angle >=0){
         double tanAngle = tan(angle * pi / 180);
-        double error = -0.5;
+        double error = 0.5;
 
         for (int i = start; i <= end; i++){
-            error += tanAngle;
+            error -= tanAngle;
             if (error < 0){
                 pos--;
-                error--;
+                error++;
             }
 
             if (pos < 0){
                 break;
             }
+            QRgb pix = qBlue(image.pixel(i, pos));
+
+            if(pix == 0)
+            {
+                continue;
+            }
+
+            dataToSend = "X";
+            dataToSend += QString::number(angleValueX[i]);
+            dataToSend += "Y";
+            dataToSend += QString::number(angleValueY[pos]);
+            dataToSend += "L";
+            dataToSend += QString::number(pix);
+//            dataToSend += "M1";
+//            dataToSend += "S3000";
+            dataToSend += '\n';
+            _serialData->push_back(dataToSend);
+            _serialData->push_back("L0M0\n");
         }
     //Computing for height octant
     } else if (angle < 0 && angle >= -45){
@@ -348,6 +370,22 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             if (pos >= heightPix){
                 break;
             }
+            QRgb pix = qBlue(image.pixel(i, pos));
+
+            if(pix == 0)
+            {
+                continue;
+            }
+
+            dataToSend = "X";
+            dataToSend += QString::number(angleValueX[i]);
+            dataToSend += "Y";
+            dataToSend += QString::number(angleValueY[pos]);
+            dataToSend += "L";
+            dataToSend += QString::number(pix);
+            dataToSend += '\n';
+            _serialData->push_back(dataToSend);
+            _serialData->push_back("L0\n");
         }
     //Computing for seventh octant
     } else if (angle < -45 && angle >= -90){
@@ -364,6 +402,22 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             if (pos > widthPix){
                 break;
             }
+            QRgb pix = qBlue(image.pixel(pos, i));
+
+            if(pix == 0)
+            {
+                continue;
+            }
+
+            dataToSend = "X";
+            dataToSend += QString::number(angleValueX[pos]);
+            dataToSend += "Y";
+            dataToSend += QString::number(angleValueY[i]);
+            dataToSend += "L";
+            dataToSend += QString::number(pix);
+            dataToSend += '\n';
+            _serialData->push_back(dataToSend);
+            _serialData->push_back("L0\n");
         }
     }
 
