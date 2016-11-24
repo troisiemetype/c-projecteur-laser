@@ -83,6 +83,9 @@ private slots:
 
     void on_heightMmLineEdit_editingFinished();
 
+    void readData();
+
+
 private:
     Ui::ProjecteurLaser *ui;
 

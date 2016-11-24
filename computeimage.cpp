@@ -99,7 +99,7 @@ void ComputeImage::updateMaxSize()
 //that will be sent to the laser.
 //This string is like:
 //data = IidLlvalueXxvalueYyvalueSspeede.getSe.getS
-void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* progressBar)
+void ComputeImage::computeCoords(vector<string>* serialData, QProgressBar* progressBar)
 {
     _serialData = serialData;
 
@@ -111,13 +111,13 @@ void ComputeImage::computeCoords(vector<QString>* serialData, QProgressBar* prog
     int debut = time(&timer);
 
 //    int index = 0;
-    double percent = 0;
+//    double percent = 0;
 
-    QString dataToSend = "";
+//    string dataToSend = "";
 
-    int angle = 0;
+    int angle = 50;
 
-    int mode = 1;
+//    int mode = 1;
 
     if (angle <= 90 && angle > 45){
 
@@ -286,7 +286,7 @@ void ComputeImage::computeAngles()
 //Each of the four octant is computed differently and handles overflows
 void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
-    QString dataToSend = "";
+    string dataToSend = "";
 
     //computing for second octant
     if (angle <= 90 && angle > 45){
@@ -311,15 +311,47 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
                 continue;
             }
 
-            dataToSend = "X";
-            dataToSend += QString::number(angleValueX[pos]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[i]);
-            dataToSend += "L";
-            dataToSend += QString::number(pix);
-            dataToSend += '\n';
+            unsigned char c = FLAG_X | FLAG_Y | FLAG_L;
+//            cout << bitset<8>(c) << endl;
+
+            unsigned char checksum = c;
+            dataToSend = c;
+            c = angleValueX[pos]/256;
+            checksum += c;
+            dataToSend += c;
+//            cout << bitset<8>(c) << endl;
+
+            c = angleValueX[pos]%256;
+            checksum += c;
+            dataToSend += c;
+//            cout << bitset<8>(c) << endl;
+
+            c = angleValueY[i]/256;
+            checksum += c;
+            dataToSend += c;
+//            cout << bitset<8>(c) << endl;
+
+            c = angleValueY[i]%256;
+            checksum += c;
+            dataToSend += c;
+//            cout << bitset<8>(c) << endl;
+
+            c = pix;
+            checksum += c;
+            dataToSend += c;
+//            cout << bitset<8>(c) << endl;
+
+            dataToSend += checksum;
+//            cout << bitset<8>(checksum) << endl;
+
             _serialData->push_back(dataToSend);
-            _serialData->push_back("L0\n");
+//            cout << angleValueX[pos] << endl;
+//            cout << angleValueY[i] << endl;
+
+            dataToSend = FLAG_L;
+            dataToSend += (char)0;
+            dataToSend += FLAG_L;
+            _serialData->push_back(dataToSend);
         }
     //Computing for first octant
     } else if (angle <=45 && angle >=0){
@@ -342,18 +374,17 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             {
                 continue;
             }
-
-            dataToSend = "X";
-            dataToSend += QString::number(angleValueX[i]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[pos]);
-            dataToSend += "L";
-            dataToSend += QString::number(pix);
+/*            "X";
+            QString::number(angleValueX[i]);
+            "Y";
+            QString::number(angleValueY[pos]);
+            QString::number(pix);
 //            dataToSend += "M1";
 //            dataToSend += "S3000";
             dataToSend += '\n';
             _serialData->push_back(dataToSend);
             _serialData->push_back("L0M0\n");
+            */
         }
     //Computing for height octant
     } else if (angle < 0 && angle >= -45){
@@ -377,7 +408,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
                 continue;
             }
 
-            dataToSend = "X";
+ /*           dataToSend = "X";
             dataToSend += QString::number(angleValueX[i]);
             dataToSend += "Y";
             dataToSend += QString::number(angleValueY[pos]);
@@ -386,7 +417,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             dataToSend += '\n';
             _serialData->push_back(dataToSend);
             _serialData->push_back("L0\n");
-        }
+ */       }
     //Computing for seventh octant
     } else if (angle < -45 && angle >= -90){
         double tanAngle = tan((-90 - angle) * pi / 180);
@@ -409,7 +440,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
                 continue;
             }
 
-            dataToSend = "X";
+ /*           dataToSend = "X";
             dataToSend += QString::number(angleValueX[pos]);
             dataToSend += "Y";
             dataToSend += QString::number(angleValueY[i]);
@@ -418,7 +449,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             dataToSend += '\n';
             _serialData->push_back(dataToSend);
             _serialData->push_back("L0\n");
-        }
+    */    }
     }
 
 }

@@ -36,7 +36,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
     move(50, 50);
 
-    serial = Serial();
+    serial = Serial(this);
 
 }
 
@@ -125,10 +125,12 @@ void ProjecteurLaser::on_actionSerialConnect_triggered()
         }
         if(ouvert && serial.isCompute()){
             ui->actionSendData->setEnabled(true);
+            ui->actionSendData->setChecked(false);
         }
     } else {
         serial.close();
         ui->actionSendData->setEnabled(false);
+        ui->actionSendData->setChecked(false);
     }
 
 }
@@ -193,7 +195,11 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered()
 //Send the data to the laser.
 void ProjecteurLaser::on_actionSendData_triggered()
 {
-    serial.sendData();
+    if(ui->actionSendData->isChecked())
+    {
+        serial.initData();
+        serial.sendData(0);
+    }
 }
 
 //Update the width of the support.
@@ -278,4 +284,13 @@ void ProjecteurLaser::on_heightMmLineEdit_editingFinished()
     //Update the computeImage object.
     computeImage = ComputeImage(image);
 }
+
+void ProjecteurLaser::readData(){
+//    cout << "data received" << endl;
+
+    if(ui->actionSendData->isChecked()){
+        serial.sendData(1);
+    }
+}
+
 

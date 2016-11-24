@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>536</width>
-    <height>378</height>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -377,6 +377,9 @@
    </property>
   </action>
   <action name="actionSendData">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>

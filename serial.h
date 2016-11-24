@@ -26,10 +26,10 @@
 #include <QString>
 #include <QStringList>
 
+#include <bitset>
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <vector>
 
 #include "serialconfig.h"
@@ -42,15 +42,16 @@ class Serial
 
 public:
     Serial();
+    Serial(QWidget *parent);
     ~Serial();
 
     bool open();
     void close();
 
-    void sendData();
+    bool sendData(int);
     void sendSupport();
 
-    void addCoord(QString);
+    void addCoord(string);
     void addBoxImage(QString);
     void addBoxSupport(QString);
 
@@ -59,24 +60,30 @@ public:
     bool isOpen();
     bool isCompute();
 
+    void initData();
+
     //getters for used values
-    vector<QString>* getDataArray();
+    vector<string>* getDataArray();
     vector<QString>* getBoxImageArray();
     vector<QString>* getBoxSupportArray();
 
     //getter for port list names
     static QStringList getPortNames();
 
+public slots:
+//    void readData();
+
 private:
     QSerialPort *serial;
     SerialConfig serialConfig;
 
-    vector<QString> dataToSend;
+    vector<string> dataToSend;
     vector<QString> dataBoxImage;
     vector<QString> dataBoxSupport;
 
     bool opened;
     int dataSize;
+    int currentCoord;
 
 };
 

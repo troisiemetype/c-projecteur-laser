@@ -21,7 +21,17 @@
 //Create a new serial object.
 Serial::Serial()
 {
-    serial = new QSerialPort();
+//    serial = new QSerialPort();
+
+//    opened = false;
+}
+
+//Create a new serial object.
+Serial::Serial(QWidget *parent)
+{
+    serial = new QSerialPort(parent);
+    QObject::connect(serial, SIGNAL(readyRead()), parent, SLOT(readData()));
+
     opened = false;
 }
 
@@ -44,6 +54,8 @@ bool Serial::open()
 
     if(serialConfig.getBool("flowcontrolxon")){
         serial->setFlowControl(QSerialPort::SoftwareControl);
+    } else {
+        serial->setFlowControl(QSerialPort::NoFlowControl);
     }
 
     if(serial->open(QIODevice::ReadWrite))
@@ -66,7 +78,7 @@ void Serial::close()
 //Send the data to the laser.
 //TODO: see how to make this realtime (so we can see a progressbar and diplay infos at the end)
 //      Maybe (probably) use some multithreading.
-void Serial::sendData()
+bool Serial::sendData(int mode)
 {
 /*    string adresse = "sortie_serial.txt";
     ofstream sortieSerial(adresse);
@@ -76,14 +88,36 @@ void Serial::sendData()
         WinInfo::info("ouverture impossible");
     }
 */
-
-    dataSize = dataToSend.size();
-
-    for(int i = 0; i < dataSize; i++){
-        QByteArray strToSend = QByteArray();
-        strToSend.append(dataToSend.at(i));
-        serial->write(strToSend);
+    if(mode == 1){
+        currentCoord++;
     }
+
+    if(currentCoord >= dataSize){
+        return false;
+    }
+
+    char *inData = new char();
+    serial->read(inData, 1);
+    cout << inData << endl;
+
+    //TODO: send unsigned chars instead of string
+    string cmdString = dataToSend.at(currentCoord);
+    int cmdSize = cmdString.size();
+    cout << "index " << currentCoord << endl;
+    cout << bitset<8>(cmdString.at(0)) << endl;
+    cout << bitset<8>(cmdString.at(1)) << endl;
+    cout << bitset<8>(cmdString.at(2)) << endl;
+    cout << bitset<8>(cmdString.at(3)) << endl;
+    cout << bitset<8>(cmdString.at(4)) << endl;
+    cout << bitset<8>(cmdString.at(5)) << endl;
+    cout << bitset<8>(cmdString.at(6)) << endl;
+    cout << endl;
+
+    serial->write((char*)&cmdString, cmdSize);
+//    serial->write(dataToSend.at(currentCoord, cmdSize));
+//    serial->write("essai");
+
+    return true;
 }
 
 //Send the rectangle area of the support.
@@ -100,7 +134,7 @@ void Serial::sendSupport()
 
 }
 
-void Serial::addCoord(QString coord)
+void Serial::addCoord(string coord)
 {
     dataToSend.push_back(coord);
 }
@@ -136,7 +170,7 @@ bool Serial::isCompute()
 
 }
 
-vector<QString>* Serial::getDataArray()
+vector<string>* Serial::getDataArray()
 {
     return &dataToSend;
 }
@@ -163,4 +197,12 @@ QStringList Serial::getPortNames()
     }
 
     return portNames;
+}
+
+void Serial::initData(){
+    serial->clear(QSerialPort::AllDirections);
+    dataSize = dataToSend.size();
+    currentCoord = 0;
+    cout << "dataSize: " << dataSize << endl;
+
 }

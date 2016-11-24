@@ -19,6 +19,7 @@
 #ifndef COMPUTEIMAGE_H
 #define COMPUTEIMAGE_H
 
+#include <bitset>
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -33,6 +34,13 @@
 #include "image.h"
 #include "wininfo.h"
 
+#define FLAG_I			1 << 5
+#define FLAG_X			1 << 4
+#define FLAG_Y			1 << 3
+#define FLAG_L			1 << 2
+#define FLAG_SPEED		1 << 1
+#define FLAG_MODE		1 << 0
+
 using namespace std;
 
 class ComputeImage
@@ -43,7 +51,7 @@ public:
     ComputeImage(Image);
 
     void updateMaxSize();
-    void computeCoords(vector<QString>*, QProgressBar*);
+    void computeCoords(vector<string>*, QProgressBar*);
     void computeSupport(vector<QString>*);
 
     int getMinDistance();
@@ -85,7 +93,7 @@ private:
     vector<int> angleValueY;
 
     //pointer to the serial buffer
-    vector<QString>* _serialData;
+    vector<string>* _serialData;
 
 };
 
