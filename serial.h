@@ -63,7 +63,7 @@ public:
     void initData();
 
     //getters for used values
-    vector<string>* getDataArray();
+    vector<QByteArray>* getDataArray();
     vector<QString>* getBoxImageArray();
     vector<QString>* getBoxSupportArray();
 
@@ -77,7 +77,7 @@ private:
     QSerialPort *serial;
     SerialConfig serialConfig;
 
-    vector<string> dataToSend;
+    vector<QByteArray> dataToSend;
     vector<QString> dataBoxImage;
     vector<QString> dataBoxSupport;
 

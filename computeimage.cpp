@@ -99,7 +99,7 @@ void ComputeImage::updateMaxSize()
 //that will be sent to the laser.
 //This string is like:
 //data = IidLlvalueXxvalueYyvalueSspeede.getSe.getS
-void ComputeImage::computeCoords(vector<string>* serialData, QProgressBar* progressBar)
+void ComputeImage::computeCoords(vector<QByteArray>* serialData, QProgressBar* progressBar)
 {
     _serialData = serialData;
 
@@ -286,7 +286,7 @@ void ComputeImage::computeAngles()
 //Each of the four octant is computed differently and handles overflows
 void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
-    string dataToSend = "";
+    QByteArray dataToSend = "";
 
     //computing for second octant
     if (angle <= 90 && angle > 45){
@@ -315,42 +315,43 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 //            cout << bitset<8>(c) << endl;
 
             unsigned char checksum = c;
-            dataToSend = c;
+            dataToSend.append(c);
             c = angleValueX[pos]/256;
             checksum += c;
-            dataToSend += c;
+            dataToSend.append(c);
 //            cout << bitset<8>(c) << endl;
 
             c = angleValueX[pos]%256;
             checksum += c;
-            dataToSend += c;
+            dataToSend.append(c);
 //            cout << bitset<8>(c) << endl;
 
             c = angleValueY[i]/256;
             checksum += c;
-            dataToSend += c;
+            dataToSend.append(c);
 //            cout << bitset<8>(c) << endl;
 
             c = angleValueY[i]%256;
             checksum += c;
-            dataToSend += c;
+            dataToSend.append(c);
 //            cout << bitset<8>(c) << endl;
 
             c = pix;
             checksum += c;
-            dataToSend += c;
+            dataToSend.append(c);
 //            cout << bitset<8>(c) << endl;
 
-            dataToSend += checksum;
+            dataToSend.append(checksum);
 //            cout << bitset<8>(checksum) << endl;
 
             _serialData->push_back(dataToSend);
 //            cout << angleValueX[pos] << endl;
 //            cout << angleValueY[i] << endl;
 
-            dataToSend = FLAG_L;
-            dataToSend += (char)0;
-            dataToSend += FLAG_L;
+            dataToSend.clear();
+            dataToSend.append(FLAG_L);
+            dataToSend.append((char)0);
+            dataToSend.append(FLAG_L);
             _serialData->push_back(dataToSend);
         }
     //Computing for first octant

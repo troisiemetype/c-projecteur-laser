@@ -100,21 +100,16 @@ bool Serial::sendData(int mode)
     serial->read(inData, 1);
     cout << inData << endl;
 
-    //TODO: send unsigned chars instead of string
-    string cmdString = dataToSend.at(currentCoord);
-    int cmdSize = cmdString.size();
     cout << "index " << currentCoord << endl;
-    cout << bitset<8>(cmdString.at(0)) << endl;
-    cout << bitset<8>(cmdString.at(1)) << endl;
-    cout << bitset<8>(cmdString.at(2)) << endl;
-    cout << bitset<8>(cmdString.at(3)) << endl;
-    cout << bitset<8>(cmdString.at(4)) << endl;
-    cout << bitset<8>(cmdString.at(5)) << endl;
-    cout << bitset<8>(cmdString.at(6)) << endl;
-    cout << endl;
 
-    serial->write((char*)&cmdString, cmdSize);
-//    serial->write(dataToSend.at(currentCoord, cmdSize));
+    char *data = dataToSend.at(currentCoord).data();
+
+    while (*data){
+        cout << bitset<8>(*data) << endl;
+        ++data;
+    }
+
+    serial->write(dataToSend.at(currentCoord));
 //    serial->write("essai");
 
     return true;
@@ -136,7 +131,7 @@ void Serial::sendSupport()
 
 void Serial::addCoord(string coord)
 {
-    dataToSend.push_back(coord);
+//    dataToSend.push_back(coord);
 }
 
 void Serial::addBoxImage(QString coord)
@@ -170,7 +165,7 @@ bool Serial::isCompute()
 
 }
 
-vector<string>* Serial::getDataArray()
+vector<QByteArray>* Serial::getDataArray()
 {
     return &dataToSend;
 }

@@ -27,6 +27,7 @@
 #include <fstream>
 #include <vector>
 
+#include <QByteArray>
 #include <QCoreApplication>
 #include <QProgressBar>
 #include <QString>
@@ -51,7 +52,7 @@ public:
     ComputeImage(Image);
 
     void updateMaxSize();
-    void computeCoords(vector<string>*, QProgressBar*);
+    void computeCoords(vector<QByteArray>*, QProgressBar*);
     void computeSupport(vector<QString>*);
 
     int getMinDistance();
@@ -93,7 +94,7 @@ private:
     vector<int> angleValueY;
 
     //pointer to the serial buffer
-    vector<string>* _serialData;
+    vector<QByteArray>* _serialData;
 
 };
 
