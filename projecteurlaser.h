@@ -63,7 +63,7 @@ private slots:
 
     void on_actionImageCompute_triggered();
 
-    void on_actionImageCalibrate_triggered();
+    void on_actionImageCalibrate_triggered(bool checked);
 
     void on_actionSendData_triggered();
 
@@ -84,7 +84,6 @@ private slots:
     void on_heightMmLineEdit_editingFinished();
 
     void readData();
-
 
 private:
     Ui::ProjecteurLaser *ui;

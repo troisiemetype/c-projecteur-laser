@@ -80,15 +80,12 @@ void Serial::close()
 //      Maybe (probably) use some multithreading.
 bool Serial::sendData(int mode)
 {
-/*    string adresse = "sortie_serial.txt";
-    ofstream sortieSerial(adresse);
 
-    if(!sortieSerial)
-    {
-        WinInfo::info("ouverture impossible");
-    }
-*/
-    if(mode == 1){
+    char *inData = new char();
+    serial->read(inData, 1);
+//    cout << bitset<8>(*inData) << endl;
+
+    if(mode == 1 && *inData == 0){
         currentCoord++;
     }
 
@@ -96,21 +93,17 @@ bool Serial::sendData(int mode)
         return false;
     }
 
-    char *inData = new char();
-    serial->read(inData, 1);
-    cout << inData << endl;
 
-    cout << "index " << currentCoord << endl;
-
+//    cout << "index " << currentCoord << endl;
+/*
     char *data = dataToSend.at(currentCoord).data();
 
     while (*data){
         cout << bitset<8>(*data) << endl;
         ++data;
     }
-
+*/
     serial->write(dataToSend.at(currentCoord));
-//    serial->write("essai");
 
     return true;
 }
@@ -118,15 +111,9 @@ bool Serial::sendData(int mode)
 //Send the rectangle area of the support.
 void Serial::sendSupport()
 {
-    for(int j = 0; j < 200 ; j++)
-    {
-        for(int i = 0; i < 4; i++){
-            QByteArray strToSend = QByteArray();
-            strToSend.append(dataBoxSupport.at(i));
-            serial->write(strToSend);
-        }
+    for(int i = 0; i < 4; i++){
+        serial->write(dataBoxSupport.at(i));
     }
-
 }
 
 void Serial::addCoord(string coord)
@@ -134,12 +121,12 @@ void Serial::addCoord(string coord)
 //    dataToSend.push_back(coord);
 }
 
-void Serial::addBoxImage(QString coord)
+void Serial::addBoxImage(QByteArray coord)
 {
     dataBoxImage.push_back(coord);
 }
 
-void Serial::addBoxSupport(QString coord)
+void Serial::addBoxSupport(QByteArray coord)
 {
     dataBoxSupport.push_back(coord);
 }
@@ -170,12 +157,12 @@ vector<QByteArray>* Serial::getDataArray()
     return &dataToSend;
 }
 
-vector<QString>* Serial::getBoxImageArray()
+vector<QByteArray>* Serial::getBoxImageArray()
 {
     return &dataBoxImage;
 }
 
-vector<QString>* Serial::getBoxSupportArray()
+vector<QByteArray>* Serial::getBoxSupportArray()
 {
     return &dataBoxSupport;
 }
@@ -198,6 +185,6 @@ void Serial::initData(){
     serial->clear(QSerialPort::AllDirections);
     dataSize = dataToSend.size();
     currentCoord = 0;
-    cout << "dataSize: " << dataSize << endl;
+//    cout << "dataSize: " << dataSize << endl;
 
 }

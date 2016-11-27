@@ -172,6 +172,8 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->progressLabel->setText(tr("Calcul en cours..."));
     ui->progressBar->show();
 
+    computeImage.setScanAngle(ui->angleSpinBox->value());
+
     //Call the computeCoord function, give it a pointer to the progressbar.
     computeImage.computeCoords(serial.getDataArray(), ui->progressBar);
 
@@ -186,7 +188,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 }
 
 //compute and send a calibration rectangle.
-void ProjecteurLaser::on_actionImageCalibrate_triggered()
+void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
 {
     computeImage.computeSupport(serial.getBoxSupportArray());
     serial.sendSupport();
@@ -289,8 +291,13 @@ void ProjecteurLaser::readData(){
 //    cout << "data received" << endl;
 
     if(ui->actionSendData->isChecked()){
-        serial.sendData(1);
+        if(serial.sendData(1) == false){
+            ui->actionSendData->setChecked(false);
+        }
     }
+
+    if(ui->actionImageCalibrate->isChecked()){
+        serial.sendSupport();
+    }
+
 }
-
-

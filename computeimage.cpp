@@ -115,53 +115,53 @@ void ComputeImage::computeCoords(vector<QByteArray>* serialData, QProgressBar* p
 
 //    string dataToSend = "";
 
-    int angle = 50;
+//    int angle = 0;
 
 //    int mode = 1;
 
-    if (angle <= 90 && angle > 45){
+    if (scanAngle <= 90 && scanAngle > 45){
 
-        if (angle != 90){
+        if (scanAngle != 90){
             for (int i = 0; i < heightPix; i++){
-                bresenham(i, 0, 0, angle);
+                bresenham(i, 0, 0, scanAngle);
             }
         }
 
         for (int i = 0; i < widthPix; i++){
-            bresenham(heightPix - 1, 0, i, angle);
+            bresenham(heightPix - 1, 0, i, scanAngle);
         }
 
-    } else if (angle <= 45 && angle >= 0){
+    } else if (scanAngle <= 45 && scanAngle >= 0){
 
         for (int i = 0; i < heightPix; i++){
-            bresenham(0, widthPix - 1, i, angle);
+            bresenham(0, widthPix - 1, i, scanAngle);
         }
 
-        if (angle != 0){
+        if (scanAngle != 0){
             for (int i = 0; i < widthPix; i++){
-                bresenham(i, widthPix - 1, heightPix - 1, angle);
+                bresenham(i, widthPix - 1, heightPix - 1, scanAngle);
             }
         }
 
-    } else if (angle < 0 && angle >= -45){
+    } else if (scanAngle < 0 && scanAngle >= -45){
 
         for (int i = heightPix - 1; i >= 0; i--){
-            bresenham(0, widthPix - 1, i, angle);
+            bresenham(0, widthPix - 1, i, scanAngle);
         }
         for (int i = 0; i < widthPix; i++){
-            bresenham(i, widthPix - 1, 0, angle);
+            bresenham(i, widthPix - 1, 0, scanAngle);
         }
 
 
-    } else if (angle < -45 && angle >= -90){
+    } else if (scanAngle < -45 && scanAngle >= -90){
 
-        if (angle != -90){
+        if (scanAngle != -90){
             for (int i = heightPix - 1; i >= 0; i--){
-                bresenham(i, heightPix - 1, 0, angle);
+                bresenham(i, heightPix - 1, 0, scanAngle);
             }
         }
         for (int i = 0; i < widthPix; i++){
-            bresenham(0, heightPix - 1, 0, angle);
+            bresenham(0, heightPix - 1, 0, scanAngle);
         }
 
     }
@@ -175,8 +175,11 @@ void ComputeImage::computeCoords(vector<QByteArray>* serialData, QProgressBar* p
 
 }
 
-void ComputeImage::computeSupport(vector<QString> *serialData)
+void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 {
+
+    QByteArray dataToSend = "";
+
     double angleValue = 0;
     double angleRatio = 0;
     double halfSize = 0;
@@ -193,38 +196,109 @@ void ComputeImage::computeSupport(vector<QString> *serialData)
     angleRatio = angleValue / maxAngleY;
     heightValue = angleMaxValue * angleRatio;
 
-    QString dataToSend = "L255";
-    dataToSend += "X";
-    dataToSend += QString::number(widthValue);
-    dataToSend += "M0";
-    dataToSend += "L255";
-    dataToSend += "\n";
+
+    char c = FLAG_X | FLAG_L;
+    cout << bitset<8>(c) << endl;
+
+    unsigned char checksum = (unsigned char)c;
+    dataToSend.append(c);
+
+    c = widthValue/256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    c = widthValue%256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    checksum += 255;
+    dataToSend.append((unsigned char)255);
+
+    dataToSend.append(checksum);
 
     serialData->push_back(dataToSend);
+    dataToSend.clear();
+    cout << endl;
 
-    dataToSend = "Y";
-    dataToSend += QString::number(heightValue);
-    dataToSend += "M0";
-    dataToSend += "L255";
-    dataToSend += "\n";
+    c = FLAG_Y | FLAG_L;
+    cout << bitset<8>(c) << endl;
+
+    checksum = (unsigned char)c;
+    dataToSend.append(c);
+
+    c = heightValue/256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    c = heightValue%256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    checksum += 255;
+    dataToSend.append((unsigned char)255);
+
+    dataToSend.append(checksum);
 
     serialData->push_back(dataToSend);
+    dataToSend.clear();
+    cout << endl;
 
-    dataToSend = "X";
-    dataToSend += QString::number(-widthValue);
-    dataToSend += "M0";
-    dataToSend += "L255";
-    dataToSend += "\n";
+
+    c = FLAG_X | FLAG_L;
+    cout << bitset<8>(c) << endl;
+
+    checksum = (unsigned char)c;
+    dataToSend.append(c);
+
+    c = -widthValue/256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    c = -widthValue%256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    checksum += 255;
+    dataToSend.append((unsigned char)255);
+
+    dataToSend.append(checksum);
 
     serialData->push_back(dataToSend);
+    dataToSend.clear();
+    cout << endl;
 
-    dataToSend = "Y";
-    dataToSend += QString::number(-heightValue);
-    dataToSend += "M0";
-    dataToSend += "L255";
-    dataToSend += "\n";
+    c = FLAG_Y | FLAG_L;
+    cout << bitset<8>(c) << endl;
+
+    checksum = (unsigned char)c;
+    dataToSend.append(c);
+
+    c = -heightValue/256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    c = -heightValue%256;
+    checksum += (unsigned char)c;
+    dataToSend.append(c);
+    cout << bitset<8>(c) << endl;
+
+    checksum += 255;
+    dataToSend.append((unsigned char)255);
+
+    dataToSend.append(checksum);
 
     serialData->push_back(dataToSend);
+    dataToSend.clear();
+
+    cout << endl;
+    cout << endl;
 
 }
 
@@ -301,6 +375,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
 
             if (pos >= widthPix){
+
+                dataToSend.append(FLAG_L);
+                dataToSend.append((char)0);
+                dataToSend.append(FLAG_L);
+                _serialData->push_back(dataToSend);
+                dataToSend.clear();
+
                 break;
             }
 
@@ -310,50 +391,46 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             {
                 continue;
             }
-
-            unsigned char c = FLAG_X | FLAG_Y | FLAG_L;
-//            cout << bitset<8>(c) << endl;
-
-            unsigned char checksum = c;
-            dataToSend.append(c);
-            c = angleValueX[pos]/256;
-            checksum += c;
-            dataToSend.append(c);
-//            cout << bitset<8>(c) << endl;
-
-            c = angleValueX[pos]%256;
-            checksum += c;
-            dataToSend.append(c);
-//            cout << bitset<8>(c) << endl;
-
-            c = angleValueY[i]/256;
-            checksum += c;
-            dataToSend.append(c);
-//            cout << bitset<8>(c) << endl;
-
-            c = angleValueY[i]%256;
-            checksum += c;
-            dataToSend.append(c);
-//            cout << bitset<8>(c) << endl;
-
-            c = pix;
-            checksum += c;
-            dataToSend.append(c);
-//            cout << bitset<8>(c) << endl;
-
-            dataToSend.append(checksum);
-//            cout << bitset<8>(checksum) << endl;
-
-            _serialData->push_back(dataToSend);
 //            cout << angleValueX[pos] << endl;
 //            cout << angleValueY[i] << endl;
 
-            dataToSend.clear();
-            dataToSend.append(FLAG_L);
-            dataToSend.append((char)0);
-            dataToSend.append(FLAG_L);
+            char c = FLAG_X | FLAG_Y | FLAG_L;
+//            cout << bitset<8>(c) << endl;
+
+            unsigned char checksum = (unsigned char)c;
+            dataToSend.append(c);
+            c = angleValueX[pos]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueX[pos]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[i]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[i]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = pix;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            dataToSend.append(checksum);
+
             _serialData->push_back(dataToSend);
+            dataToSend.clear();
         }
+
+        dataToSend.append(FLAG_L);
+        dataToSend.append((char)0);
+        dataToSend.append(FLAG_L);
+        _serialData->push_back(dataToSend);
+        dataToSend.clear();
+
     //Computing for first octant
     } else if (angle <=45 && angle >=0){
         double tanAngle = tan(angle * pi / 180);
@@ -367,6 +444,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
 
             if (pos < 0){
+
+                dataToSend.append(FLAG_L);
+                dataToSend.append((char)0);
+                dataToSend.append(FLAG_L);
+                _serialData->push_back(dataToSend);
+                dataToSend.clear();
+
                 break;
             }
             QRgb pix = qBlue(image.pixel(i, pos));
@@ -375,18 +459,45 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             {
                 continue;
             }
-/*            "X";
-            QString::number(angleValueX[i]);
-            "Y";
-            QString::number(angleValueY[pos]);
-            QString::number(pix);
-//            dataToSend += "M1";
-//            dataToSend += "S3000";
-            dataToSend += '\n';
+
+            char c = FLAG_X | FLAG_Y | FLAG_L;
+
+            unsigned char checksum = (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueX[i]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueX[i]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[pos]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[pos]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = pix;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            dataToSend.append(checksum);
+
             _serialData->push_back(dataToSend);
-            _serialData->push_back("L0M0\n");
-            */
+            dataToSend.clear();
+
         }
+
+        dataToSend.append(FLAG_L);
+        dataToSend.append((char)0);
+        dataToSend.append(FLAG_L);
+        _serialData->push_back(dataToSend);
+        dataToSend.clear();
+
     //Computing for height octant
     } else if (angle < 0 && angle >= -45){
         double tanAngle = tan(angle * pi / 180);
@@ -400,6 +511,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
 
             if (pos >= heightPix){
+
+                dataToSend.append(FLAG_L);
+                dataToSend.append((char)0);
+                dataToSend.append(FLAG_L);
+                _serialData->push_back(dataToSend);
+                dataToSend.clear();
+
                 break;
             }
             QRgb pix = qBlue(image.pixel(i, pos));
@@ -409,16 +527,38 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
                 continue;
             }
 
- /*           dataToSend = "X";
-            dataToSend += QString::number(angleValueX[i]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[pos]);
-            dataToSend += "L";
-            dataToSend += QString::number(pix);
-            dataToSend += '\n';
+            char c = FLAG_X | FLAG_Y | FLAG_L;
+
+            unsigned char checksum = (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueX[i]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueX[i]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[pos]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[pos]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = pix;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            dataToSend.append(checksum);
+
             _serialData->push_back(dataToSend);
-            _serialData->push_back("L0\n");
- */       }
+            dataToSend.clear();
+
+
+        }
     //Computing for seventh octant
     } else if (angle < -45 && angle >= -90){
         double tanAngle = tan((-90 - angle) * pi / 180);
@@ -432,6 +572,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
 
             if (pos > widthPix){
+
+                dataToSend.append(FLAG_L);
+                dataToSend.append((char)0);
+                dataToSend.append(FLAG_L);
+                _serialData->push_back(dataToSend);
+                dataToSend.clear();
+
                 break;
             }
             QRgb pix = qBlue(image.pixel(pos, i));
@@ -440,17 +587,37 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             {
                 continue;
             }
+            char c = FLAG_X | FLAG_Y | FLAG_L;
+//            cout << bitset<8>(c) << endl;
 
- /*           dataToSend = "X";
-            dataToSend += QString::number(angleValueX[pos]);
-            dataToSend += "Y";
-            dataToSend += QString::number(angleValueY[i]);
-            dataToSend += "L";
-            dataToSend += QString::number(pix);
-            dataToSend += '\n';
+            unsigned char checksum = (unsigned char)c;
+            dataToSend.append(c);
+            c = angleValueX[pos]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueX[pos]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[i]/256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = angleValueY[i]%256;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            c = pix;
+            checksum += (unsigned char)c;
+            dataToSend.append(c);
+
+            dataToSend.append(checksum);
+
             _serialData->push_back(dataToSend);
-            _serialData->push_back("L0\n");
-    */    }
+            dataToSend.clear();
+
+        }
     }
 
 }
@@ -458,4 +625,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 int ComputeImage::getMinDistance()
 {
     return minDistance;
+}
+
+void ComputeImage::setScanAngle(int angle){
+    scanAngle = angle;
 }

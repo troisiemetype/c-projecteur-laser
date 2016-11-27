@@ -19,6 +19,7 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include <QAction>
 #include <QByteArray>
 #include <QList>
 #include <QSerialPort>
@@ -52,8 +53,8 @@ public:
     void sendSupport();
 
     void addCoord(string);
-    void addBoxImage(QString);
-    void addBoxSupport(QString);
+    void addBoxImage(QByteArray);
+    void addBoxSupport(QByteArray);
 
     void emptyCoord();
 
@@ -64,8 +65,8 @@ public:
 
     //getters for used values
     vector<QByteArray>* getDataArray();
-    vector<QString>* getBoxImageArray();
-    vector<QString>* getBoxSupportArray();
+    vector<QByteArray>* getBoxImageArray();
+    vector<QByteArray>* getBoxSupportArray();
 
     //getter for port list names
     static QStringList getPortNames();
@@ -78,8 +79,8 @@ private:
     SerialConfig serialConfig;
 
     vector<QByteArray> dataToSend;
-    vector<QString> dataBoxImage;
-    vector<QString> dataBoxSupport;
+    vector<QByteArray> dataBoxImage;
+    vector<QByteArray> dataBoxSupport;
 
     bool opened;
     int dataSize;

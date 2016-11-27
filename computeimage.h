@@ -53,9 +53,10 @@ public:
 
     void updateMaxSize();
     void computeCoords(vector<QByteArray>*, QProgressBar*);
-    void computeSupport(vector<QString>*);
+    void computeSupport(vector<QByteArray>*);
 
     int getMinDistance();
+    void setScanAngle(int);
 
 private:
     void computeAngles();
@@ -80,6 +81,7 @@ private:
     int halfMaxSizeX;
     int halfMaxSizeY;
     int size;
+    int scanAngle;
 
     //Values that store the max angle of the scan.
     double maxAngleX;
