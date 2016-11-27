@@ -71,14 +71,6 @@ ComputeImage::ComputeImage(Image file)
     } else {
         ratioPixMm = double(heightMm) / heightPix;
     }
-/*
-    cout << "ratio pix/mm: " << ratioPixMm << endl;
-    cout << "width mm: " << widthMm << endl;
-    cout << "distance: " << distance << endl;
-    cout << "width pix: " << widthPix << endl;
-    cout << "max angle X: " << maxAngleX << endl;
-    cout << "max pos: " << angleMaxValue << endl;
-*/
 
 }
 
@@ -109,15 +101,6 @@ void ComputeImage::computeCoords(vector<QByteArray>* serialData, QProgressBar* p
 
     time_t timer;
     int debut = time(&timer);
-
-//    int index = 0;
-//    double percent = 0;
-
-//    string dataToSend = "";
-
-//    int angle = 0;
-
-//    int mode = 1;
 
     if (scanAngle <= 90 && scanAngle > 45){
 
@@ -177,9 +160,6 @@ void ComputeImage::computeCoords(vector<QByteArray>* serialData, QProgressBar* p
 
 void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 {
-
-    QByteArray dataToSend = "";
-
     double angleValue = 0;
     double angleRatio = 0;
     double halfSize = 0;
@@ -197,91 +177,17 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     heightValue = angleMaxValue * angleRatio;
 
 
-    char c = FLAG_X | FLAG_L;
+    computeCommand((FLAG_X | FLAG_L), widthValue, 0, 255, 0, 0);
+    serialData->push_back(_dataToSend);
 
-    unsigned char checksum = (unsigned char)c;
-    dataToSend.append(c);
+    computeCommand((FLAG_Y | FLAG_L), 0, heightValue, 255, 0, 0);
+    serialData->push_back(_dataToSend);
 
-    c = widthValue/256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
+    computeCommand((FLAG_X | FLAG_L), -widthValue, 0, 255, 0, 0);
+    serialData->push_back(_dataToSend);
 
-    c = widthValue%256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    checksum += 255;
-    dataToSend.append((unsigned char)255);
-
-    dataToSend.append(checksum);
-
-    serialData->push_back(dataToSend);
-    dataToSend.clear();
-
-    c = FLAG_Y | FLAG_L;
-
-    checksum = (unsigned char)c;
-    dataToSend.append(c);
-
-    c = heightValue/256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    c = heightValue%256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    checksum += 255;
-    dataToSend.append((unsigned char)255);
-
-    dataToSend.append(checksum);
-
-    serialData->push_back(dataToSend);
-    dataToSend.clear();
-
-
-
-    c = FLAG_X | FLAG_L;
-
-    checksum = (unsigned char)c;
-    dataToSend.append(c);
-
-    c = -widthValue/256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    c = -widthValue%256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    checksum += 255;
-    dataToSend.append((unsigned char)255);
-
-    dataToSend.append(checksum);
-
-    serialData->push_back(dataToSend);
-    dataToSend.clear();
-
-    c = FLAG_Y | FLAG_L;
-
-    checksum = (unsigned char)c;
-    dataToSend.append(c);
-
-    c = -heightValue/256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    c = -heightValue%256;
-    checksum += (unsigned char)c;
-    dataToSend.append(c);
-
-    checksum += 255;
-    dataToSend.append((unsigned char)255);
-
-    dataToSend.append(checksum);
-
-    serialData->push_back(dataToSend);
-    dataToSend.clear();
+    computeCommand((FLAG_Y | FLAG_L), 0, -heightValue, 255, 0, 0);
+    serialData->push_back(_dataToSend);
 
 }
 
@@ -359,11 +265,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos >= widthPix){
 
-                dataToSend.append(FLAG_L);
-                dataToSend.append((char)0);
-                dataToSend.append(FLAG_L);
-                _serialData->push_back(dataToSend);
-                dataToSend.clear();
+                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                _serialData->push_back(_dataToSend);
 
                 break;
             }
@@ -377,42 +280,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 //            cout << angleValueX[pos] << endl;
 //            cout << angleValueY[i] << endl;
 
-            char c = FLAG_X | FLAG_Y | FLAG_L;
-//            cout << bitset<8>(c) << endl;
+            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+                           angleValueX[pos],
+                           angleValueY[i],
+                           pix, 0, 0);
+            _serialData->push_back(_dataToSend);
 
-            unsigned char checksum = (unsigned char)c;
-            dataToSend.append(c);
-            c = angleValueX[pos]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueX[pos]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[i]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[i]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = pix;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            dataToSend.append(checksum);
-
-            _serialData->push_back(dataToSend);
-            dataToSend.clear();
         }
-
-        dataToSend.append(FLAG_L);
-        dataToSend.append((char)0);
-        dataToSend.append(FLAG_L);
-        _serialData->push_back(dataToSend);
-        dataToSend.clear();
 
     //Computing for first octant
     } else if (angle <=45 && angle >=0){
@@ -428,11 +302,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos < 0){
 
-                dataToSend.append(FLAG_L);
-                dataToSend.append((char)0);
-                dataToSend.append(FLAG_L);
-                _serialData->push_back(dataToSend);
-                dataToSend.clear();
+                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                _serialData->push_back(_dataToSend);
 
                 break;
             }
@@ -443,43 +314,12 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
                 continue;
             }
 
-            char c = FLAG_X | FLAG_Y | FLAG_L;
-
-            unsigned char checksum = (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueX[i]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueX[i]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[pos]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[pos]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = pix;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            dataToSend.append(checksum);
-
-            _serialData->push_back(dataToSend);
-            dataToSend.clear();
-
-        }
-
-        dataToSend.append(FLAG_L);
-        dataToSend.append((char)0);
-        dataToSend.append(FLAG_L);
-        _serialData->push_back(dataToSend);
-        dataToSend.clear();
+            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+                           angleValueX[i],
+                           angleValueY[pos],
+                           pix, 0, 0);
+            _serialData->push_back(_dataToSend);
+      }
 
     //Computing for height octant
     } else if (angle < 0 && angle >= -45){
@@ -495,11 +335,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos >= heightPix){
 
-                dataToSend.append(FLAG_L);
-                dataToSend.append((char)0);
-                dataToSend.append(FLAG_L);
-                _serialData->push_back(dataToSend);
-                dataToSend.clear();
+                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                _serialData->push_back(_dataToSend);
 
                 break;
             }
@@ -510,36 +347,12 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
                 continue;
             }
 
+            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+                           angleValueX[i],
+                           angleValueY[pos],
+                           pix, 0, 0);
+            _serialData->push_back(_dataToSend);
             char c = FLAG_X | FLAG_Y | FLAG_L;
-
-            unsigned char checksum = (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueX[i]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueX[i]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[pos]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[pos]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = pix;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            dataToSend.append(checksum);
-
-            _serialData->push_back(dataToSend);
-            dataToSend.clear();
-
 
         }
     //Computing for seventh octant
@@ -556,11 +369,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos > widthPix){
 
-                dataToSend.append(FLAG_L);
-                dataToSend.append((char)0);
-                dataToSend.append(FLAG_L);
-                _serialData->push_back(dataToSend);
-                dataToSend.clear();
+                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                _serialData->push_back(_dataToSend);
 
                 break;
             }
@@ -570,38 +380,59 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             {
                 continue;
             }
-            char c = FLAG_X | FLAG_Y | FLAG_L;
-//            cout << bitset<8>(c) << endl;
-
-            unsigned char checksum = (unsigned char)c;
-            dataToSend.append(c);
-            c = angleValueX[pos]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueX[pos]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[i]/256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = angleValueY[i]%256;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            c = pix;
-            checksum += (unsigned char)c;
-            dataToSend.append(c);
-
-            dataToSend.append(checksum);
-
-            _serialData->push_back(dataToSend);
-            dataToSend.clear();
-
+            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+                           angleValueX[pos],
+                           angleValueY[i],
+                           pix, 0, 0);
+            _serialData->push_back(_dataToSend);
         }
     }
+}
+
+void ComputeImage::computeCommand(char flags, int posX, int posY, char posL, int speed, char mode)
+{
+    _dataToSend.clear();
+    _checksum = 0;
+
+    computeCommandChar(flags);
+
+    if(flags & FLAG_X){
+        computeCommandInt(posX);
+    }
+
+    if(flags & FLAG_Y){
+        computeCommandInt(posY);
+    }
+
+    if(flags & FLAG_L){
+        computeCommandChar(posL);
+    }
+
+    if(flags & FLAG_SPEED){
+        computeCommandInt(speed);
+    }
+
+    if(flags & FLAG_MODE){
+        computeCommandChar(mode);
+    }
+
+    computeCommandChar(_checksum);
+//    cout << endl;
+
+
+}
+
+void ComputeImage::computeCommandInt(int val)
+{
+    computeCommandChar(val/256);
+    computeCommandChar(val%256);
+}
+
+void ComputeImage::computeCommandChar(char val)
+{
+    _checksum += (unsigned char)val;
+    _dataToSend.append(val);
+//    cout << bitset<8>(val) << endl;
 
 }
 

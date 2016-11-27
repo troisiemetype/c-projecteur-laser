@@ -61,6 +61,9 @@ public:
 private:
     void computeAngles();
     void bresenham(int, int, int, int);
+    void computeCommand(char, int, int, char, int, char);
+    void computeCommandInt(int);
+    void computeCommandChar(char);
 
     //Copies of the image values
     QImage image;
@@ -97,6 +100,10 @@ private:
 
     //pointer to the serial buffer
     vector<QByteArray>* _serialData;
+
+    //values for command creation
+    QByteArray _dataToSend;
+    unsigned char _checksum;
 
 };
 
