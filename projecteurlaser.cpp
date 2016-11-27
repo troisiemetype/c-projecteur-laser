@@ -191,6 +191,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
 {
     computeImage.computeSupport(serial.getBoxSupportArray());
+    serial.initData();
     serial.sendSupport();
 }
 
@@ -209,7 +210,7 @@ void ProjecteurLaser::on_supportWidthLineEdit_editingFinished()
 {
     //Record the new value, hide send button, update the computeImage object
     image.setSupportWidth(ui->supportWidthLineEdit->text().toInt());
-    QString str = QString::number(image.getSupportHeight());
+//    QString str = QString::number(image.getSupportHeight());
     ui->actionSendData->setEnabled(false);
 
     computeImage = ComputeImage(image);
@@ -220,7 +221,7 @@ void ProjecteurLaser::on_supportHeightLineEdit_editingFinished()
 {
     //Record the new value, hide send button, update the computeImage object
     image.setSupportHeight(ui->supportHeightLineEdit->text().toInt());
-    QString str = QString::number(image.getSupportWidth());
+//    QString str = QString::number(image.getSupportWidth());
     ui->actionSendData->setEnabled(false);
 
     computeImage = ComputeImage(image);
@@ -294,9 +295,7 @@ void ProjecteurLaser::readData(){
         if(serial.sendData(1) == false){
             ui->actionSendData->setChecked(false);
         }
-    }
-
-    if(ui->actionImageCalibrate->isChecked()){
+    } else if(ui->actionImageCalibrate->isChecked()){
         serial.sendSupport();
     }
 

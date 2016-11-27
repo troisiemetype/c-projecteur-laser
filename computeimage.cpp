@@ -33,8 +33,8 @@ ComputeImage::ComputeImage(Image file)
     pi = atan(1) * 4;
 
     //The max angle in cfg file is store as degrees; converting it to radians.
-    maxAngleX = 20 * pi / 180;
-    maxAngleY = 20 * pi / 180;
+    maxAngleX = 10 * pi / 180;
+    maxAngleY = 10 * pi / 180;
 
     //Prepare the tan of the scan max angle.
     //With python it speeds up the calculus, but it seems C++ doesn't care!
@@ -51,7 +51,7 @@ ComputeImage::ComputeImage(Image file)
     speed = file.getSpeed();
     //distance = file.getDistance();
     //Temporary distance value for tests.
-    distance = 400;
+    distance = 650;
 
     supportWidth = file.getSupportWidth();
     supportHeight = file.getSupportHeight();
@@ -198,7 +198,6 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 
 
     char c = FLAG_X | FLAG_L;
-    cout << bitset<8>(c) << endl;
 
     unsigned char checksum = (unsigned char)c;
     dataToSend.append(c);
@@ -206,12 +205,10 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     c = widthValue/256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     c = widthValue%256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     checksum += 255;
     dataToSend.append((unsigned char)255);
@@ -220,10 +217,8 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 
     serialData->push_back(dataToSend);
     dataToSend.clear();
-    cout << endl;
 
     c = FLAG_Y | FLAG_L;
-    cout << bitset<8>(c) << endl;
 
     checksum = (unsigned char)c;
     dataToSend.append(c);
@@ -231,12 +226,10 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     c = heightValue/256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     c = heightValue%256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     checksum += 255;
     dataToSend.append((unsigned char)255);
@@ -245,11 +238,10 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 
     serialData->push_back(dataToSend);
     dataToSend.clear();
-    cout << endl;
+
 
 
     c = FLAG_X | FLAG_L;
-    cout << bitset<8>(c) << endl;
 
     checksum = (unsigned char)c;
     dataToSend.append(c);
@@ -257,12 +249,10 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     c = -widthValue/256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     c = -widthValue%256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     checksum += 255;
     dataToSend.append((unsigned char)255);
@@ -271,10 +261,8 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 
     serialData->push_back(dataToSend);
     dataToSend.clear();
-    cout << endl;
 
     c = FLAG_Y | FLAG_L;
-    cout << bitset<8>(c) << endl;
 
     checksum = (unsigned char)c;
     dataToSend.append(c);
@@ -282,12 +270,10 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     c = -heightValue/256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     c = -heightValue%256;
     checksum += (unsigned char)c;
     dataToSend.append(c);
-    cout << bitset<8>(c) << endl;
 
     checksum += 255;
     dataToSend.append((unsigned char)255);
@@ -296,9 +282,6 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
 
     serialData->push_back(dataToSend);
     dataToSend.clear();
-
-    cout << endl;
-    cout << endl;
 
 }
 

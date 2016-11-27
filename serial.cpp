@@ -111,9 +111,11 @@ bool Serial::sendData(int mode)
 //Send the rectangle area of the support.
 void Serial::sendSupport()
 {
-    for(int i = 0; i < 4; i++){
-        serial->write(dataBoxSupport.at(i));
+    if(currentCoord >= 4){
+        currentCoord = 0;
     }
+    serial->write(dataBoxSupport.at(currentCoord));
+    currentCoord++;
 }
 
 void Serial::addCoord(string coord)
@@ -134,6 +136,8 @@ void Serial::addBoxSupport(QByteArray coord)
 void Serial::emptyCoord()
 {
     dataToSend.clear();
+    dataBoxImage.clear();
+    dataBoxSupport.clear();
 }
 
 bool Serial::isOpen()
