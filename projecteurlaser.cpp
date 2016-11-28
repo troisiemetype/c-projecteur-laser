@@ -83,6 +83,11 @@ void ProjecteurLaser::on_actionFileNew_triggered()
         ui->speedLineEdit->setText(QString::number(image.getSpeed()));
         ui->blackWhiteCheckEdit->setChecked(true);
 
+        ui->modeComboBox->addItem("Points");
+        ui->modeComboBox->addItem("Points and time");
+        ui->modeComboBox->addItem("Routes");
+        cout << ui->modeComboBox->currentIndex() << endl;
+
     }
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
@@ -161,6 +166,9 @@ void ProjecteurLaser::on_actionAbout_triggered()
 //Compute the image coordinates for laser.
 void ProjecteurLaser::on_actionImageCompute_triggered()
 {
+    ui->actionImageCalibrate->setChecked(false);
+    ui->actionSendData->setChecked(false);
+
     //Create a new image object.
     computeImage = ComputeImage(image);
 
@@ -190,18 +198,28 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 //compute and send a calibration rectangle.
 void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
 {
-    computeImage.computeSupport(serial.getBoxSupportArray());
-    serial.initData();
-    serial.sendSupport();
+    if(checked)
+    {
+        ui->infosWidget->setEnabled(false);
+        computeImage.computeSupport(serial.getBoxSupportArray());
+        serial.initData();
+        serial.sendSupport();
+    } else {
+        ui->infosWidget->setEnabled(true);
+    }
 }
 
 //Send the data to the laser.
-void ProjecteurLaser::on_actionSendData_triggered()
+void ProjecteurLaser::on_actionSendData_triggered(bool checked)
 {
-    if(ui->actionSendData->isChecked())
+    if(checked)
     {
+        ui->infosWidget->setEnabled(false);
         serial.initData();
         serial.sendData(0);
+    } else {
+        ui->infosWidget->setEnabled(true);
+
     }
 }
 
@@ -299,4 +317,9 @@ void ProjecteurLaser::readData(){
         serial.sendSupport();
     }
 
+}
+
+void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
+{
+    cout << index << endl;
 }

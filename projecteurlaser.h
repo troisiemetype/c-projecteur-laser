@@ -65,7 +65,7 @@ private slots:
 
     void on_actionImageCalibrate_triggered(bool checked);
 
-    void on_actionSendData_triggered();
+    void on_actionSendData_triggered(bool checked);
 
     void on_supportWidthLineEdit_editingFinished();
 
@@ -84,6 +84,8 @@ private slots:
     void on_heightMmLineEdit_editingFinished();
 
     void readData();
+
+    void on_modeComboBox_currentIndexChanged(int index);
 
 private:
     Ui::ProjecteurLaser *ui;

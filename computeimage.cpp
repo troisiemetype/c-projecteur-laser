@@ -51,7 +51,7 @@ ComputeImage::ComputeImage(Image file)
     speed = file.getSpeed();
     //distance = file.getDistance();
     //Temporary distance value for tests.
-    distance = 650;
+    distance = file.getDistance();
 
     supportWidth = file.getSupportWidth();
     supportHeight = file.getSupportHeight();
@@ -248,8 +248,6 @@ void ComputeImage::computeAngles()
 //compute the points with Bresenham algorithm
 //Each of the four octant is computed differently and handles overflows
 void ComputeImage::bresenham(int start, int end, int pos, int angle){
-
-    QByteArray dataToSend = "";
 
     //computing for second octant
     if (angle <= 90 && angle > 45){

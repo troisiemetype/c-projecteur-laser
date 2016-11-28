@@ -42,6 +42,10 @@ Image::Image(QString const& file)
 
     ratio = (float)width / (float)height;
 
+    //defaut speed and distance
+    distance = 650;
+    speed = 100;
+
     //default support size = image size.
     supportWidth = widthMm;
     supportHeight = heightMm;
