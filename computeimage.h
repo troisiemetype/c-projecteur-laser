@@ -61,7 +61,7 @@ public:
 private:
     void computeAngles();
     void bresenham(int, int, int, int);
-    void computeCommand(char, int, int, char, int, char);
+    QByteArray computeCommand(char, int, int, char, int, char);
     void computeCommandInt(int);
     void computeCommandChar(char);
 
@@ -72,6 +72,7 @@ private:
     int widthMm;
     int heightMm;
     int speed;
+    int mode;
     int distance;
     int supportWidth;
     int supportHeight;

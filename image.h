@@ -50,6 +50,7 @@ public:
     int getHeightMm();
     int getDistance();
     int getSpeed();
+    int getMode();
     int getSupportWidth();
     int getSupportHeight();
 
@@ -60,6 +61,7 @@ public:
     void setSupportHeight(int);
     void setDistance(int);
     void setSpeed(int);
+    void setImageMode(int);
     void setMode(int);
 
     void setStep(int);
@@ -84,6 +86,7 @@ private:
 
     int distance;
     int speed;
+    int mode;
 
     int supportWidth;
     int supportHeight;

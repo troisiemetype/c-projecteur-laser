@@ -81,12 +81,14 @@ void ProjecteurLaser::on_actionFileNew_triggered()
         ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
         ui->distanceLineEdit->setText(QString::number(image.getDistance()));
         ui->speedLineEdit->setText(QString::number(image.getSpeed()));
-        ui->blackWhiteCheckEdit->setChecked(true);
 
         ui->modeComboBox->addItem("Points");
         ui->modeComboBox->addItem("Points and time");
         ui->modeComboBox->addItem("Routes");
-        cout << ui->modeComboBox->currentIndex() << endl;
+
+        ui->imageModeComboBox->addItem("Grayscale");
+        ui->imageModeComboBox->addItem("Floyd-Steinberg");
+        ui->imageModeComboBox->addItem("Threshold");
 
     }
 
@@ -262,13 +264,15 @@ void ProjecteurLaser::on_speedLineEdit_editingFinished()
 
 //Temporary: Change the image mode.
 //TODO: but this settings in a dropdown menu, possibly in an image settings window.
-void ProjecteurLaser::on_blackWhiteCheckEdit_toggled(bool checked)
+void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 {
-    if(checked){
-        image.setMode(0);
+    if(index == 2){
+        ui->stepSlider->setVisible(true);
     } else {
-        image.setMode(1);
+        ui->stepSlider->setVisible(false);
     }
+
+    image.setImageMode(index);
 
     ui->imageLabel->setPixmap(image.getPixmap());
     computeImage = ComputeImage(image);
@@ -276,11 +280,11 @@ void ProjecteurLaser::on_blackWhiteCheckEdit_toggled(bool checked)
 
 //Set the step between black and white for thresold.
 //TODO: see if we keep this or no.
-void ProjecteurLaser::on_horizontalSlider_sliderReleased()
+void ProjecteurLaser::on_stepSlider_valueChanged(int value)
 {
-    int seuil = ui->horizontalSlider->value();
+    int seuil = value;
     image.setStep(seuil);
-    cout << seuil << endl;
+    image.setImageMode(ui->imageModeComboBox->currentIndex());
     ui->imageLabel->setPixmap(image.getPixmap());
 }
 
@@ -321,5 +325,5 @@ void ProjecteurLaser::readData(){
 
 void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
 {
-    cout << index << endl;
+    image.setMode(index);
 }

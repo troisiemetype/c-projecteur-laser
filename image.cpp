@@ -86,8 +86,6 @@ bool Image::close()
 //Get an updated pixmap for displaying in GUI.
 QPixmap Image::getPixmap()
 {
-    //thumbnail = thumbnail.convertToFormat(QImage::Format_Mono);
-
     thumbnailBW = setGray(thumbnail, blackWhiteMode);
 
     QPixmap pixmap;
@@ -136,6 +134,10 @@ int Image::getSpeed()
     return speed;
 }
 
+int Image::getMode(){
+    return mode;
+}
+
 int Image::getSupportWidth()
 {
     return supportWidth;
@@ -180,7 +182,11 @@ void Image::setSpeed(int value)
     speed = value;
 }
 
-void Image::setMode(int value)
+void Image::setMode(int value){
+    mode = value;
+}
+
+void Image::setImageMode(int value)
 {
     blackWhiteMode = value;
     negative = setGray(image, blackWhiteMode);
@@ -189,9 +195,9 @@ void Image::setMode(int value)
 }
 
 //convert the image into black and white
-//TODO: give the choice between a gray image and black and white thresold image.
 QImage Image::setGray(QImage image, int mode)
 {
+    //mode == 0: grayscale image
     if(mode == 0)
     {
         for(int i=0; i<image.height(); i++)
@@ -209,10 +215,14 @@ QImage Image::setGray(QImage image, int mode)
             }
         }
         return image;
-
+    //mode == 1: Floyd-Steinberg image
     } else if(mode == 1){
         image = image.convertToFormat(QImage::Format_Mono);
-/*        for(int i=0; i<image.height(); i++)
+
+        return image;
+    //mode == 2: Threshold image
+    } else if(mode == 2){
+        for(int i=0; i<image.height(); i++)
         {
             //TODO: See why scanLine() gives a different color than access by pixel().
             //uchar * line = image.scanLine(i);
@@ -224,13 +234,14 @@ QImage Image::setGray(QImage image, int mode)
                 int gray = qGray(color);
                 if(gray > blackWhiteStep){
                     image.setPixel(j, i, qRgb(255, 255, 255));
-                    //image.setPixel(j, i, qGray(image.pixel(j, i)));
                 } else {
                     image.setPixel(j, i, qRgb(0, 0, 0));
                 }
+                //image.setPixel(j, i, qGray(image.pixel(j, i)));
             }
-        }*/
+        }
         return image;
+
     }
 
 }

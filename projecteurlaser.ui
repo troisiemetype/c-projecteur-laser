@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>536</width>
-    <height>428</height>
+    <height>479</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -150,9 +150,9 @@
           </widget>
          </item>
          <item row="10" column="0">
-          <widget class="QLabel" name="blackWhiteLabel">
+          <widget class="QLabel" name="imageModeLabel">
            <property name="text">
-            <string>Black and white</string>
+            <string>Image mode</string>
            </property>
           </widget>
          </item>
@@ -165,13 +165,6 @@
          </item>
          <item row="7" column="1">
           <widget class="QLineEdit" name="speedLineEdit"/>
-         </item>
-         <item row="10" column="1">
-          <widget class="QCheckBox" name="blackWhiteCheckEdit">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
          </item>
          <item row="8" column="0">
           <widget class="QLabel" name="angleLabel">
@@ -209,17 +202,20 @@
          <item row="9" column="1">
           <widget class="QComboBox" name="modeComboBox"/>
          </item>
+         <item row="10" column="1">
+          <widget class="QComboBox" name="imageModeComboBox"/>
+         </item>
+         <item row="11" column="1">
+          <widget class="QSlider" name="stepSlider">
+           <property name="maximum">
+            <number>255</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QSlider" name="horizontalSlider">
-         <property name="maximum">
-          <number>255</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="Line" name="line_2">

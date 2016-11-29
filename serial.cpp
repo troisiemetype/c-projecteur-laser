@@ -93,16 +93,6 @@ bool Serial::sendData(int mode)
         return false;
     }
 
-
-//    cout << "index " << currentCoord << endl;
-/*
-    char *data = dataToSend.at(currentCoord).data();
-
-    while (*data){
-        cout << bitset<8>(*data) << endl;
-        ++data;
-    }
-*/
     serial->write(dataToSend.at(currentCoord));
 
     return true;
@@ -111,11 +101,18 @@ bool Serial::sendData(int mode)
 //Send the rectangle area of the support.
 void Serial::sendSupport()
 {
+    char *inData = new char();
+    serial->read(inData, 1);
+//    cout << bitset<8>(*inData) << endl;
+
+    if(*inData == 0){
+        currentCoord++;
+    }
+
     if(currentCoord >= 4){
         currentCoord = 0;
     }
     serial->write(dataBoxSupport.at(currentCoord));
-    currentCoord++;
 }
 
 void Serial::addCoord(string coord)

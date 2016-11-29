@@ -75,9 +75,9 @@ private slots:
 
     void on_speedLineEdit_editingFinished();
 
-    void on_blackWhiteCheckEdit_toggled(bool checked);
+    void on_imageModeComboBox_currentIndexChanged(int index);
 
-    void on_horizontalSlider_sliderReleased();
+    void on_stepSlider_valueChanged(int value);
 
     void on_widthMmLineEdit_editingFinished();
 

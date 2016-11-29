@@ -49,8 +49,7 @@ ComputeImage::ComputeImage(Image file)
     widthMm = file.getWidthMm();
     heightMm = file.getHeightMm();
     speed = file.getSpeed();
-    //distance = file.getDistance();
-    //Temporary distance value for tests.
+    mode = file.getMode();
     distance = file.getDistance();
 
     supportWidth = file.getSupportWidth();
@@ -254,6 +253,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
         double tanAngle = tan((90 - angle) * pi / 180);
         double error = -0.5;
 
+        QRgb pixPv = 0;
+
         for (int i = start; i >= end; i--){
             error += tanAngle;
             if (error > 0){
@@ -273,8 +274,14 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if(pix == 0)
             {
+                if(pixPv != 0){
+                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    _serialData->push_back(_dataToSend);
+                }
+                pixPv = pix;
                 continue;
             }
+            pixPv = pix;
 //            cout << angleValueX[pos] << endl;
 //            cout << angleValueY[i] << endl;
 
@@ -290,6 +297,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     } else if (angle <=45 && angle >=0){
         double tanAngle = tan(angle * pi / 180);
         double error = 0.5;
+
+        QRgb pixPv = 0;
 
         for (int i = start; i <= end; i++){
             error -= tanAngle;
@@ -309,8 +318,14 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if(pix == 0)
             {
+                if(pixPv != 0){
+                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    _serialData->push_back(_dataToSend);
+                }
+                pixPv = pix;
                 continue;
             }
+            pixPv = pix;
 
             computeCommand((FLAG_X | FLAG_Y | FLAG_L),
                            angleValueX[i],
@@ -323,6 +338,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     } else if (angle < 0 && angle >= -45){
         double tanAngle = tan(angle * pi / 180);
         double error = -0.5;
+
+        QRgb pixPv = 0;
 
         for (int i = start; i <= end; i++){
             error -= tanAngle;
@@ -342,8 +359,14 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if(pix == 0)
             {
+                if(pixPv != 0){
+                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    _serialData->push_back(_dataToSend);
+                }
+                pixPv = pix;
                 continue;
             }
+            pixPv = pix;
 
             computeCommand((FLAG_X | FLAG_Y | FLAG_L),
                            angleValueX[i],
@@ -357,6 +380,8 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     } else if (angle < -45 && angle >= -90){
         double tanAngle = tan((-90 - angle) * pi / 180);
         double error = -0.5;
+
+        QRgb pixPv = 0;
 
         for (int i = start; i <= end; i++){
             error -= tanAngle;
@@ -376,8 +401,15 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if(pix == 0)
             {
+                if(pixPv != 0){
+                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    _serialData->push_back(_dataToSend);
+                }
+                pixPv = pix;
                 continue;
             }
+            pixPv = pix;
+
             computeCommand((FLAG_X | FLAG_Y | FLAG_L),
                            angleValueX[pos],
                            angleValueY[i],
@@ -387,7 +419,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     }
 }
 
-void ComputeImage::computeCommand(char flags, int posX, int posY, char posL, int speed, char mode)
+QByteArray ComputeImage::computeCommand(char flags, int posX, int posY, char posL, int speed, char mode)
 {
     _dataToSend.clear();
     _checksum = 0;
@@ -416,6 +448,8 @@ void ComputeImage::computeCommand(char flags, int posX, int posY, char posL, int
 
     computeCommandChar(_checksum);
 //    cout << endl;
+
+    return _dataToSend;
 
 
 }
