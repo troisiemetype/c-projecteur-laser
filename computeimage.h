@@ -57,11 +57,12 @@ public:
 
     int getMinDistance();
     void setScanAngle(int);
+    int getDpi();
 
 private:
     void computeAngles();
     void bresenham(int, int, int, int);
-    QByteArray computeCommand(char, int, int, char, int, char);
+    QByteArray computeCommand(char, char, int, int, char, int, char);
     void computeCommandInt(int);
     void computeCommandChar(char);
 
@@ -71,6 +72,7 @@ private:
     int heightPix;
     int widthMm;
     int heightMm;
+    char index;
     int speed;
     int mode;
     int distance;

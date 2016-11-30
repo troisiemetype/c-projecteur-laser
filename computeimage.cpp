@@ -50,6 +50,7 @@ ComputeImage::ComputeImage(Image file)
     heightMm = file.getHeightMm();
     speed = file.getSpeed();
     mode = file.getMode();
+    index = 0;
     distance = file.getDistance();
 
     supportWidth = file.getSupportWidth();
@@ -176,17 +177,20 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     heightValue = angleMaxValue * angleRatio;
 
 
-    computeCommand((FLAG_X | FLAG_L), widthValue, 0, 255, 0, 0);
+    computeCommand((FLAG_X | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, widthValue, 0, 255, 10, 1);
     serialData->push_back(_dataToSend);
 
-    computeCommand((FLAG_Y | FLAG_L), 0, heightValue, 255, 0, 0);
+    computeCommand((FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, 0, heightValue, 255, 10, 1);
     serialData->push_back(_dataToSend);
 
-    computeCommand((FLAG_X | FLAG_L), -widthValue, 0, 255, 0, 0);
+    computeCommand((FLAG_X | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, -widthValue, 0, 255, 10, 1);
     serialData->push_back(_dataToSend);
 
-    computeCommand((FLAG_Y | FLAG_L), 0, -heightValue, 255, 0, 0);
+    computeCommand((FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, 0, -heightValue, 255, 10, 1);
     serialData->push_back(_dataToSend);
+
+//    computeCommand((FLAG_X | FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, widthValue, -heightValue, 255, 10, 1);
+//    serialData->push_back(_dataToSend);
 
 }
 
@@ -248,12 +252,17 @@ void ComputeImage::computeAngles()
 //Each of the four octant is computed differently and handles overflows
 void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
+    char flags = FLAG_X | FLAG_Y | FLAG_L;
+    if(mode != 0){
+        flags |= FLAG_SPEED | FLAG_MODE;
+    }
+
+    QRgb pixPv = 0;
+
     //computing for second octant
     if (angle <= 90 && angle > 45){
         double tanAngle = tan((90 - angle) * pi / 180);
         double error = -0.5;
-
-        QRgb pixPv = 0;
 
         for (int i = start; i >= end; i--){
             error += tanAngle;
@@ -264,7 +273,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos >= widthPix){
 
-                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                 _serialData->push_back(_dataToSend);
 
                 break;
@@ -275,7 +284,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             if(pix == 0)
             {
                 if(pixPv != 0){
-                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                     _serialData->push_back(_dataToSend);
                 }
                 pixPv = pix;
@@ -285,10 +294,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 //            cout << angleValueX[pos] << endl;
 //            cout << angleValueY[i] << endl;
 
-            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+            computeCommand(flags,
+                           index++,
                            angleValueX[pos],
                            angleValueY[i],
-                           pix, 0, 0);
+                           pix,
+                           speed,
+                           mode);
             _serialData->push_back(_dataToSend);
 
         }
@@ -297,8 +309,6 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     } else if (angle <=45 && angle >=0){
         double tanAngle = tan(angle * pi / 180);
         double error = 0.5;
-
-        QRgb pixPv = 0;
 
         for (int i = start; i <= end; i++){
             error -= tanAngle;
@@ -309,7 +319,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos < 0){
 
-                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                 _serialData->push_back(_dataToSend);
 
                 break;
@@ -319,7 +329,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             if(pix == 0)
             {
                 if(pixPv != 0){
-                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                     _serialData->push_back(_dataToSend);
                 }
                 pixPv = pix;
@@ -327,10 +337,13 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
             pixPv = pix;
 
-            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+            computeCommand(flags,
+                           index++,
                            angleValueX[i],
                            angleValueY[pos],
-                           pix, 0, 0);
+                           pix,
+                           speed,
+                           mode);
             _serialData->push_back(_dataToSend);
       }
 
@@ -338,8 +351,6 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
     } else if (angle < 0 && angle >= -45){
         double tanAngle = tan(angle * pi / 180);
         double error = -0.5;
-
-        QRgb pixPv = 0;
 
         for (int i = start; i <= end; i++){
             error -= tanAngle;
@@ -350,7 +361,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos >= heightPix){
 
-                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                 _serialData->push_back(_dataToSend);
 
                 break;
@@ -360,7 +371,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             if(pix == 0)
             {
                 if(pixPv != 0){
-                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                     _serialData->push_back(_dataToSend);
                 }
                 pixPv = pix;
@@ -368,20 +379,20 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
             pixPv = pix;
 
-            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+            computeCommand(flags,
+                           index++,
                            angleValueX[i],
                            angleValueY[pos],
-                           pix, 0, 0);
+                           pix,
+                           speed,
+                           mode);
             _serialData->push_back(_dataToSend);
-            char c = FLAG_X | FLAG_Y | FLAG_L;
 
         }
     //Computing for seventh octant
     } else if (angle < -45 && angle >= -90){
         double tanAngle = tan((-90 - angle) * pi / 180);
         double error = -0.5;
-
-        QRgb pixPv = 0;
 
         for (int i = start; i <= end; i++){
             error -= tanAngle;
@@ -392,7 +403,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
 
             if (pos > widthPix){
 
-                computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                 _serialData->push_back(_dataToSend);
 
                 break;
@@ -402,7 +413,7 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             if(pix == 0)
             {
                 if(pixPv != 0){
-                    computeCommand(FLAG_L, 0, 0, 0, 0, 0);
+                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
                     _serialData->push_back(_dataToSend);
                 }
                 pixPv = pix;
@@ -410,21 +421,28 @@ void ComputeImage::bresenham(int start, int end, int pos, int angle){
             }
             pixPv = pix;
 
-            computeCommand((FLAG_X | FLAG_Y | FLAG_L),
+            computeCommand(flags,
+                           index++,
                            angleValueX[pos],
                            angleValueY[i],
-                           pix, 0, 0);
+                           pix,
+                           speed,
+                           mode);
             _serialData->push_back(_dataToSend);
         }
     }
 }
 
-QByteArray ComputeImage::computeCommand(char flags, int posX, int posY, char posL, int speed, char mode)
+QByteArray ComputeImage::computeCommand(char flags, char id, int posX, int posY, char posL, int speed, char mode)
 {
     _dataToSend.clear();
     _checksum = 0;
 
     computeCommandChar(flags);
+
+    if(flags & FLAG_I){
+        computeCommandChar(id);
+    }
 
     if(flags & FLAG_X){
         computeCommandInt(posX);
@@ -475,4 +493,8 @@ int ComputeImage::getMinDistance()
 
 void ComputeImage::setScanAngle(int angle){
     scanAngle = angle;
+}
+
+int ComputeImage::getDpi(){
+    return float(25.4) / ratioPixMm;
 }

@@ -87,23 +87,7 @@ int SerialConfig::getIndex(QString value)
 
 int SerialConfig::getValue(QString value)
 {
-    if(value == "baudrate")
-    {
-         return 0;
-
-    } else if(value == "databits"){
-        return 0;
-
-    } else if(value == "parity"){
-        return 0;
-
-    } else if(value == "stopbits"){
-        return 0;
-
-    } else {
-        return 0;
-    }
-
+     return settings->value(value).toInt();
 }
 
 bool SerialConfig::getBool(QString value)

@@ -53,6 +53,7 @@ public:
     int getMode();
     int getSupportWidth();
     int getSupportHeight();
+    int getBlackWhiteStep();
 
     //setters
     void setImageWidth(int);

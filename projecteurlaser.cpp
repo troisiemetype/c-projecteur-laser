@@ -34,6 +34,15 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->progressBar->hide();
     ui->progressLabel->hide();
 
+    ui->modeComboBox->addItem("Points");
+    ui->modeComboBox->addItem("Points and time");
+//    ui->modeComboBox->addItem("Routes");
+
+    ui->imageModeComboBox->addItem("Grayscale");
+    ui->imageModeComboBox->addItem("Floyd-Steinberg");
+    ui->imageModeComboBox->addItem("Threshold");
+
+
     move(50, 50);
 
     serial = Serial(this);
@@ -43,6 +52,13 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 ProjecteurLaser::~ProjecteurLaser()
 {
     delete ui;
+}
+
+void ProjecteurLaser::enableSends(bool state)
+{
+    ui->actionSendData->setEnabled(state);
+    ui->actionImageCalibrate->setEnabled(state);
+
 }
 
 //Open a new file. Init the image copies its values to the GUI fields.
@@ -81,19 +97,11 @@ void ProjecteurLaser::on_actionFileNew_triggered()
         ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
         ui->distanceLineEdit->setText(QString::number(image.getDistance()));
         ui->speedLineEdit->setText(QString::number(image.getSpeed()));
-
-        ui->modeComboBox->addItem("Points");
-        ui->modeComboBox->addItem("Points and time");
-        ui->modeComboBox->addItem("Routes");
-
-        ui->imageModeComboBox->addItem("Grayscale");
-        ui->imageModeComboBox->addItem("Floyd-Steinberg");
-        ui->imageModeComboBox->addItem("Threshold");
+        ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
 
     }
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
-    ui->actionImageCalibrate->setEnabled(true);
     ui->actionImageCompute->setEnabled(true);
 
     ui->centralWidget->show();
@@ -115,28 +123,26 @@ void ProjecteurLaser::on_actionFileClose_triggered()
     //Hide the image and values area, hide calibrate, compute and send buttons.
     ui->centralWidget->hide();
 
-    ui->actionImageCalibrate->setEnabled(false);
     ui->actionImageCompute->setEnabled(false);
-    ui->actionSendData->setEnabled(false);
-
+    enableSends(false);
 }
 
 //Connect the UART.
-void ProjecteurLaser::on_actionSerialConnect_triggered()
+void ProjecteurLaser::on_actionSerialConnect_triggered(bool checked)
 {
-    if(ui->actionSerialConnect->isChecked())
+    if(checked)
     {
         int ouvert = serial.open();
         if(!ouvert){
             ui->actionSerialConnect->setChecked(false);
         }
         if(ouvert && serial.isCompute()){
-            ui->actionSendData->setEnabled(true);
+            enableSends(true);
             ui->actionSendData->setChecked(false);
         }
     } else {
         serial.close();
-        ui->actionSendData->setEnabled(false);
+        enableSends(false);
         ui->actionSendData->setChecked(false);
     }
 
@@ -170,6 +176,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 {
     ui->actionImageCalibrate->setChecked(false);
     ui->actionSendData->setChecked(false);
+    ui->infosWidget->setEnabled(true);
 
     //Create a new image object.
     computeImage = ComputeImage(image);
@@ -193,7 +200,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 
     //If serial is open, show send button.
     if(serial.isOpen()){
-        ui->actionSendData->setEnabled(true);
+        enableSends(true);
     }
 }
 
@@ -203,6 +210,7 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
     if(checked)
     {
         ui->infosWidget->setEnabled(false);
+        enableSends(true);
         computeImage.computeSupport(serial.getBoxSupportArray());
         serial.initData();
         serial.sendSupport();
@@ -217,11 +225,11 @@ void ProjecteurLaser::on_actionSendData_triggered(bool checked)
     if(checked)
     {
         ui->infosWidget->setEnabled(false);
+        enableSends(true);
         serial.initData();
-        serial.sendData(0);
+        serial.sendData();
     } else {
         ui->infosWidget->setEnabled(true);
-
     }
 }
 
@@ -230,8 +238,7 @@ void ProjecteurLaser::on_supportWidthLineEdit_editingFinished()
 {
     //Record the new value, hide send button, update the computeImage object
     image.setSupportWidth(ui->supportWidthLineEdit->text().toInt());
-//    QString str = QString::number(image.getSupportHeight());
-    ui->actionSendData->setEnabled(false);
+    enableSends(false);
 
     computeImage = ComputeImage(image);
 }
@@ -241,8 +248,7 @@ void ProjecteurLaser::on_supportHeightLineEdit_editingFinished()
 {
     //Record the new value, hide send button, update the computeImage object
     image.setSupportHeight(ui->supportHeightLineEdit->text().toInt());
-//    QString str = QString::number(image.getSupportWidth());
-    ui->actionSendData->setEnabled(false);
+    enableSends(false);
 
     computeImage = ComputeImage(image);
 }
@@ -251,7 +257,7 @@ void ProjecteurLaser::on_supportHeightLineEdit_editingFinished()
 void ProjecteurLaser::on_distanceLineEdit_editingFinished()
 {
     image.setDistance(ui->distanceLineEdit->text().toInt());
-    ui->actionSendData->setEnabled(false);
+    enableSends(false);
 
 }
 
@@ -259,7 +265,7 @@ void ProjecteurLaser::on_distanceLineEdit_editingFinished()
 void ProjecteurLaser::on_speedLineEdit_editingFinished()
 {
     image.setSpeed(ui->speedLineEdit->text().toInt());
-    ui->actionSendData->setEnabled(false);
+    enableSends(false);
 }
 
 //Temporary: Change the image mode.
@@ -276,6 +282,8 @@ void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 
     ui->imageLabel->setPixmap(image.getPixmap());
     computeImage = ComputeImage(image);
+    enableSends(false);
+
 }
 
 //Set the step between black and white for thresold.
@@ -286,6 +294,7 @@ void ProjecteurLaser::on_stepSlider_valueChanged(int value)
     image.setStep(seuil);
     image.setImageMode(ui->imageModeComboBox->currentIndex());
     ui->imageLabel->setPixmap(image.getPixmap());
+    enableSends(false);
 }
 
 //Update the width of the picture.
@@ -297,6 +306,8 @@ void ProjecteurLaser::on_widthMmLineEdit_editingFinished()
 
     //Update the computeImage object.
     computeImage = ComputeImage(image);
+    ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
+    enableSends(false);
 }
 
 //Update the height of the picture.
@@ -308,14 +319,17 @@ void ProjecteurLaser::on_heightMmLineEdit_editingFinished()
 
     //Update the computeImage object.
     computeImage = ComputeImage(image);
+    ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
+    enableSends(false);
 }
 
 void ProjecteurLaser::readData(){
 //    cout << "data received" << endl;
 
     if(ui->actionSendData->isChecked()){
-        if(serial.sendData(1) == false){
+        if(serial.sendData() == false){
             ui->actionSendData->setChecked(false);
+            ui->infosWidget->setEnabled(true);
         }
     } else if(ui->actionImageCalibrate->isChecked()){
         serial.sendSupport();
@@ -326,4 +340,13 @@ void ProjecteurLaser::readData(){
 void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
 {
     image.setMode(index);
+    enableSends(false);
+    if(index == 0){
+        ui->speedLabel->setVisible(false);
+        ui->speedLineEdit->setVisible(false);
+    } else if(index == 1){
+        ui->speedLabel->setVisible(true);
+        ui->speedLineEdit->setVisible(true);
+
+    }
 }

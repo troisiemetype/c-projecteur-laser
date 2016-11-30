@@ -52,7 +52,7 @@ Image::Image(QString const& file)
 
     //The type of image we use. grayscale, thresold, etc.
     blackWhiteMode = 0;
-    blackWhiteStep = 128;
+    blackWhiteStep = 127;
 
     //The negative object, whom computings are made on.
     negative = setGray(image, blackWhiteMode);
@@ -146,6 +146,10 @@ int Image::getSupportWidth()
 int Image::getSupportHeight()
 {
     return supportHeight;
+}
+
+int Image::getBlackWhiteStep(){
+    return blackWhiteStep;
 }
 
 //Update the width from GUI, adapt height.

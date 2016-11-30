@@ -49,7 +49,7 @@ public:
     bool open();
     void close();
 
-    bool sendData(int);
+    bool sendData();
     void sendSupport();
 
     void addCoord(string);

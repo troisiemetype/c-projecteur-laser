@@ -42,6 +42,8 @@ public:
     explicit ProjecteurLaser(QWidget *parent = 0);
     ~ProjecteurLaser();
 
+    void enableSends(bool);
+
 private slots:
     void on_actionFileNew_triggered();
 
@@ -51,7 +53,7 @@ private slots:
 
     void on_actionFileClose_triggered();
 
-    void on_actionSerialConnect_triggered();
+    void on_actionSerialConnect_triggered(bool checked);
 
     void on_actionSerialDisconnect_triggered();
 

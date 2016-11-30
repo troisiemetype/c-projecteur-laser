@@ -47,7 +47,7 @@ bool Serial::open()
     serialConfig = SerialConfig();
 
     serial->setPortName(serialConfig.getString("port"));
-    serial->setBaudRate(115200);
+    serial->setBaudRate(serialConfig.getValue("baudrate"));
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
     serial->setStopBits(QSerialPort::OneStop);
@@ -78,14 +78,14 @@ void Serial::close()
 //Send the data to the laser.
 //TODO: see how to make this realtime (so we can see a progressbar and diplay infos at the end)
 //      Maybe (probably) use some multithreading.
-bool Serial::sendData(int mode)
+bool Serial::sendData()
 {
 
     char *inData = new char();
     serial->read(inData, 1);
 //    cout << bitset<8>(*inData) << endl;
 
-    if(mode == 1 && *inData == 0){
+    if(*inData == 0){
         currentCoord++;
     }
 
