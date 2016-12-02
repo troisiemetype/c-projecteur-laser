@@ -290,6 +290,7 @@
     <addaction name="actionFileOpen"/>
     <addaction name="actionFileSave"/>
     <addaction name="actionFileClose"/>
+    <addaction name="actionGrayScale"/>
    </widget>
    <widget class="QMenu" name="menuSerial">
     <property name="title">
@@ -442,6 +443,14 @@
    </property>
    <property name="toolTip">
     <string>Send the image to the projector</string>
+   </property>
+  </action>
+  <action name="actionGrayScale">
+   <property name="text">
+    <string>Gray scale</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a gray scale image</string>
    </property>
   </action>
  </widget>

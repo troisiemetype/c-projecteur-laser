@@ -20,6 +20,7 @@
 #define IMAGE_H
 
 #include <QImage>
+#include <QPainter>
 #include <QPixmap>
 #include <QString>
 
@@ -34,7 +35,10 @@ class Image
 public:
     Image();
     Image(QString const&);
+    Image(int);
     ~Image();
+
+    void initImage();
 
     bool open(QString const&);
     bool close();

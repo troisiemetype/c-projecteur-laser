@@ -28,17 +28,59 @@ Image::Image()
 //The Image constructor. Called by the GUI when a file is opened.
 Image::Image(QString const& file)
 {
+    //Create the image from an image file
+    image = QImage(file);
+
+    widthMm = 1000 * image.width() / image.dotsPerMeterX();
+    heightMm = 1000 * image.height() / image.dotsPerMeterY();
+
+    initImage();
+}
+
+//This is the contructor for a gray scale image
+Image::Image(int dpi)
+{
+    int sizeMm = 160;
+
+    image = QImage(4000, 4000, QImage::Format_RGB32);
+    image.fill(Qt::white);
+    QPainter *painter = new QPainter();
+    painter->begin(&image);
+
+    for(int i = 0; i < 64; i++){
+        int x = 500 * (i % 8);
+        int y = 500 * (i / 8);
+        int pix = 255 - 4*i;
+
+        painter->fillRect(x, y, 500, 500, QColor(pix, pix, pix));
+    }
+
+    delete painter;
+
+    int newSize = sizeMm * dpi / (float)25.4;
+    image = image.scaled(newSize, newSize);
+
+    widthMm = sizeMm;
+    heightMm = sizeMm;
+
+    initImage();
+}
+
+Image::~Image()
+{
+
+}
+
+void Image::initImage()
+{
     //image always contains the original file.
     //There are other QImage object used, i.e.:
     //negative is the negative version of this image. Computed again on blackWitheMode change.
     //thumbnail is the thumbnail version of the original.
     //thumbnailBW, is computed from the above, each time needed.
-    image = QImage(file);
-    //image = image.convertToFormat(QImage::Format_Mono);
+
     width = image.width();
     height = image.height();
-    widthMm = 1000 * width / image.dotsPerMeterX();
-    heightMm = 1000 * height / image.dotsPerMeterY();
 
     ratio = (float)width / (float)height;
 
@@ -66,11 +108,6 @@ Image::Image(QString const& file)
     }
 
     saved = 0;
-}
-
-Image::~Image()
-{
-
 }
 
 bool Image::open(QString const& file)

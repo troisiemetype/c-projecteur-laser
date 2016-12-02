@@ -17,7 +17,7 @@
  */
 
 /*
- * This program is intended. This is the main program, that defines the GUI and ties its inputs and outputs
+ * This is the main program, that defines the GUI and ties its inputs and outputs
  * to the classes used.
  */
 
@@ -61,6 +61,22 @@ void ProjecteurLaser::enableSends(bool state)
 
 }
 
+void ProjecteurLaser::populateGui()
+{
+    ui->imageLabel->setPixmap(image.getPixmap());
+
+    //And get all the values to be displayed in the GUI.
+    ui->widthPixelsLabelEdit->setText(QString::number(image.getWidthPix()));
+    ui->heightPixelsLabelEdit->setText(QString::number(image.getHeightPix()));
+    ui->widthMmLineEdit->setText(QString::number(image.getWidthMm()));
+    ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
+    ui->supportWidthLineEdit->setText(QString::number(image.getSupportWidth()));
+    ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
+    ui->distanceLineEdit->setText(QString::number(image.getDistance()));
+    ui->speedLineEdit->setText(QString::number(image.getSpeed()));
+    ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
+}
+
 //Open a new file. Init the image copies its values to the GUI fields.
 void ProjecteurLaser::on_actionFileNew_triggered()
 {
@@ -86,19 +102,7 @@ void ProjecteurLaser::on_actionFileNew_triggered()
         image = Image(file);
         computeImage = ComputeImage(image);
 
-        ui->imageLabel->setPixmap(image.getPixmap());
-
-        //And get all the values to be displayed in the GUI.
-        ui->widthPixelsLabelEdit->setText(QString::number(image.getWidthPix()));
-        ui->heightPixelsLabelEdit->setText(QString::number(image.getHeightPix()));
-        ui->widthMmLineEdit->setText(QString::number(image.getWidthMm()));
-        ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
-        ui->supportWidthLineEdit->setText(QString::number(image.getSupportWidth()));
-        ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
-        ui->distanceLineEdit->setText(QString::number(image.getDistance()));
-        ui->speedLineEdit->setText(QString::number(image.getSpeed()));
-        ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
-
+        populateGui();
     }
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
@@ -349,4 +353,21 @@ void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
         ui->speedLineEdit->setVisible(true);
 
     }
+}
+
+void ProjecteurLaser::on_actionGrayScale_triggered()
+{
+    bool ok = false;
+    int dpi = QInputDialog::getInt(this, "Gray scale", "dpi", 300, 0, 2400, 1, &ok);
+
+    if(!ok){return;}
+
+    image = Image(dpi);
+    computeImage = ComputeImage(image);
+    populateGui();
+
+    //Last, enable buttons for calibrating and computing, and show the image and values area.
+    ui->actionImageCompute->setEnabled(true);
+    ui->centralWidget->show();
+
 }

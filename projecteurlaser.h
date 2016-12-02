@@ -21,6 +21,7 @@
 
 #include <QMainWindow>
 
+#include <QInputDialog>
 #include <QFileDialog>
 
 #include "computeimage.h"
@@ -43,6 +44,7 @@ public:
     ~ProjecteurLaser();
 
     void enableSends(bool);
+    void populateGui();
 
 private slots:
     void on_actionFileNew_triggered();
@@ -88,6 +90,8 @@ private slots:
     void readData();
 
     void on_modeComboBox_currentIndexChanged(int index);
+
+    void on_actionGrayScale_triggered();
 
 private:
     Ui::ProjecteurLaser *ui;
