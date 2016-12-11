@@ -40,7 +40,7 @@ Image::Image(QString const& file)
 //This is the contructor for a gray scale image
 Image::Image(int dpi)
 {
-    int sizeMm = 160;
+    int sizeMm = 80;
 
     image = QImage(4000, 4000, QImage::Format_RGB32);
     image.fill(Qt::white);

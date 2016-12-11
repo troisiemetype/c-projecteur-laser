@@ -214,7 +214,7 @@ void ComputeImage::computeAngles()
 
     //First get the values for width
     //
-    //First is compute the distance between image centerand pix pos, in mm.
+    //First is compute the distance between image center and pix pos, in mm.
     //Then this value is used to find the corresponding angle.
     //Compute a ration between this angle and the max angle.
     //Finally use this ratio to get the laser position, by multiplying it by greatest posible value.
@@ -224,17 +224,17 @@ void ComputeImage::computeAngles()
         halfSize = (i - widthPix / 2) * ratioPixMm;
         angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
         angleRatio = angleValue / maxAngleX;
-        posValue = angleMaxValue * angleRatio;
+        posValue = round(angleMaxValue * angleRatio);
         angleValueX.push_back(posValue);
     }
 
-    //The get the values for height
+    //Then get the values for height
     for(int i = 0; i<heightPix; i++)
     {
         halfSize = (i - heightPix / 2) * ratioPixMm;
         angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
         angleRatio = angleValue / maxAngleY;
-        posValue = angleMaxValue * angleRatio;
+        posValue = round(angleMaxValue * angleRatio);
         angleValueY.push_back(posValue);
 
     }
@@ -474,8 +474,11 @@ QByteArray ComputeImage::computeCommand(char flags, char id, int posX, int posY,
 
 void ComputeImage::computeCommandInt(int val)
 {
-    computeCommandChar(val/256);
+//    cout << val << endl;
+//    computeCommandChar(val/256);
+    computeCommandChar(val >> 8);
     computeCommandChar(val%256);
+//    cout << endl;
 }
 
 void ComputeImage::computeCommandChar(char val)
