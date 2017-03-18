@@ -48,6 +48,7 @@ bool Serial::open()
 
     serial->setPortName(serialConfig.getString("port"));
     serial->setBaudRate(serialConfig.getValue("baudrate"));
+//    serial->setBaudRate(1000000);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
     serial->setStopBits(QSerialPort::OneStop);

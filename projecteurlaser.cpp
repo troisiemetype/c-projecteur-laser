@@ -46,7 +46,15 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     move(50, 50);
 
     serial = Serial(this);
+/* Values for testing if the sytem is bif-endian or little-endian, so as to track bug with linux 32bits
+    cout << "char" << sizeof(char) << endl;
+    cout << "int" << sizeof(int) << endl;
 
+    int n = 1;
+    for(int i = 0; i<4; i++){
+        cout << (int)((char*)&n)[i] << endl;
+    }
+*/
 }
 
 ProjecteurLaser::~ProjecteurLaser()

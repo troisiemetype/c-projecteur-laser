@@ -214,9 +214,9 @@ void ComputeImage::computeAngles()
 
     //First get the values for width
     //
-    //First is compute the distance between image center and pix pos, in mm.
+    //First is computed the distance between image center and pix pos, in mm.
     //Then this value is used to find the corresponding angle.
-    //Compute a ration between this angle and the max angle.
+    //Compute a ratio between this angle and the max angle.
     //Finally use this ratio to get the laser position, by multiplying it by greatest posible value.
     //Store this value into the angleValue array.
     for(int i = 0; i<widthPix; i++)
@@ -224,7 +224,8 @@ void ComputeImage::computeAngles()
         halfSize = (i - widthPix / 2) * ratioPixMm;
         angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
         angleRatio = angleValue / maxAngleX;
-        posValue = round(angleMaxValue * angleRatio);
+//        posValue = round(angleMaxValue * angleRatio);
+        posValue = angleMaxValue * angleRatio;
         angleValueX.push_back(posValue);
     }
 
@@ -234,7 +235,8 @@ void ComputeImage::computeAngles()
         halfSize = (i - heightPix / 2) * ratioPixMm;
         angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
         angleRatio = angleValue / maxAngleY;
-        posValue = round(angleMaxValue * angleRatio);
+//        posValue = round(angleMaxValue * angleRatio);
+        posValue = angleMaxValue * angleRatio;
         angleValueY.push_back(posValue);
 
     }
