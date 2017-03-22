@@ -209,11 +209,13 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
     if(checked)
     {
         ui->infosWidget->setEnabled(false);
-        enableSends(true);
+        enableSends(false);
+        ui->actionImageCalibrate->setEnabled(true);
         computeImage->computeSupport();
         audio->playSupport();
     } else {
         ui->infosWidget->setEnabled(true);
+        enableSends(true);
         audio->stopSupport();
     }
 }

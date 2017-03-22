@@ -37,9 +37,9 @@ void Audio::append(int x, int y, int l){
 
     for(int i = 0; i < l; i++){
         image->putChar(x%256);
-        image->putChar(x/256);
+        image->putChar(x >> 8);
         image->putChar(y%256);
-        image->putChar(y/256);
+        image->putChar(y >> 8);
     }
 }
 
@@ -82,9 +82,9 @@ int Audio::getLength(){
 
 void Audio::appendSupport(int x, int y){
     support->putChar(x%256);
-    support->putChar(x/256);
+    support->putChar(x >> 8);
     support->putChar(y%256);
-    support->putChar(y/256);
+    support->putChar(y >> 8);
 }
 
 void Audio::clearSupport(){
@@ -93,9 +93,9 @@ void Audio::clearSupport(){
 }
 
 void Audio::playSupport(){
-    connect(audioSupport, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleSupportStateChanged(QAudio::State)));
     support->reset();
     audioSupport->start(support);
+    connect(audioSupport, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleSupportStateChanged(QAudio::State)));
 }
 
 void Audio::stopSupport(){
@@ -121,12 +121,10 @@ void Audio::handleAudioStateChanged(QAudio::State state){
 
 void Audio::handleSupportStateChanged(QAudio::State state){
     switch(state){
-        case QAudio::ActiveState:
-            break;
         case QAudio::IdleState:
-//            audioSupport->stop();
             support->reset();
-            audioSupport->start(support);
+            break;
+        case QAudio::ActiveState:
             break;
         default:
             break;

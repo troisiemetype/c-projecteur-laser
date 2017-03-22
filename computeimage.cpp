@@ -39,8 +39,8 @@ void ComputeImage::init(Image file)
     pi = atan(1) * 4;
 
     //The max angle in cfg file is store as degrees; converting it to radians.
-    maxAngleX = 10 * pi / 180;
-    maxAngleY = 10 * pi / 180;
+    maxAngleX = 20 * pi / 180;
+    maxAngleY = 20 * pi / 180;
 
     //Prepare the tan of the scan max angle.
     //With python it speeds up the calculus, but it seems C++ doesn't care!
@@ -168,16 +168,16 @@ void ComputeImage::computeSupport()
 
     audio->clearSupport();
 
-    for(;x<widthValue; x+=5){
+    for(;x<widthValue; x+=32){
         audio->appendSupport(x, y);
     }
-    for(;y<heightValue; y+=5){
+    for(;y<heightValue; y+=32){
         audio->appendSupport(x, y);
     }
-    for(;x>-widthValue; x-=5){
+    for(;x>-widthValue; x-=32){
         audio->appendSupport(x, y);
     }
-    for(;y>-heightValue; y-=5){
+    for(;y>-heightValue; y-=32){
         audio->appendSupport(x, y);
     }
 
@@ -206,7 +206,7 @@ void ComputeImage::computeAngles()
     //First is compute the distance between image center and pix pos, in mm.
     //Then this value is used to find the corresponding angle.
     //Compute a ration between this angle and the max angle.
-    //Finally use this ratio to get the laser position, by multiplying it by greatest posible value.
+    //Finally use this ratio to get the laser position, by multiplying it by greatest possible value.
     //Store this value into the angleValue array.
     for(int i = 0; i<widthPix; i++)
     {
