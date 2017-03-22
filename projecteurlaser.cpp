@@ -202,7 +202,11 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->actionImageCalibrate->setEnabled(true);
     enableSends(true);
     ui->actionSend->setEnabled(true);
-    cout << "durée insolation: " << audio->getLength() << endl;
+    QString text = "Durée d'insolation: ";
+    text += QString::number(audio->getLength());
+    text += " secondes.";
+    this->statusBar()->showMessage(text);
+//    cout << "durée insolation: " << audio->getLength() << endl;
 }
 
 //compute and send a calibration rectangle.
