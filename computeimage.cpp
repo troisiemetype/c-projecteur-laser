@@ -39,8 +39,8 @@ void ComputeImage::init(Image file)
     pi = atan(1) * 4;
 
     //The max angle in cfg file is store as degrees; converting it to radians.
-    maxAngleX = 20 * pi / 180;
-    maxAngleY = 20 * pi / 180;
+    maxAngleX = 12 * pi / 180;
+    maxAngleY = 12 * pi / 180;
 
     //Prepare the tan of the scan max angle.
     //With python it speeds up the calculus, but it seems C++ doesn't care!
@@ -104,42 +104,36 @@ void ComputeImage::computeCoords(Audio *buffer)
 
     audio = buffer;
     audio->clearCoords();
-//    progressBar = progress;
 
     pixelsComputed = 0;
 
+    float tanAngle = 0;
+
     if (scanAngle > 45){
-        if (scanAngle != 90){
-            for (int i = 0; i < heightPix; i++){
-                bresenham(0, i);
-            }
-        }
-        for (int i = 0; i < widthPix; i++){
+        tanAngle = tan((90 - scanAngle) * pi / 180);
+        for (int i = -tanAngle * heightPix; i < widthPix; i++){
             bresenham(i, heightPix - 1);
         }
+
     } else if (scanAngle >= 0){
-        for (int i = 0; i < heightPix; i++){
+        tanAngle = tan(scanAngle * pi / 180);
+        int limit = heightPix + tanAngle * widthPix;
+        for (int i = 0; i < limit; i++){
             bresenham(0, i);
         }
-        if (scanAngle != 0){
-            for (int i = 0; i < widthPix; i++){
-                bresenham(i, heightPix - 1);
-            }
-        }
+
     } else if (scanAngle >= -45){
-        for (int i = heightPix - 1; i >= 0; i--){
+        tanAngle = tan(scanAngle * pi / 180);
+        int limit = tanAngle * widthPix;
+        for (int i = heightPix - 1; i >= limit; i--){
             bresenham(0, i);
         }
-        for (int i = 0; i < widthPix; i++){
-            bresenham(i, 0);
-        }
+
     } else {
         if (scanAngle != -90){
-            for (int i = heightPix - 1; i >= 0; i--){
-                bresenham(0, i);
-            }
+            tanAngle = -tan((90 + scanAngle) * pi / 180);
         }
-        for (int i = 0; i < widthPix; i++){
+        for (int i = tanAngle * heightPix; i < widthPix; i++){
             bresenham(i, 0);
         }
     }
@@ -247,12 +241,17 @@ void ComputeImage::bresenham(int x, int y){
 
         for (; y >= 0; y--){
             error += tanAngle;
-            pixelsComputed++;
 
             if(error > 0){
                 x++;
                 error--;
             }
+
+            if(x < 0){
+                continue;
+            }
+
+            pixelsComputed++;
 
             if(x >= widthPix){
                 break;
@@ -273,12 +272,17 @@ void ComputeImage::bresenham(int x, int y){
 
         for (; x <= widthPix - 1; x++){
             error += tanAngle;
-            pixelsComputed++;
 
             if (error > 0){
                 y--;
                 error--;
             }
+
+            if (y >= heightPix){
+                continue;
+            }
+
+            pixelsComputed++;
 
             if(y < 0){
                 break;
@@ -302,12 +306,17 @@ void ComputeImage::bresenham(int x, int y){
 
         for (; x <= widthPix - 1; x++){
             error += tanAngle;
-            pixelsComputed++;
 
             if (error > 0){
                 y++;
                 error--;
             }
+
+            if (y < 0){
+                continue;
+            }
+
+            pixelsComputed++;
 
             if(y >= heightPix){
                 break;
@@ -326,14 +335,19 @@ void ComputeImage::bresenham(int x, int y){
         double tanAngle = -tan((90 - scanAngle) * pi / 180);
         double error = -0.5;
 
-        for (; y <= heightPix; y++){
+        for (; y <= heightPix - 1; y++){
             error += tanAngle;
-            pixelsComputed++;
 
             if(error > 0){
                 x++;
                 error--;
             }
+
+            if (x < 0){
+                continue;
+            }
+
+            pixelsComputed++;
 
             if(x >= widthPix){
                 break;

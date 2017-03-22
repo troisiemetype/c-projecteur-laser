@@ -102,7 +102,7 @@ void Image::initImage()
     ratio = (float)width / (float)height;
 
     //defaut speed and distance
-    distance = 650;
+    distance = 475;
     speed = 100;
 
     //default support size = image size.

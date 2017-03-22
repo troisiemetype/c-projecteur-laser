@@ -50,6 +50,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->modeLabel->hide();
     ui->modeComboBox->hide();
 
+    repeat = 0;
 
     move(50, 50);
 
@@ -57,6 +58,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     audio = new Audio();
 
     connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
+    connect(this, SIGNAL(exposureChanged(int)), audio, SLOT(handleExposureChanged(int)));
     connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
 
 }
@@ -87,7 +89,6 @@ void ProjecteurLaser::populateGui()
     ui->supportWidthLineEdit->setText(QString::number(image.getSupportWidth()));
     ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
     ui->distanceLineEdit->setText(QString::number(image.getDistance()));
-    ui->speedLineEdit->setText(QString::number(image.getSpeed()));
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
 
     ui->stepSlider->setVisible(false);
@@ -248,13 +249,6 @@ void ProjecteurLaser::on_distanceLineEdit_editingFinished()
 
 }
 
-//Update the speed.
-void ProjecteurLaser::on_speedLineEdit_editingFinished()
-{
-    image.setSpeed(ui->speedLineEdit->text().toInt());
-    enableSends(false);
-}
-
 //Temporary: Change the image mode.
 //TODO: but this settings in a dropdown menu, possibly in an image settings window.
 void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
@@ -314,11 +308,11 @@ void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
     image.setMode(index);
     enableSends(false);
     if(index == 0){
-        ui->speedLabel->setVisible(false);
-        ui->speedLineEdit->setVisible(false);
+//        ui->speedLabel->setVisible(true);
+//        ui->speedLineEdit->setVisible(false);
     } else if(index == 1){
-        ui->speedLabel->setVisible(true);
-        ui->speedLineEdit->setVisible(true);
+//        ui->speedLabel->setVisible(true);
+//        ui->speedLineEdit->setVisible(true);
 
     }
 }
@@ -349,7 +343,7 @@ void ProjecteurLaser::on_actionSend_triggered(bool checked)
     {
         ui->infosWidget->setEnabled(false);
         enableSends(true);
-        audio->play();
+        audio->play(repeat);
     } else {
         audio->stop();
     }
@@ -389,5 +383,22 @@ void ProjecteurLaser::handleProgress(int value){
 
 void ProjecteurLaser::on_angleSpinBox_valueChanged(int arg1)
 {
+    enableSends(false);
+}
+
+void ProjecteurLaser::on_exposureSlider_sliderMoved(int position)
+{
+    QString text = "Exposure: ";
+    text += QString::number(position);
+    text += "%";
+    ui->speedLabel->setText(text);
+    enableSends(false);
+
+    emit exposureChanged(position);
+}
+
+void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
+{
+    repeat = arg1;
     enableSends(false);
 }

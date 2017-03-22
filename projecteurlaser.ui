@@ -188,27 +188,24 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="1">
-          <widget class="QLineEdit" name="speedLineEdit"/>
-         </item>
          <item row="10" column="0">
           <widget class="QLabel" name="speedLabel">
            <property name="text">
-            <string>Speed</string>
+            <string>Exposure: 100%</string>
            </property>
           </widget>
          </item>
-         <item row="11" column="1">
+         <item row="12" column="1">
           <widget class="QComboBox" name="imageModeComboBox"/>
          </item>
-         <item row="11" column="0">
+         <item row="12" column="0">
           <widget class="QLabel" name="imageModeLabel">
            <property name="text">
             <string>Image mode</string>
            </property>
           </widget>
          </item>
-         <item row="12" column="1">
+         <item row="13" column="1">
           <widget class="QSlider" name="stepSlider">
            <property name="maximum">
             <number>255</number>
@@ -232,6 +229,45 @@
           <widget class="QLabel" name="resolutionLabelEdit">
            <property name="text">
             <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="1">
+          <widget class="QSlider" name="exposureSlider">
+           <property name="minimum">
+            <number>25</number>
+           </property>
+           <property name="maximum">
+            <number>250</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>100</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="invertedAppearance">
+            <bool>false</bool>
+           </property>
+           <property name="invertedControls">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QLabel" name="repeatLabel">
+           <property name="text">
+            <string>Repeat</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="1">
+          <widget class="QSpinBox" name="repeatSpinBox">
+           <property name="maximum">
+            <number>10</number>
            </property>
           </widget>
          </item>

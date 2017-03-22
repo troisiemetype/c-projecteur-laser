@@ -44,6 +44,9 @@ public:
     void enableSends(bool);
     void populateGui();
 
+signals:
+    void exposureChanged(int);
+
 private slots:
     void on_actionFileNew_triggered();
 
@@ -66,8 +69,6 @@ private slots:
     void on_supportHeightLineEdit_editingFinished();
 
     void on_distanceLineEdit_editingFinished();
-
-    void on_speedLineEdit_editingFinished();
 
     void on_imageModeComboBox_currentIndexChanged(int index);
 
@@ -93,12 +94,18 @@ private slots:
 
     void on_angleSpinBox_valueChanged(int arg1);
 
+    void on_exposureSlider_sliderMoved(int position);
+
+    void on_repeatSpinBox_valueChanged(int arg1);
+
 private:
     Ui::ProjecteurLaser *ui;
 
     ComputeImage *computeImage;
     Image image;
     Audio *audio;
+
+    int repeat;
 
     QString typeFichier;
 
