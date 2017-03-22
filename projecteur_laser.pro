@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport
+QT       += core gui multimedia serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,17 +17,12 @@ SOURCES += main.cpp\
            image.cpp \
            wininfo.cpp \
            computeimage.cpp \
-           serial.cpp \
-           serialconfig.cpp \
-           winserialsettings.cpp
+    audio.cpp
 
 HEADERS  += projecteurlaser.h \
             image.h \
             wininfo.h \
             computeimage.h \
-            serial.h \
-            serialconfig.h \
-            winserialsettings.h
+    audio.h
 
-FORMS    += projecteurlaser.ui \
-            winserialsettings.ui
+FORMS    += projecteurlaser.ui

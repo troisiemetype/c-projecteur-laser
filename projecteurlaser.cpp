@@ -19,12 +19,13 @@
 /*
  * This is the main program, that defines the GUI and ties its inputs and outputs
  * to the classes used.
+ * It contains all the slots for GUI management
  */
 
 #include "projecteurlaser.h"
 #include "ui_projecteurlaser.h"
 
-//Contructor. Define GUI, give it a position. Create the serial object.
+//Contructor. Define GUI, give it a position.
 ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ProjecteurLaser)
@@ -42,10 +43,15 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->imageModeComboBox->addItem("Floyd-Steinberg");
     ui->imageModeComboBox->addItem("Threshold");
 
+    ui->modeLabel->hide();
+    ui->modeComboBox->hide();
+
 
     move(50, 50);
 
-    serial = Serial(this);
+    audio = new Audio();
+
+    connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
 
 }
 
@@ -56,7 +62,9 @@ ProjecteurLaser::~ProjecteurLaser()
 
 void ProjecteurLaser::enableSends(bool state)
 {
-    ui->actionSendData->setEnabled(state);
+    ui->actionSend->setEnabled(state);
+    ui->actionPause->setEnabled(state);
+    ui->actionStop->setEnabled(state);
     ui->actionImageCalibrate->setEnabled(state);
 
 }
@@ -93,7 +101,7 @@ void ProjecteurLaser::on_actionFileNew_triggered()
 
     //Check extenion of the file. Behave differently if it's a bmp or a svg.
     //Image managment and computing are not the same for both.
-    if(file.section('.', 1, 1) == "svg"){
+    if(file.section('.', 1) == "svg"){
         typeFichier = "svg";
     } else {
         typeFichier = "bmp";
@@ -118,7 +126,20 @@ void ProjecteurLaser::on_actionFileOpen_triggered()
 
 void ProjecteurLaser::on_actionFileSave_triggered()
 {
+    QString file = QFileDialog::getSaveFileName(this, tr("save as"),
+                                                QString(), tr("sound (*.wav)"));
+    QString fileExt = file.section('.', 1);
 
+    if (fileExt.isEmpty()){
+        file.append(".wav");
+    } else if (fileExt != "wav" && fileExt != "wave"){
+        WinInfo::error("Mauvais format de fichier.");
+        return;
+    }
+
+    cout << file.toStdString() << endl;
+
+    audio->save(file);
 }
 
 //Close the current file. Hide buttons that shouldn't be clicked when no file is open.
@@ -129,40 +150,7 @@ void ProjecteurLaser::on_actionFileClose_triggered()
 
     ui->actionImageCompute->setEnabled(false);
     enableSends(false);
-}
-
-//Connect the UART.
-void ProjecteurLaser::on_actionSerialConnect_triggered(bool checked)
-{
-    if(checked)
-    {
-        int ouvert = serial.open();
-        if(!ouvert){
-            ui->actionSerialConnect->setChecked(false);
-        }
-        if(ouvert && serial.isCompute()){
-            enableSends(true);
-            ui->actionSendData->setChecked(false);
-        }
-    } else {
-        serial.close();
-        enableSends(false);
-        ui->actionSendData->setChecked(false);
-    }
-
-}
-
-//Disconnect the UART.
-void ProjecteurLaser::on_actionSerialDisconnect_triggered()
-{
-    serial.close();
-}
-
-//Open the UART settings.
-void ProjecteurLaser::on_actionSerialSettings_triggered()
-{
-    WinSerialSettings winSerialSettings(this);
-    winSerialSettings.exec();
+    audio->clear();
 }
 
 void ProjecteurLaser::on_actionHelp_triggered()
@@ -179,14 +167,11 @@ void ProjecteurLaser::on_actionAbout_triggered()
 void ProjecteurLaser::on_actionImageCompute_triggered()
 {
     ui->actionImageCalibrate->setChecked(false);
-    ui->actionSendData->setChecked(false);
+    ui->actionSend->setChecked(false);
     ui->infosWidget->setEnabled(true);
 
     //Create a new image object.
     computeImage = ComputeImage(image);
-
-    //Empty the serial buffer.
-    serial.emptyCoord();
 
     //Show the progressbar area.
     ui->progressLabel->show();
@@ -195,17 +180,17 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 
     computeImage.setScanAngle(ui->angleSpinBox->value());
 
-    //Call the computeCoord function, give it a pointer to the progressbar.
-    computeImage.computeCoords(serial.getDataArray(), ui->progressBar);
+    //Call the computeCoord function, give it a pointer to the audio processor.
+    computeImage.computeCoords(audio, ui->progressBar);
+    audio->stop();
 
     //Hide the progressbar area.
     ui->progressLabel->hide();
     ui->progressBar->hide();
-
-    //If serial is open, show send button.
-    if(serial.isOpen()){
-        enableSends(true);
-    }
+    ui->actionImageCalibrate->setEnabled(true);
+    enableSends(true);
+    ui->actionSend->setEnabled(true);
+    cout << "durée insolation: " << audio->getLength() << endl;
 }
 
 //compute and send a calibration rectangle.
@@ -215,23 +200,11 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
     {
         ui->infosWidget->setEnabled(false);
         enableSends(true);
+/* TODO: to be replaced by whatever needed with audio
         computeImage.computeSupport(serial.getBoxSupportArray());
         serial.initData();
         serial.sendSupport();
-    } else {
-        ui->infosWidget->setEnabled(true);
-    }
-}
-
-//Send the data to the laser.
-void ProjecteurLaser::on_actionSendData_triggered(bool checked)
-{
-    if(checked)
-    {
-        ui->infosWidget->setEnabled(false);
-        enableSends(true);
-        serial.initData();
-        serial.sendData();
+        */
     } else {
         ui->infosWidget->setEnabled(true);
     }
@@ -327,20 +300,6 @@ void ProjecteurLaser::on_heightMmLineEdit_editingFinished()
     enableSends(false);
 }
 
-void ProjecteurLaser::readData(){
-//    cout << "data received" << endl;
-
-    if(ui->actionSendData->isChecked()){
-        if(serial.sendData() == false){
-            ui->actionSendData->setChecked(false);
-            ui->infosWidget->setEnabled(true);
-        }
-    } else if(ui->actionImageCalibrate->isChecked()){
-        serial.sendSupport();
-    }
-
-}
-
 void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
 {
     image.setMode(index);
@@ -364,10 +323,53 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
 
     image = Image(dpi);
     computeImage = ComputeImage(image);
+
+    audio = new Audio();
+
     populateGui();
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
     ui->actionImageCompute->setEnabled(true);
     ui->centralWidget->show();
+
+}
+
+void ProjecteurLaser::on_actionSend_triggered(bool checked)
+{
+    if(checked)
+    {
+        ui->infosWidget->setEnabled(false);
+        enableSends(true);
+        audio->play();
+    } else {
+        audio->stop();
+    }
+}
+
+void ProjecteurLaser::on_actionPause_triggered(bool checked)
+{
+    if(!ui->actionSend->isChecked()){
+        ui->actionPause->setChecked(false);
+        return;
+    }
+
+    if(checked)
+    {
+        audio->pause(true);
+    } else {
+        audio->pause(false);
+    }
+
+}
+
+void ProjecteurLaser::on_actionStop_triggered()
+{
+    audio->stop();
+}
+
+void ProjecteurLaser::handleAudioStopped(){
+    ui->infosWidget->setEnabled(true);
+    ui->actionSend->setChecked(false);
+    ui->actionPause->setChecked(false);
 
 }

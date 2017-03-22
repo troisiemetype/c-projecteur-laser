@@ -32,6 +32,7 @@
 #include <QProgressBar>
 #include <QString>
 
+#include "audio.h"
 #include "image.h"
 #include "wininfo.h"
 
@@ -52,8 +53,8 @@ public:
     ComputeImage(Image);
 
     void updateMaxSize();
-    void computeCoords(vector<QByteArray>*, QProgressBar*);
-    void computeSupport(vector<QByteArray>*);
+    void computeCoords(Audio *buffer, QProgressBar *progress);
+    void computeSupport();
 
     int getMinDistance();
     void setScanAngle(int);
@@ -61,10 +62,20 @@ public:
 
 private:
     void computeAngles();
-    void bresenham(int, int, int, int);
+    void bresenham(int start, int end);
     QByteArray computeCommand(char, char, int, int, char, int, char);
     void computeCommandInt(int);
     void computeCommandChar(char);
+
+    void inline swap(int a, int b){
+        int t = a;
+        a = b;
+        b = t;
+    }
+
+    //pointers to external objects
+    Audio *audio;
+    QProgressBar *progressBar;
 
     //Copies of the image values
     QImage image;
@@ -101,13 +112,8 @@ private:
     vector<int> angleValueX;
     vector<int> angleValueY;
 
-    //pointer to the serial buffer
-    vector<QByteArray>* _serialData;
-
-    //values for command creation
-    QByteArray _dataToSend;
-    unsigned char _checksum;
-
+    //progress of computing
+    int pixelsComputed;
 };
 
 #endif // COMPUTEIMAGE_H

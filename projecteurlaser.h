@@ -24,11 +24,9 @@
 #include <QInputDialog>
 #include <QFileDialog>
 
+#include "audio.h"
 #include "computeimage.h"
 #include "image.h"
-#include "serial.h"
-#include "serialconfig.h"
-#include "winserialsettings.h"
 #include "wininfo.h"
 
 namespace Ui {
@@ -55,12 +53,6 @@ private slots:
 
     void on_actionFileClose_triggered();
 
-    void on_actionSerialConnect_triggered(bool checked);
-
-    void on_actionSerialDisconnect_triggered();
-
-    void on_actionSerialSettings_triggered();
-
     void on_actionHelp_triggered();
 
     void on_actionAbout_triggered();
@@ -68,8 +60,6 @@ private slots:
     void on_actionImageCompute_triggered();
 
     void on_actionImageCalibrate_triggered(bool checked);
-
-    void on_actionSendData_triggered(bool checked);
 
     void on_supportWidthLineEdit_editingFinished();
 
@@ -87,22 +77,27 @@ private slots:
 
     void on_heightMmLineEdit_editingFinished();
 
-    void readData();
-
     void on_modeComboBox_currentIndexChanged(int index);
 
     void on_actionGrayScale_triggered();
+
+    void on_actionSend_triggered(bool checked);
+
+    void on_actionPause_triggered(bool checked);
+
+    void on_actionStop_triggered();
+
+    void handleAudioStopped();
 
 private:
     Ui::ProjecteurLaser *ui;
 
     ComputeImage computeImage;
     Image image;
-    Serial serial;
+    Audio *audio;
 
     QString typeFichier;
 
-//    Serial serial;
 };
 
 #endif // PROJECTEURLASER_H
