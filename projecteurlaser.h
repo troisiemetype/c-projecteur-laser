@@ -91,6 +91,8 @@ private slots:
 
     void handleProgress(int value);
 
+    void on_angleSpinBox_valueChanged(int arg1);
+
 private:
     Ui::ProjecteurLaser *ui;
 

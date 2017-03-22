@@ -25,21 +25,28 @@ public:
     Audio();
     ~Audio();
     void append(int x, int y, int lValue);
-    void clear();
+    void clearCoords();
     void save(const QString &filename);
     void play();
     void pause(bool value);
     void stop();
     int getLength();
 
+    void appendSupport(int x, int y);
+    void clearSupport();
+    void playSupport();
+    void stopSupport();
+
 protected:
     QAudioFormat format;
     QAudioOutput *audio;
+    QAudioOutput *audioSupport;
     QBuffer *image;
     QBuffer *support;
 
 public slots:
-    void handleStateChanged(QAudio::State);
+    void handleAudioStateChanged(QAudio::State);
+    void handleSupportStateChanged(QAudio::State);
 
 signals:
     void stopped();

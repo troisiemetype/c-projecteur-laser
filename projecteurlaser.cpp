@@ -88,7 +88,10 @@ void ProjecteurLaser::populateGui()
     ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
     ui->distanceLineEdit->setText(QString::number(image.getDistance()));
     ui->speedLineEdit->setText(QString::number(image.getSpeed()));
-//    ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
+    ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
+
+    ui->stepSlider->setVisible(false);
+
 }
 
 //Open a new file. Init the image copies its values to the GUI fields.
@@ -156,7 +159,8 @@ void ProjecteurLaser::on_actionFileClose_triggered()
 
     ui->actionImageCompute->setEnabled(false);
     enableSends(false);
-    audio->clear();
+    audio->clearCoords();
+    audio->clearSupport();
 }
 
 void ProjecteurLaser::on_actionHelp_triggered()
@@ -206,13 +210,11 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
     {
         ui->infosWidget->setEnabled(false);
         enableSends(true);
-/* TODO: to be replaced by whatever needed with audio
-        computeImage->computeSupport(serial.getBoxSupportArray());
-        serial.initData();
-        serial.sendSupport();
-        */
+        computeImage->computeSupport();
+        audio->playSupport();
     } else {
         ui->infosWidget->setEnabled(true);
+        audio->stopSupport();
     }
 }
 
@@ -267,11 +269,9 @@ void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 
     ui->imageLabel->setPixmap(image.getPixmap());
     enableSends(false);
-
 }
 
 //Set the step between black and white for thresold.
-//TODO: see if we keep this or no.
 void ProjecteurLaser::on_stepSlider_valueChanged(int value)
 {
     int seuil = value;
@@ -383,4 +383,9 @@ void ProjecteurLaser::handleAudioStopped(){
 
 void ProjecteurLaser::handleProgress(int value){
     ui->progressBar->setValue(value);
+}
+
+void ProjecteurLaser::on_angleSpinBox_valueChanged(int arg1)
+{
+    enableSends(false);
 }

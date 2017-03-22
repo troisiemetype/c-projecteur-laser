@@ -16,28 +16,19 @@ Audio::Audio()
     audio = new QAudioOutput(format);
     image = new QBuffer;
     image->open(QIODevice::ReadWrite);
+    audioSupport = new QAudioOutput(format);
     support = new QBuffer;
     support->open(QIODevice::ReadWrite);
 
     cout << "Audio instance created" << endl;
+    cout << audio << endl;
 
-    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-/*
-    buffer->reset();
-    audio->start(buffer);
-
-    QEventLoop loop;
-
-    do{
-        loop.exec();
-    } while(audio->state() == QAudio::ActiveState);
-
-    loop.exit();
-    */
+    connect(audio, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleAudioStateChanged(QAudio::State)));
 }
 
 Audio::~Audio(){
     delete audio;
+    delete audioSupport;
     delete image;
     delete support;
 }
@@ -49,17 +40,11 @@ void Audio::append(int x, int y, int l){
         image->putChar(x/256);
         image->putChar(y%256);
         image->putChar(y/256);
-//        cout << "x: " << x << endl;
-//        cout << "y: " << y << endl;
-//        cout << "l: " << (int)l << endl;
     }
 }
 
-void Audio::clear(){
+void Audio::clearCoords(){
     image->buffer().clear();
-    support->buffer().clear();
-    cout << "buffer emptied" << endl;
-
 }
 
 void Audio::save(const QString &filename){
@@ -95,7 +80,31 @@ int Audio::getLength(){
     return image->buffer().size() / 4 / format.sampleRate();
 }
 
-void Audio::handleStateChanged(QAudio::State state){
+void Audio::appendSupport(int x, int y){
+    support->putChar(x%256);
+    support->putChar(x/256);
+    support->putChar(y%256);
+    support->putChar(y/256);
+}
+
+void Audio::clearSupport(){
+    support->reset();
+    support->buffer().clear();
+}
+
+void Audio::playSupport(){
+    connect(audioSupport, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleSupportStateChanged(QAudio::State)));
+    support->reset();
+    audioSupport->start(support);
+}
+
+void Audio::stopSupport(){
+    disconnect(audioSupport, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleSupportStateChanged(QAudio::State)));
+    audio->stop();
+}
+
+
+void Audio::handleAudioStateChanged(QAudio::State state){
     switch(state){
         case QAudio::ActiveState:
             break;
@@ -108,5 +117,18 @@ void Audio::handleStateChanged(QAudio::State state){
         default:
             break;
     }
+}
 
+void Audio::handleSupportStateChanged(QAudio::State state){
+    switch(state){
+        case QAudio::ActiveState:
+            break;
+        case QAudio::IdleState:
+//            audioSupport->stop();
+            support->reset();
+            audioSupport->start(support);
+            break;
+        default:
+            break;
+    }
 }

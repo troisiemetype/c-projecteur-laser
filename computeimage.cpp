@@ -103,7 +103,7 @@ void ComputeImage::computeCoords(Audio *buffer)
     computeAngles();
 
     audio = buffer;
-    audio->clear();
+    audio->clearCoords();
 //    progressBar = progress;
 
     pixelsComputed = 0;
@@ -163,8 +163,23 @@ void ComputeImage::computeSupport()
     angleRatio = angleValue / maxAngleY;
     heightValue = angleMaxValue * angleRatio;
 
-//    computeCommand((FLAG_X | FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, widthValue, -heightValue, 255, 10, 1);
-//    serialData->push_back(_dataToSend);
+    int x = -widthValue;
+    int y = -heightValue;
+
+    audio->clearSupport();
+
+    for(;x<widthValue; x+=5){
+        audio->appendSupport(x, y);
+    }
+    for(;y<heightValue; y+=5){
+        audio->appendSupport(x, y);
+    }
+    for(;x>-widthValue; x-=5){
+        audio->appendSupport(x, y);
+    }
+    for(;y>-heightValue; y-=5){
+        audio->appendSupport(x, y);
+    }
 
 }
 
