@@ -102,6 +102,16 @@ void ComputeImage::computeCoords(Audio *buffer)
     updateMaxSize();
     computeAngles();
 
+    if(widthMm > maxSizeX || heightMm > maxSizeY){
+        QString text = "Max size for this distance is ";
+        text += QString::number(maxSizeX);
+        text += "x";
+        text += QString::number(maxSizeY);
+        text += "mm. Please decrease size or increase distance.";
+        WinInfo::info(text, "Size error");
+        return;
+    }
+
     audio = buffer;
     audio->clearCoords();
 

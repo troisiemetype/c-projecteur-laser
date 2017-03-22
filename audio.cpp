@@ -51,6 +51,10 @@ Audio::Audio()
     support = new QBuffer;
     support->open(QIODevice::ReadWrite);
 
+    //The timer is launch when playing and is used to update GUI progress bar.
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), SLOT(handleTimer()));
+
 //    cout << "Audio instance created" << endl;
 //    cout << audio << endl;
 
@@ -101,14 +105,19 @@ void Audio::save(const QString &filename){
 //Value is sent from  the GUI, it's the number of times the file must be looped.
 void Audio::play(int value){
     repeat = value;
+    getLength();
+    elapsed = 0;
+    timer->start(1000);
     audio->start(image);
 }
 
 //Pause/resume the sending.
 void Audio::pause(bool value){
     if(value){
+        timer->stop();
         audio->suspend();
     } else {
+        timer->start(1000);
         audio->resume();
     }
 
@@ -117,6 +126,7 @@ void Audio::pause(bool value){
 //Stop sending file.
 //Signal is emmited so that GUI can reactivate areas.
 void Audio::stop(){
+    timer->stop();
     audio->stop();
     image->reset();
 
@@ -126,7 +136,7 @@ void Audio::stop(){
 
 //return insolation length, in seconds.
 int Audio::getLength(){
-    return image->buffer().size() / 4 / format.sampleRate();
+    return length = (repeat + 1) * image->buffer().size() / 4 / format.sampleRate();
 }
 
 //Populate support buffer.
@@ -170,6 +180,7 @@ void Audio::handleAudioStateChanged(QAudio::State state){
                 image->reset();
                 repeat--;
             } else {
+                timer->stop();
                 audio->stop();
                 emit stopped();
                 image->reset();
@@ -198,4 +209,10 @@ void Audio::handleSupportStateChanged(QAudio::State state){
 //Save the value of exposure when it's changed int othe GUI.
 void Audio::handleExposureChanged(int value){
     exposure = value;
+}
+
+void Audio::handleTimer(){
+    elapsed++;
+    int progress = 100 * (float)elapsed / length;
+    emit progressing(progress);
 }

@@ -27,6 +27,7 @@
 #include <QIODevice>
 #include <QObject>
 #include <QString>
+#include <QTimer>
 
 
 #include <QDebug>
@@ -61,17 +62,23 @@ protected:
     QAudioOutput *audioSupport;
     QBuffer *image;
     QBuffer *support;
+    QTimer *timer;
 
     int exposure;
     int repeat;
+    int length;
+    int elapsed;
 
 public slots:
     void handleAudioStateChanged(QAudio::State);
     void handleSupportStateChanged(QAudio::State);
     void handleExposureChanged(int);
+    void handleTimer();
 
 signals:
     void stopped();
+    void progressing(int value);
+
 };
 
 #endif // AUDIO_H

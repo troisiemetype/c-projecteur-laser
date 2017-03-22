@@ -60,6 +60,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
     connect(this, SIGNAL(exposureChanged(int)), audio, SLOT(handleExposureChanged(int)));
     connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
+    connect(audio, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
 
 }
 
@@ -307,14 +308,6 @@ void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
 {
     image.setMode(index);
     enableSends(false);
-    if(index == 0){
-//        ui->speedLabel->setVisible(true);
-//        ui->speedLineEdit->setVisible(false);
-    } else if(index == 1){
-//        ui->speedLabel->setVisible(true);
-//        ui->speedLineEdit->setVisible(true);
-
-    }
 }
 
 void ProjecteurLaser::on_actionGrayScale_triggered()
@@ -341,10 +334,19 @@ void ProjecteurLaser::on_actionSend_triggered(bool checked)
 {
     if(checked)
     {
+        //Show the progressbar area.
+        ui->progressLabel->show();
+        ui->progressLabel->setText(tr("Insolation en cours..."));
+        ui->progressBar->setValue(0);
+        ui->progressBar->show();
+
         ui->infosWidget->setEnabled(false);
         enableSends(true);
         audio->play(repeat);
     } else {
+        //hide the progressbar area.
+        ui->progressLabel->hide();
+        ui->progressBar->hide();
         audio->stop();
     }
 }
@@ -367,6 +369,10 @@ void ProjecteurLaser::on_actionPause_triggered(bool checked)
 
 void ProjecteurLaser::on_actionStop_triggered()
 {
+    //hide the progressbar area.
+    ui->progressLabel->hide();
+    ui->progressBar->hide();
+
     audio->stop();
 }
 
@@ -400,5 +406,4 @@ void ProjecteurLaser::on_exposureSlider_sliderMoved(int position)
 void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
 {
     repeat = arg1;
-    enableSends(false);
 }
