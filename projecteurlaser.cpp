@@ -30,6 +30,10 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ProjecteurLaser)
 {
+
+    computeImage = NULL;
+    audio = NULL;
+
     ui->setupUi(this);
     ui->centralWidget->hide();
     ui->progressBar->hide();
@@ -49,9 +53,11 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
     move(50, 50);
 
+    computeImage = new ComputeImage();
     audio = new Audio();
 
     connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
+    connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
 
 }
 
@@ -82,7 +88,7 @@ void ProjecteurLaser::populateGui()
     ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
     ui->distanceLineEdit->setText(QString::number(image.getDistance()));
     ui->speedLineEdit->setText(QString::number(image.getSpeed()));
-    ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
+//    ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
 }
 
 //Open a new file. Init the image copies its values to the GUI fields.
@@ -108,7 +114,7 @@ void ProjecteurLaser::on_actionFileNew_triggered()
 
         //Create the image object, get it's pixmap
         image = Image(file);
-        computeImage = ComputeImage(image);
+        computeImage->init(image);
 
         populateGui();
     }
@@ -171,17 +177,17 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->infosWidget->setEnabled(true);
 
     //Create a new image object.
-    computeImage = ComputeImage(image);
+    computeImage->init(image);
 
     //Show the progressbar area.
     ui->progressLabel->show();
     ui->progressLabel->setText(tr("Calcul en cours..."));
     ui->progressBar->show();
 
-    computeImage.setScanAngle(ui->angleSpinBox->value());
+    computeImage->setScanAngle(ui->angleSpinBox->value());
 
     //Call the computeCoord function, give it a pointer to the audio processor.
-    computeImage.computeCoords(audio, ui->progressBar);
+    computeImage->computeCoords(audio);
     audio->stop();
 
     //Hide the progressbar area.
@@ -201,7 +207,7 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
         ui->infosWidget->setEnabled(false);
         enableSends(true);
 /* TODO: to be replaced by whatever needed with audio
-        computeImage.computeSupport(serial.getBoxSupportArray());
+        computeImage->computeSupport(serial.getBoxSupportArray());
         serial.initData();
         serial.sendSupport();
         */
@@ -217,7 +223,7 @@ void ProjecteurLaser::on_supportWidthLineEdit_editingFinished()
     image.setSupportWidth(ui->supportWidthLineEdit->text().toInt());
     enableSends(false);
 
-    computeImage = ComputeImage(image);
+    computeImage->init(image);
 }
 
 //Update the height of the support.
@@ -227,7 +233,7 @@ void ProjecteurLaser::on_supportHeightLineEdit_editingFinished()
     image.setSupportHeight(ui->supportHeightLineEdit->text().toInt());
     enableSends(false);
 
-    computeImage = ComputeImage(image);
+    computeImage->init(image);
 }
 
 //Update the distance from laser to wall.
@@ -249,6 +255,7 @@ void ProjecteurLaser::on_speedLineEdit_editingFinished()
 //TODO: but this settings in a dropdown menu, possibly in an image settings window.
 void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 {
+    if (computeImage == NULL) return;
     if(index == 2){
         ui->stepSlider->setVisible(true);
     } else {
@@ -256,9 +263,9 @@ void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
     }
 
     image.setImageMode(index);
+    computeImage->init(image);
 
     ui->imageLabel->setPixmap(image.getPixmap());
-    computeImage = ComputeImage(image);
     enableSends(false);
 
 }
@@ -282,8 +289,8 @@ void ProjecteurLaser::on_widthMmLineEdit_editingFinished()
     ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
 
     //Update the computeImage object.
-    computeImage = ComputeImage(image);
-    ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
+    computeImage->init(image);
+    ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
     enableSends(false);
 }
 
@@ -295,8 +302,8 @@ void ProjecteurLaser::on_heightMmLineEdit_editingFinished()
     ui->widthMmLineEdit->setText(QString::number(image.getWidthMm()));
 
     //Update the computeImage object.
-    computeImage = ComputeImage(image);
-    ui->resolutionLabelEdit->setText(QString::number(computeImage.getDpi()));
+    computeImage->init(image);
+    ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
     enableSends(false);
 }
 
@@ -322,7 +329,7 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
     if(!ok){return;}
 
     image = Image(dpi);
-    computeImage = ComputeImage(image);
+    computeImage->init(image);
 
     audio = new Audio();
 
@@ -372,4 +379,8 @@ void ProjecteurLaser::handleAudioStopped(){
     ui->actionSend->setChecked(false);
     ui->actionPause->setChecked(false);
 
+}
+
+void ProjecteurLaser::handleProgress(int value){
+    ui->progressBar->setValue(value);
 }

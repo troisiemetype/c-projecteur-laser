@@ -25,13 +25,13 @@
 
 ComputeImage::ComputeImage()
 {
-
+    audio = NULL;
 }
 
 //Create a new computeImage object.
 //This copies the values it needs from the image that is opened.
 //Each time the image is updated the computeImage object is created again.
-ComputeImage::ComputeImage(Image file)
+void ComputeImage::init(Image file)
 {
     //initialisation of vars and constants.
     //Positions for X and Y is coded on 16 bits.
@@ -95,7 +95,7 @@ void ComputeImage::updateMaxSize()
 
 //Look at each pixel value of the image to create a string
 //that will be sent to the laser.
-void ComputeImage::computeCoords(Audio *buffer, QProgressBar *progress)
+void ComputeImage::computeCoords(Audio *buffer)
 {
 
     //Get the last distance value and compute angle pos for every pixel.
@@ -104,7 +104,7 @@ void ComputeImage::computeCoords(Audio *buffer, QProgressBar *progress)
 
     audio = buffer;
     audio->clear();
-    progressBar = progress;
+//    progressBar = progress;
 
     pixelsComputed = 0;
 
@@ -335,8 +335,7 @@ void ComputeImage::bresenham(int x, int y){
     }
 
     int progress = 100 * (float)pixelsComputed / size;
-    progressBar->setValue(progress);
-
+    emit progressing(progress);
 }
 
 int ComputeImage::getMinDistance(){

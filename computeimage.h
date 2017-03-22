@@ -29,6 +29,7 @@
 
 #include <QByteArray>
 #include <QCoreApplication>
+#include <QObject>
 #include <QProgressBar>
 #include <QString>
 
@@ -45,20 +46,24 @@
 
 using namespace std;
 
-class ComputeImage
+class ComputeImage : public QObject
 {
+    Q_OBJECT
 
 public:
     ComputeImage();
-    ComputeImage(Image);
+    void init(Image);
 
     void updateMaxSize();
-    void computeCoords(Audio *buffer, QProgressBar *progress);
+    void computeCoords(Audio *buffer);
     void computeSupport();
 
     int getMinDistance();
     void setScanAngle(int);
     int getDpi();
+
+signals:
+    void progressing(int value);
 
 private:
     void computeAngles();
@@ -114,6 +119,7 @@ private:
 
     //progress of computing
     int pixelsComputed;
+
 };
 
 #endif // COMPUTEIMAGE_H

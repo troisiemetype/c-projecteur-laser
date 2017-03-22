@@ -89,10 +89,12 @@ private slots:
 
     void handleAudioStopped();
 
+    void handleProgress(int value);
+
 private:
     Ui::ProjecteurLaser *ui;
 
-    ComputeImage computeImage;
+    ComputeImage *computeImage;
     Image image;
     Audio *audio;
 

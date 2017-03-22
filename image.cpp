@@ -273,19 +273,14 @@ QImage Image::setGray(QImage image, int mode)
                 //image.setPixel(j, i, qGray(image.pixel(j, i)));
             }
         }
-        return image;
     //mode == 1: Floyd-Steinberg image
     } else if(mode == 1){
         image = image.convertToFormat(QImage::Format_Mono);
 
-        return image;
     //mode == 2: Threshold image
     } else if(mode == 2){
         for(int i=0; i<image.height(); i++)
         {
-            //TODO: See why scanLine() gives a different color than access by pixel().
-            //uchar * line = image.scanLine(i);
-
             for(int j=0; j<image.width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
@@ -299,10 +294,8 @@ QImage Image::setGray(QImage image, int mode)
                 //image.setPixel(j, i, qGray(image.pixel(j, i)));
             }
         }
-        return image;
-
     }
-
+    return image;
 }
 
 void Image::setStep(int value){
