@@ -26,6 +26,12 @@
 ComputeImage::ComputeImage()
 {
     audio = NULL;
+
+    //Initialize value for jump and offset.
+    jump = 0;
+    offsetX = 0;
+    offsetY = 0;
+
 }
 
 //Create a new computeImage object.
@@ -103,12 +109,13 @@ void ComputeImage::computeCoords(Audio *buffer)
     computeAngles();
 
     if(widthMm > maxSizeX || heightMm > maxSizeY){
-        QString text = "Max size for this distance is ";
+//        QString text = tr("Max size for this distance is %n x %nmm. Please decrease size or increase distance.");
+        QString text = tr("Max size for this distance is ");
         text += QString::number(maxSizeX);
         text += "x";
         text += QString::number(maxSizeY);
-        text += "mm. Please decrease size or increase distance.";
-        WinInfo::info(text, "Size error");
+        text += tr("mm. Please decrease size or increase distance.");
+        WinInfo::info(text, tr("Size error"));
         return;
     }
 
@@ -122,6 +129,9 @@ void ComputeImage::computeCoords(Audio *buffer)
     if (scanAngle > 45){
         tanAngle = tan((90 - scanAngle) * pi / 180);
         for (int i = -tanAngle * heightPix; i < widthPix; i++){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
             bresenham(i, heightPix - 1);
         }
 
@@ -129,6 +139,9 @@ void ComputeImage::computeCoords(Audio *buffer)
         tanAngle = tan(scanAngle * pi / 180);
         int limit = heightPix + tanAngle * widthPix;
         for (int i = 0; i < limit; i++){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
             bresenham(0, i);
         }
 
@@ -136,6 +149,9 @@ void ComputeImage::computeCoords(Audio *buffer)
         tanAngle = tan(scanAngle * pi / 180);
         int limit = tanAngle * widthPix;
         for (int i = heightPix - 1; i >= limit; i--){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
             bresenham(0, i);
         }
 
@@ -144,6 +160,9 @@ void ComputeImage::computeCoords(Audio *buffer)
             tanAngle = -tan((90 + scanAngle) * pi / 180);
         }
         for (int i = tanAngle * heightPix; i < widthPix; i++){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
             bresenham(i, 0);
         }
     }
@@ -209,7 +228,7 @@ void ComputeImage::computeAngles()
     //
     //First is compute the distance between image center and pix pos, in mm.
     //Then this value is used to find the corresponding angle.
-    //Compute a ration between this angle and the max angle.
+    //Compute a ratio between this angle and the max angle.
     //Finally use this ratio to get the laser position, by multiplying it by greatest possible value.
     //Store this value into the angleValue array.
     for(int i = 0; i<widthPix; i++)
@@ -232,10 +251,16 @@ void ComputeImage::computeAngles()
 
     }
 
+    //get the number of points for a pixel increment.
+    offsetValueX = abs((float)angleValueX[0] / (widthPix / 2));
+    offsetValueX *= (float)offsetX / 100;
+    offsetValueY = abs((float)angleValueY[0] / (heightPix / 2));
+    offsetValueY *= (float)offsetY / 100;
+
     int duree = time(&timer) - debut;
-    QString message = "Angles computed in ";
+    QString message = tr("Angles computed in ");
     message += QString::number(duree);
-    message += " seconds";
+    message += tr(" seconds");
 
    // WinInfo::info(message);
 
@@ -273,7 +298,7 @@ void ComputeImage::bresenham(int x, int y){
                 continue;
             }
             //append values to audio
-            audio->append(angleValueX[x], angleValueY[y], pix);
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
 
     } else if (scanAngle >= 0){
@@ -307,7 +332,7 @@ void ComputeImage::bresenham(int x, int y){
 //            cout << "y: " << y << endl;
 //            cout << "l: " << (int)pix << endl;
             //append values to audio
-            audio->append(angleValueX[x], angleValueY[y], pix);
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
 
     } else if (scanAngle >= -45){
@@ -338,7 +363,7 @@ void ComputeImage::bresenham(int x, int y){
                 continue;
             }
             //append values to audio
-            audio->append(angleValueX[x], angleValueY[y], pix);
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
 
     } else {
@@ -369,7 +394,7 @@ void ComputeImage::bresenham(int x, int y){
                 continue;
             }
             //append values to audio
-            audio->append(angleValueX[x], angleValueY[y], pix);
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
     }
 
@@ -388,3 +413,16 @@ void ComputeImage::setScanAngle(int angle){
 int ComputeImage::getDpi(){
     return float(25.4) / ratioPixMm;
 }
+
+void ComputeImage::setJump(int value){
+    jump = value;
+}
+
+void ComputeImage::setOffsetX(int value){
+    offsetX = value;
+}
+
+void ComputeImage::setOffsetY(int value){
+    offsetY = value;
+}
+

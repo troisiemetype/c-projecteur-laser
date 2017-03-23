@@ -127,11 +127,6 @@ void Image::initImage()
     saved = 0;
 }
 
-bool Image::open(QString const& file)
-{
-    return 0;
-}
-
 bool Image::close()
 {
     return 0;

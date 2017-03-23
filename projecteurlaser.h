@@ -78,8 +78,6 @@ private slots:
 
     void on_heightMmLineEdit_editingFinished();
 
-    void on_modeComboBox_currentIndexChanged(int index);
-
     void on_actionGrayScale_triggered();
 
     void on_actionSend_triggered(bool checked);
@@ -97,6 +95,14 @@ private slots:
     void on_exposureSlider_sliderMoved(int position);
 
     void on_repeatSpinBox_valueChanged(int arg1);
+
+    void on_offsetXSlider_valueChanged(int value);
+
+    void on_offsetYSlider_valueChanged(int value);
+
+    void on_jumpSpinBox_valueChanged(int arg1);
+
+    void on_resetButton_clicked();
 
 private:
     Ui::ProjecteurLaser *ui;

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>499</height>
+    <width>558</width>
+    <height>521</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ProjecteurLaser</string>
+   <string>Projecteur Laser</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -23,7 +23,7 @@
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <widget class="QLabel" name="imageLabel">
       <property name="sizePolicy">
@@ -48,230 +48,318 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="infosWidget" native="true">
-      <layout class="QVBoxLayout" name="infosLayout">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetNoConstraint</enum>
+     <widget class="QWidget" name="verticalWidget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
        <item>
-        <layout class="QFormLayout" name="formLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
+        <widget class="QWidget" name="infosWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="widthPixelsLabel">
-           <property name="text">
-            <string>Image width, pixels</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="widthPixelsLabelEdit">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="heightPixelsLabel">
-           <property name="text">
-            <string>Image height, pixels</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="heightPixelsLabelEdit">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="widthMmLabel">
-           <property name="text">
-            <string>Image width, mm</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="widthMmLineEdit"/>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="heightMmLabel">
-           <property name="text">
-            <string>Image height, mm</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="heightMmLineEdit"/>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="supportWidthLabel">
-           <property name="text">
-            <string>Support width, mm</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="supportWidthLineEdit"/>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="supportHeightLabel">
-           <property name="text">
-            <string>Support height, mm</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QLineEdit" name="supportHeightLineEdit"/>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="distanceLabel">
-           <property name="text">
-            <string>Distance</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QLineEdit" name="distanceLineEdit">
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="baseSize">
-            <size>
-             <width>3</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QSpinBox" name="angleSpinBox">
-           <property name="accelerated">
-            <bool>true</bool>
-           </property>
-           <property name="keyboardTracking">
-            <bool>false</bool>
-           </property>
-           <property name="suffix">
-            <string>°</string>
-           </property>
-           <property name="minimum">
-            <number>-90</number>
-           </property>
-           <property name="maximum">
-            <number>90</number>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="angleLabel">
-           <property name="text">
-            <string>Angle</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QComboBox" name="modeComboBox"/>
-         </item>
-         <item row="9" column="0">
-          <widget class="QLabel" name="modeLabel">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Mode</string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QLabel" name="speedLabel">
-           <property name="text">
-            <string>Exposure: 100%</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="1">
-          <widget class="QComboBox" name="imageModeComboBox"/>
-         </item>
-         <item row="12" column="0">
-          <widget class="QLabel" name="imageModeLabel">
-           <property name="text">
-            <string>Image mode</string>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="1">
-          <widget class="QSlider" name="stepSlider">
-           <property name="maximum">
-            <number>255</number>
-           </property>
-           <property name="value">
-            <number>127</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="resolutionLabel">
-           <property name="text">
-            <string>Resolution, dpi</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="resolutionLabelEdit">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1">
-          <widget class="QSlider" name="exposureSlider">
-           <property name="minimum">
-            <number>25</number>
-           </property>
-           <property name="maximum">
-            <number>250</number>
-           </property>
-           <property name="singleStep">
-            <number>5</number>
-           </property>
-           <property name="value">
-            <number>100</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="invertedAppearance">
-            <bool>false</bool>
-           </property>
-           <property name="invertedControls">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QLabel" name="repeatLabel">
-           <property name="text">
-            <string>Repeat</string>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="1">
-          <widget class="QSpinBox" name="repeatSpinBox">
-           <property name="maximum">
-            <number>10</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMinimumSize</enum>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>9</number>
+          </property>
+          <item row="7" column="3">
+           <widget class="QLineEdit" name="distanceLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>3</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QLabel" name="supportHeightLabel">
+            <property name="text">
+             <string>Support height, mm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="widthMmLabel">
+            <property name="text">
+             <string>Image width, mm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="repeatLabel">
+            <property name="text">
+             <string>Repeat</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="widthPixelsLabelEdit">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3">
+           <widget class="QLineEdit" name="supportHeightLineEdit"/>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QLabel" name="heightPixelsLabel">
+            <property name="text">
+             <string>Image height, pixels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="5">
+           <widget class="QSpinBox" name="jumpSpinBox"/>
+          </item>
+          <item row="4" column="3">
+           <widget class="QLineEdit" name="heightMmLineEdit"/>
+          </item>
+          <item row="3" column="4">
+           <widget class="QLabel" name="offsetXLabel">
+            <property name="text">
+             <string>Offset width: 0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="heightMmLabel">
+            <property name="text">
+             <string>Image height, mm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QLineEdit" name="supportWidthLineEdit"/>
+          </item>
+          <item row="0" column="5">
+           <widget class="QSpinBox" name="repeatSpinBox">
+            <property name="maximum">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="4">
+           <widget class="QLabel" name="jumpLabel">
+            <property name="text">
+             <string>Jump</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="widthPixelsLabel">
+            <property name="text">
+             <string>Image width, pixels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5">
+           <widget class="QSlider" name="offsetXSlider">
+            <property name="minimum">
+             <number>-100</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="invertedControls">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="5">
+           <widget class="QComboBox" name="imageModeComboBox"/>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="supportWidthLabel">
+            <property name="text">
+             <string>Support width, mm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QSlider" name="exposureSlider">
+            <property name="minimum">
+             <number>20</number>
+            </property>
+            <property name="maximum">
+             <number>250</number>
+            </property>
+            <property name="singleStep">
+             <number>5</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="invertedAppearance">
+             <bool>false</bool>
+            </property>
+            <property name="invertedControls">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QLabel" name="distanceLabel">
+            <property name="text">
+             <string>Distance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QSpinBox" name="angleSpinBox">
+            <property name="accelerated">
+             <bool>true</bool>
+            </property>
+            <property name="keyboardTracking">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string>°</string>
+            </property>
+            <property name="minimum">
+             <number>-90</number>
+            </property>
+            <property name="maximum">
+             <number>90</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QLabel" name="speedLabel">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Exposure: 100%</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="5">
+           <widget class="QSlider" name="stepSlider">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="value">
+             <number>127</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="heightPixelsLabelEdit">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="angleLabel">
+            <property name="text">
+             <string>Angle</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QLineEdit" name="widthMmLineEdit"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="resolutionLabel">
+            <property name="text">
+             <string>Resolution, dpi</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="4">
+           <widget class="QLabel" name="offsetYLabel">
+            <property name="text">
+             <string>Offset height: 0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5">
+           <widget class="QSlider" name="offsetYSlider">
+            <property name="minimum">
+             <number>-100</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="4">
+           <widget class="QLabel" name="imageModeLabel">
+            <property name="text">
+             <string>Image mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="resolutionLabelEdit">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="4">
+           <widget class="QPushButton" name="resetButton">
+            <property name="text">
+             <string>Reset options</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="Line" name="line_2">
@@ -282,8 +370,11 @@
        </item>
        <item>
         <widget class="QLabel" name="progressLabel">
+         <property name="lineWidth">
+          <number>1</number>
+         </property>
          <property name="text">
-          <string>TextLabel</string>
+          <string>progress</string>
          </property>
         </widget>
        </item>
@@ -291,6 +382,18 @@
         <widget class="QProgressBar" name="progressBar">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
          </property>
          <property name="value">
           <number>50</number>
@@ -320,7 +423,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>536</width>
+     <width>558</width>
      <height>19</height>
     </rect>
    </property>
@@ -332,7 +435,6 @@
     <addaction name="actionFileOpen"/>
     <addaction name="actionFileSave"/>
     <addaction name="actionFileClose"/>
-    <addaction name="actionGrayScale"/>
    </widget>
    <widget class="QMenu" name="menuImage">
     <property name="title">
@@ -351,8 +453,15 @@
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionGrayScale"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -395,6 +504,9 @@
    <property name="text">
     <string>Open</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
    <property name="visible">
     <bool>false</bool>
    </property>
@@ -409,6 +521,9 @@
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
    <property name="visible">
     <bool>true</bool>
    </property>
@@ -417,10 +532,16 @@
    <property name="text">
     <string>Close</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
   </action>
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -435,6 +556,9 @@
    <property name="text">
     <string>Compute</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="actionImageCalibrate">
    <property name="checkable">
@@ -445,6 +569,9 @@
    </property>
    <property name="text">
     <string>Calibrate</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionGrayScale">
@@ -462,6 +589,9 @@
    <property name="text">
     <string>Insolate</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
   <action name="actionPause">
    <property name="checkable">
@@ -470,6 +600,9 @@
    <property name="text">
     <string>Pause</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
   </action>
   <action name="actionStop">
    <property name="checkable">
@@ -477,6 +610,9 @@
    </property>
    <property name="text">
     <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>

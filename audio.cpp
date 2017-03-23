@@ -117,7 +117,7 @@ void Audio::pause(bool value){
         timer->stop();
         audio->suspend();
     } else {
-        timer->start(1000);
+        timer->start(200);
         audio->resume();
     }
 
@@ -184,7 +184,7 @@ void Audio::handleAudioStateChanged(QAudio::State state){
                 audio->stop();
                 emit stopped();
                 image->reset();
-                cout << "stop" << endl;
+//                cout << "stop" << endl;
             }
             break;
         default:

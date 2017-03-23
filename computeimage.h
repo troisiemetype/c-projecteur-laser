@@ -62,6 +62,10 @@ public:
     void setScanAngle(int);
     int getDpi();
 
+    void setJump(int value);
+    void setOffsetX(int value);
+    void setOffsetY(int value);
+
 signals:
     void progressing(int value);
 
@@ -104,6 +108,12 @@ private:
     int halfMaxSizeY;
     int size;
     int scanAngle;
+
+    int jump;
+    int offsetX;
+    int offsetY;
+    int offsetValueX;
+    int offsetValueY;
 
     //Values that store the max angle of the scan.
     double maxAngleX;

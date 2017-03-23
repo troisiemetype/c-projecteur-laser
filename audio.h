@@ -35,6 +35,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "wininfo.h"
+
 
 class Audio : public QObject
 {

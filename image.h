@@ -40,7 +40,6 @@ public:
 
     void initImage();
 
-    bool open(QString const&);
     bool close();
     bool save();
 

@@ -39,16 +39,11 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->progressBar->hide();
     ui->progressLabel->hide();
 
-    ui->modeComboBox->addItem("Points");
-    ui->modeComboBox->addItem("Points and time");
-//    ui->modeComboBox->addItem("Routes");
+    ui->imageModeComboBox->addItem(tr("Grayscale"));
+    ui->imageModeComboBox->addItem(tr("Floyd-Steinberg"));
+    ui->imageModeComboBox->addItem(tr("Threshold"));
 
-    ui->imageModeComboBox->addItem("Grayscale");
-    ui->imageModeComboBox->addItem("Floyd-Steinberg");
-    ui->imageModeComboBox->addItem("Threshold");
-
-    ui->modeLabel->hide();
-    ui->modeComboBox->hide();
+    enableSends(false);
 
     repeat = 0;
 
@@ -144,7 +139,7 @@ void ProjecteurLaser::on_actionFileSave_triggered()
     if (fileExt.isEmpty()){
         file.append(".wav");
     } else if (fileExt != "wav" && fileExt != "wave"){
-        WinInfo::error("Mauvais format de fichier.");
+        WinInfo::error(tr("Wrong file format."));
         return;
     }
 
@@ -187,7 +182,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 
     //Show the progressbar area.
     ui->progressLabel->show();
-    ui->progressLabel->setText(tr("Calcul en cours..."));
+    ui->progressLabel->setText(tr("Processing..."));
     ui->progressBar->show();
 
     computeImage->setScanAngle(ui->angleSpinBox->value());
@@ -202,9 +197,9 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->actionImageCalibrate->setEnabled(true);
     enableSends(true);
     ui->actionSend->setEnabled(true);
-    QString text = "Durée d'insolation: ";
+    QString text = tr("Insolation time: ");
     text += QString::number(audio->getLength());
-    text += " secondes.";
+    text += tr(" seconds.");
     this->statusBar()->showMessage(text);
 //    cout << "durée insolation: " << audio->getLength() << endl;
 }
@@ -308,16 +303,10 @@ void ProjecteurLaser::on_heightMmLineEdit_editingFinished()
     enableSends(false);
 }
 
-void ProjecteurLaser::on_modeComboBox_currentIndexChanged(int index)
-{
-    image.setMode(index);
-    enableSends(false);
-}
-
 void ProjecteurLaser::on_actionGrayScale_triggered()
 {
     bool ok = false;
-    int dpi = QInputDialog::getInt(this, "Gray scale", "dpi", 300, 0, 2400, 1, &ok);
+    int dpi = QInputDialog::getInt(this, tr("Gray scale"), "dpi", 300, 0, 2400, 1, &ok);
 
     if(!ok){return;}
 
@@ -340,7 +329,7 @@ void ProjecteurLaser::on_actionSend_triggered(bool checked)
     {
         //Show the progressbar area.
         ui->progressLabel->show();
-        ui->progressLabel->setText(tr("Insolation en cours..."));
+        ui->progressLabel->setText(tr("Insolating..."));
         ui->progressBar->setValue(0);
         ui->progressBar->show();
 
@@ -385,6 +374,10 @@ void ProjecteurLaser::handleAudioStopped(){
     ui->actionSend->setChecked(false);
     ui->actionPause->setChecked(false);
 
+    //hide the progressbar area.
+    ui->progressLabel->hide();
+    ui->progressBar->hide();
+
 }
 
 void ProjecteurLaser::handleProgress(int value){
@@ -398,7 +391,7 @@ void ProjecteurLaser::on_angleSpinBox_valueChanged(int arg1)
 
 void ProjecteurLaser::on_exposureSlider_sliderMoved(int position)
 {
-    QString text = "Exposure: ";
+    QString text = (tr("Exposure: "));
     text += QString::number(position);
     text += "%";
     ui->speedLabel->setText(text);
@@ -410,4 +403,40 @@ void ProjecteurLaser::on_exposureSlider_sliderMoved(int position)
 void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
 {
     repeat = arg1;
+    enableSends(false);
+}
+
+void ProjecteurLaser::on_offsetXSlider_valueChanged(int value)
+{
+    QString text = (tr("Offset width: "));
+    text += QString::number(value);
+    ui->offsetXLabel->setText(text);
+    computeImage->setOffsetX(value);
+    enableSends(false);
+}
+
+void ProjecteurLaser::on_offsetYSlider_valueChanged(int value)
+{
+    QString text = (tr("Offset heigth: "));
+    text += QString::number(value);
+    ui->offsetYLabel->setText(text);
+    computeImage->setOffsetY(value);
+    enableSends(false);
+}
+
+void ProjecteurLaser::on_jumpSpinBox_valueChanged(int arg1)
+{
+    computeImage->setJump(arg1);
+    enableSends(false);
+    cout << "jump" << endl;
+}
+
+void ProjecteurLaser::on_resetButton_clicked()
+{
+    ui->repeatSpinBox->setValue(0);
+    ui->angleSpinBox->setValue(0);
+    ui->exposureSlider->setValue(100);
+    ui->offsetXSlider->setValue(0);
+    ui->offsetYSlider->setValue(0);
+    ui->jumpSpinBox->setValue(0);
 }
