@@ -16,25 +16,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * This class is the heart of the program.
+ * It transforms the image into coordinates for the laser, given original size, size wanted, distance, etc.
+ */
+
 #include "computeimage.h"
 
 ComputeImage::ComputeImage()
 {
+    audio = NULL;
+
+    //Initialize value for jump and offset.
+    jump = 0;
+    offsetX = 0;
+    offsetY = 0;
 
 }
 
 //Create a new computeImage object.
 //This copies the values it needs from the image that is opened.
 //Each time the image is updated the computeImage object is created again.
-ComputeImage::ComputeImage(Image file)
+void ComputeImage::init(Image file)
 {
     //initialisation of vars and constants.
+    //Positions for X and Y is coded on 16 bits.
     angleMaxValue = pow(2, 15);
     pi = atan(1) * 4;
 
     //The max angle in cfg file is store as degrees; converting it to radians.
-    maxAngleX = 10 * pi / 180;
-    maxAngleY = 10 * pi / 180;
+    maxAngleX = 12 * pi / 180;
+    maxAngleY = 12 * pi / 180;
 
     //Prepare the tan of the scan max angle.
     //With python it speeds up the calculus, but it seems C++ doesn't care!
@@ -89,76 +101,74 @@ void ComputeImage::updateMaxSize()
 
 //Look at each pixel value of the image to create a string
 //that will be sent to the laser.
-//This string is like:
-//data = IidLlvalueXxvalueYyvalueSspeede.getSe.getS
-void ComputeImage::computeCoords(vector<QByteArray>* serialData, QProgressBar* progressBar)
+void ComputeImage::computeCoords(Audio *buffer)
 {
-    _serialData = serialData;
 
     //Get the last distance value and compute angle pos for every pixel.
     updateMaxSize();
     computeAngles();
 
-    time_t timer;
-    int debut = time(&timer);
-
-    if (scanAngle <= 90 && scanAngle > 45){
-
-        if (scanAngle != 90){
-            for (int i = 0; i < heightPix; i++){
-                bresenham(i, 0, 0, scanAngle);
-            }
-        }
-
-        for (int i = 0; i < widthPix; i++){
-            bresenham(heightPix - 1, 0, i, scanAngle);
-        }
-
-    } else if (scanAngle <= 45 && scanAngle >= 0){
-
-        for (int i = 0; i < heightPix; i++){
-            bresenham(0, widthPix - 1, i, scanAngle);
-        }
-
-        if (scanAngle != 0){
-            for (int i = 0; i < widthPix; i++){
-                bresenham(i, widthPix - 1, heightPix - 1, scanAngle);
-            }
-        }
-
-    } else if (scanAngle < 0 && scanAngle >= -45){
-
-        for (int i = heightPix - 1; i >= 0; i--){
-            bresenham(0, widthPix - 1, i, scanAngle);
-        }
-        for (int i = 0; i < widthPix; i++){
-            bresenham(i, widthPix - 1, 0, scanAngle);
-        }
-
-
-    } else if (scanAngle < -45 && scanAngle >= -90){
-
-        if (scanAngle != -90){
-            for (int i = heightPix - 1; i >= 0; i--){
-                bresenham(i, heightPix - 1, 0, scanAngle);
-            }
-        }
-        for (int i = 0; i < widthPix; i++){
-            bresenham(0, heightPix - 1, 0, scanAngle);
-        }
-
+    if(widthMm > maxSizeX || heightMm > maxSizeY){
+//        QString text = tr("Max size for this distance is %n x %nmm. Please decrease size or increase distance.");
+        QString text = tr("Max size for this distance is ");
+        text += QString::number(maxSizeX);
+        text += "x";
+        text += QString::number(maxSizeY);
+        text += tr("mm. Please decrease size or increase distance.");
+        WinInfo::info(text, tr("Size error"));
+        return;
     }
 
-    int duree = time(&timer) - debut;
-    QString message = "Position values computed in ";
-    message += QString::number(duree);
-    message += " seconds";
+    audio = buffer;
+    audio->clearCoords();
 
-//    WinInfo::info(message);
+    pixelsComputed = 0;
 
+    float tanAngle = 0;
+
+    if (scanAngle > 45){
+        tanAngle = tan((90 - scanAngle) * pi / 180);
+        for (int i = -tanAngle * heightPix; i < widthPix; i++){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
+            bresenham(i, heightPix - 1);
+        }
+
+    } else if (scanAngle >= 0){
+        tanAngle = tan(scanAngle * pi / 180);
+        int limit = heightPix + tanAngle * widthPix;
+        for (int i = 0; i < limit; i++){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
+            bresenham(0, i);
+        }
+
+    } else if (scanAngle >= -45){
+        tanAngle = tan(scanAngle * pi / 180);
+        int limit = tanAngle * widthPix;
+        for (int i = heightPix - 1; i >= limit; i--){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
+            bresenham(0, i);
+        }
+
+    } else {
+        if (scanAngle != -90){
+            tanAngle = -tan((90 + scanAngle) * pi / 180);
+        }
+        for (int i = tanAngle * heightPix; i < widthPix; i++){
+            if((jump != 0) && (i%(jump + 1)) != 0){
+                continue;
+            }
+            bresenham(i, 0);
+        }
+    }
 }
 
-void ComputeImage::computeSupport(vector<QByteArray> *serialData)
+void ComputeImage::computeSupport()
 {
     double angleValue = 0;
     double angleRatio = 0;
@@ -176,21 +186,23 @@ void ComputeImage::computeSupport(vector<QByteArray> *serialData)
     angleRatio = angleValue / maxAngleY;
     heightValue = angleMaxValue * angleRatio;
 
+    int x = -widthValue;
+    int y = -heightValue;
 
-    computeCommand((FLAG_X | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, widthValue, 0, 255, 10, 1);
-    serialData->push_back(_dataToSend);
+    audio->clearSupport();
 
-    computeCommand((FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, 0, heightValue, 255, 10, 1);
-    serialData->push_back(_dataToSend);
-
-    computeCommand((FLAG_X | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, -widthValue, 0, 255, 10, 1);
-    serialData->push_back(_dataToSend);
-
-    computeCommand((FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, 0, -heightValue, 255, 10, 1);
-    serialData->push_back(_dataToSend);
-
-//    computeCommand((FLAG_X | FLAG_Y | FLAG_L | FLAG_SPEED | FLAG_MODE), 0, widthValue, -heightValue, 255, 10, 1);
-//    serialData->push_back(_dataToSend);
+    for(;x<widthValue; x+=32){
+        audio->appendSupport(x, y);
+    }
+    for(;y<heightValue; y+=32){
+        audio->appendSupport(x, y);
+    }
+    for(;x>-widthValue; x-=32){
+        audio->appendSupport(x, y);
+    }
+    for(;y>-heightValue; y-=32){
+        audio->appendSupport(x, y);
+    }
 
 }
 
@@ -202,22 +214,22 @@ void ComputeImage::computeAngles()
     angleValueX.clear();
     angleValueY.clear();
 
-    time_t timer;
-    int debut = time(&timer);
-
     //Initlize some vars for computing temporary values
     double angleValue = 0;
     double angleRatio = 0;
     double halfSize = 0;
     int posValue = 0;
 
+    time_t timer;
+    int debut = time(&timer);
 
     //First get the values for width
     //
     //First is computed the distance between image center and pix pos, in mm.
     //Then this value is used to find the corresponding angle.
     //Compute a ratio between this angle and the max angle.
-    //Finally use this ratio to get the laser position, by multiplying it by greatest posible value.
+    //Finally use this ratio to get the laser position, by multiplying it by greatest possible value.
+
     //Store this value into the angleValue array.
     for(int i = 0; i<widthPix; i++)
     {
@@ -241,10 +253,16 @@ void ComputeImage::computeAngles()
 
     }
 
+    //get the number of points for a pixel increment.
+    offsetValueX = abs((float)angleValueX[0] / (widthPix / 2));
+    offsetValueX *= (float)offsetX / 100;
+    offsetValueY = abs((float)angleValueY[0] / (heightPix / 2));
+    offsetValueY *= (float)offsetY / 100;
+
     int duree = time(&timer) - debut;
-    QString message = "Angles computed in ";
+    QString message = tr("Angles computed in ");
     message += QString::number(duree);
-    message += " seconds";
+    message += tr(" seconds");
 
    // WinInfo::info(message);
 
@@ -252,247 +270,141 @@ void ComputeImage::computeAngles()
 
 //compute the points with Bresenham algorithm
 //Each of the four octant is computed differently and handles overflows
-void ComputeImage::bresenham(int start, int end, int pos, int angle){
+void ComputeImage::bresenham(int x, int y){
 
-    char flags = FLAG_X | FLAG_Y | FLAG_L;
-    if(mode != 0){
-        flags |= FLAG_SPEED | FLAG_MODE;
-    }
-
-    QRgb pixPv = 0;
-
-    //computing for second octant
-    if (angle <= 90 && angle > 45){
-        double tanAngle = tan((90 - angle) * pi / 180);
+    if (scanAngle > 45){
+        double tanAngle = tan((90 - scanAngle) * pi / 180);
         double error = -0.5;
 
-        for (int i = start; i >= end; i--){
+        for (; y >= 0; y--){
             error += tanAngle;
-            if (error > 0){
-                pos++;
+
+            if(error > 0){
+                x++;
                 error--;
             }
 
-            if (pos >= widthPix){
+            if(x < 0){
+                continue;
+            }
 
-                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                _serialData->push_back(_dataToSend);
+            pixelsComputed++;
 
+            if(x >= widthPix){
                 break;
             }
 
-            QRgb pix = qBlue(image.pixel(pos, i));
+            QRgb pix = qBlue(image.pixel(x, y));
 
-            if(pix == 0)
-            {
-                if(pixPv != 0){
-                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                    _serialData->push_back(_dataToSend);
-                }
-                pixPv = pix;
+            if (pix == 0){
                 continue;
             }
-            pixPv = pix;
-//            cout << angleValueX[pos] << endl;
-//            cout << angleValueY[i] << endl;
-
-            computeCommand(flags,
-                           index++,
-                           angleValueX[pos],
-                           angleValueY[i],
-                           pix,
-                           speed,
-                           mode);
-            _serialData->push_back(_dataToSend);
-
+            //append values to audio
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
 
-    //Computing for first octant
-    } else if (angle <=45 && angle >=0){
-        double tanAngle = tan(angle * pi / 180);
-        double error = 0.5;
-
-        for (int i = start; i <= end; i++){
-            error -= tanAngle;
-            if (error < 0){
-                pos--;
-                error++;
-            }
-
-            if (pos < 0){
-
-                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                _serialData->push_back(_dataToSend);
-
-                break;
-            }
-            QRgb pix = qBlue(image.pixel(i, pos));
-
-            if(pix == 0)
-            {
-                if(pixPv != 0){
-                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                    _serialData->push_back(_dataToSend);
-                }
-                pixPv = pix;
-                continue;
-            }
-            pixPv = pix;
-
-            computeCommand(flags,
-                           index++,
-                           angleValueX[i],
-                           angleValueY[pos],
-                           pix,
-                           speed,
-                           mode);
-            _serialData->push_back(_dataToSend);
-      }
-
-    //Computing for height octant
-    } else if (angle < 0 && angle >= -45){
-        double tanAngle = tan(angle * pi / 180);
+    } else if (scanAngle >= 0){
+        double tanAngle = tan(scanAngle * pi / 180);
         double error = -0.5;
 
-        for (int i = start; i <= end; i++){
-            error -= tanAngle;
+        for (; x <= widthPix - 1; x++){
+            error += tanAngle;
+
             if (error > 0){
-                pos++;
+                y--;
                 error--;
             }
 
-            if (pos >= heightPix){
-
-                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                _serialData->push_back(_dataToSend);
-
-                break;
-            }
-            QRgb pix = qBlue(image.pixel(i, pos));
-
-            if(pix == 0)
-            {
-                if(pixPv != 0){
-                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                    _serialData->push_back(_dataToSend);
-                }
-                pixPv = pix;
+            if (y >= heightPix){
                 continue;
             }
-            pixPv = pix;
 
-            computeCommand(flags,
-                           index++,
-                           angleValueX[i],
-                           angleValueY[pos],
-                           pix,
-                           speed,
-                           mode);
-            _serialData->push_back(_dataToSend);
+            pixelsComputed++;
 
+            if(y < 0){
+                break;
+            }
+
+            QRgb pix = qBlue(image.pixel(x, y));
+
+            if (pix == 0){
+                continue;
+            }
+//            cout << "x: " << x << endl;
+//            cout << "y: " << y << endl;
+//            cout << "l: " << (int)pix << endl;
+            //append values to audio
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
-    //Computing for seventh octant
-    } else if (angle < -45 && angle >= -90){
-        double tanAngle = tan((-90 - angle) * pi / 180);
+
+    } else if (scanAngle >= -45){
+        double tanAngle = -tan(scanAngle * pi / 180);
         double error = -0.5;
 
-        for (int i = start; i <= end; i++){
-            error -= tanAngle;
+        for (; x <= widthPix - 1; x++){
+            error += tanAngle;
+
             if (error > 0){
-                pos++;
+                y++;
                 error--;
             }
 
-            if (pos > widthPix){
-
-                computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                _serialData->push_back(_dataToSend);
-
-                break;
-            }
-            QRgb pix = qBlue(image.pixel(pos, i));
-
-            if(pix == 0)
-            {
-                if(pixPv != 0){
-                    computeCommand(FLAG_L, index++, 0, 0, 0, 0, 0);
-                    _serialData->push_back(_dataToSend);
-                }
-                pixPv = pix;
+            if (y < 0){
                 continue;
             }
-            pixPv = pix;
 
-            computeCommand(flags,
-                           index++,
-                           angleValueX[pos],
-                           angleValueY[i],
-                           pix,
-                           speed,
-                           mode);
-            _serialData->push_back(_dataToSend);
+            pixelsComputed++;
+
+            if(y >= heightPix){
+                break;
+            }
+
+            QRgb pix = qBlue(image.pixel(x, y));
+
+            if (pix == 0){
+                continue;
+            }
+            //append values to audio
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
+        }
+
+    } else {
+        double tanAngle = -tan((90 - scanAngle) * pi / 180);
+        double error = -0.5;
+
+        for (; y <= heightPix - 1; y++){
+            error += tanAngle;
+
+            if(error > 0){
+                x++;
+                error--;
+            }
+
+            if (x < 0){
+                continue;
+            }
+
+            pixelsComputed++;
+
+            if(x >= widthPix){
+                break;
+            }
+
+            QRgb pix = qBlue(image.pixel(x, y));
+
+            if (pix == 0){
+                continue;
+            }
+            //append values to audio
+            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
     }
+
+    int progress = 100 * (float)pixelsComputed / size;
+    emit progressing(progress);
 }
 
-QByteArray ComputeImage::computeCommand(char flags, char id, int posX, int posY, char posL, int speed, char mode)
-{
-    _dataToSend.clear();
-    _checksum = 0;
-
-    computeCommandChar(flags);
-
-    if(flags & FLAG_I){
-        computeCommandChar(id);
-    }
-
-    if(flags & FLAG_X){
-        computeCommandInt(posX);
-    }
-
-    if(flags & FLAG_Y){
-        computeCommandInt(posY);
-    }
-
-    if(flags & FLAG_L){
-        computeCommandChar(posL);
-    }
-
-    if(flags & FLAG_SPEED){
-        computeCommandInt(speed);
-    }
-
-    if(flags & FLAG_MODE){
-        computeCommandChar(mode);
-    }
-
-    computeCommandChar(_checksum);
-//    cout << endl;
-
-    return _dataToSend;
-
-
-}
-
-void ComputeImage::computeCommandInt(int val)
-{
-//    cout << val << endl;
-//    computeCommandChar(val/256);
-    computeCommandChar(val >> 8);
-    computeCommandChar(val%256);
-//    cout << endl;
-}
-
-void ComputeImage::computeCommandChar(char val)
-{
-    _checksum += (unsigned char)val;
-    _dataToSend.append(val);
-//    cout << bitset<8>(val) << endl;
-
-}
-
-int ComputeImage::getMinDistance()
-{
+int ComputeImage::getMinDistance(){
     return minDistance;
 }
 
@@ -503,3 +415,16 @@ void ComputeImage::setScanAngle(int angle){
 int ComputeImage::getDpi(){
     return float(25.4) / ratioPixMm;
 }
+
+void ComputeImage::setJump(int value){
+    jump = value;
+}
+
+void ComputeImage::setOffsetX(int value){
+    offsetX = value;
+}
+
+void ComputeImage::setOffsetY(int value){
+    offsetY = value;
+}
+

@@ -16,6 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* This class is used for image management.
+ * It opens and close the image when asking from GUI.
+ * It can also construct a gray chart with 64 squares going from white to black
+ *
+ * It inits image size, speed and distance from laser to support
+ * It computes the negative image needed for projection, and it alos provides thumbnail for GUI
+ *
+ * It has a function that transforms the originale image to greyscale, floyd-steinberg compression, or treshold.
+ *
+ * Finally, it has getters a and setters for the GUI to display and eventually modify values.
+ */
+
 #include "image.h"
 
 using namespace std;
@@ -31,22 +43,27 @@ Image::Image(QString const& file)
     //Create the image from an image file
     image = QImage(file);
 
+    //Get the size in mm from the size in pixels and the dpi ratio.
     widthMm = 1000 * image.width() / image.dotsPerMeterX();
     heightMm = 1000 * image.height() / image.dotsPerMeterY();
 
     initImage();
 }
 
-//This is the contructor for a gray scale image
+//This is the contructor for a gray scale image, which goal is to set the speed needed.
 Image::Image(int dpi)
 {
     int sizeMm = 80;
 
+    //create an empty image, of great size. Fill with white
     image = QImage(4000, 4000, QImage::Format_RGB32);
     image.fill(Qt::white);
+    //the QPainter is used to fill the image with grey squares. Set it to the image.
     QPainter *painter = new QPainter();
     painter->begin(&image);
-
+    int newWidth = widthMm;
+    int newHeight;
+    //compute 64 squares
     for(int i = 0; i < 64; i++){
         int x = 500 * (i % 8);
         int y = 500 * (i / 8);
@@ -57,6 +74,7 @@ Image::Image(int dpi)
 
     delete painter;
 
+    //resize the image to the dpi ratio needed.
     int newSize = sizeMm * dpi / (float)25.4;
     image = image.scaled(newSize, newSize);
 
@@ -85,7 +103,7 @@ void Image::initImage()
     ratio = (float)width / (float)height;
 
     //defaut speed and distance
-    distance = 650;
+    distance = 475;
     speed = 100;
 
     //default support size = image size.
@@ -110,9 +128,16 @@ void Image::initImage()
     saved = 0;
 }
 
-bool Image::open(QString const& file)
-{
-    return 0;
+bool Image::resample(int dpi){
+    int newWidthPix = widthMm * dpi / (float)25.4;
+    int newHeightPix = heightMm * dpi / (float)25.4;
+
+    image = image.scaled(newWidthPix, newHeightPix);
+
+    widthMm = 1000 * image.width() / image.dotsPerMeterX();
+    heightMm = 1000 * image.height() / image.dotsPerMeterY();
+
+    initImage();
 }
 
 bool Image::close()
@@ -189,6 +214,11 @@ int Image::getBlackWhiteStep(){
     return blackWhiteStep;
 }
 
+int Image::getDpi(){
+    //39.3 is the quantity of inches in a meter
+    return image.dotsPerMeterX() / (float)39.3;
+}
+
 //Update the width from GUI, adapt height.
 void Image::setImageWidth(int value)
 {
@@ -235,7 +265,8 @@ void Image::setImageMode(int value)
 
 }
 
-//convert the image into black and white
+//convert the image into black and white, in the mode wanted,
+//i.e. grayscale, floyd-teinberg or threshold
 QImage Image::setGray(QImage image, int mode)
 {
     //mode == 0: grayscale image
@@ -255,19 +286,14 @@ QImage Image::setGray(QImage image, int mode)
                 //image.setPixel(j, i, qGray(image.pixel(j, i)));
             }
         }
-        return image;
     //mode == 1: Floyd-Steinberg image
     } else if(mode == 1){
         image = image.convertToFormat(QImage::Format_Mono);
 
-        return image;
     //mode == 2: Threshold image
     } else if(mode == 2){
         for(int i=0; i<image.height(); i++)
         {
-            //TODO: See why scanLine() gives a different color than access by pixel().
-            //uchar * line = image.scanLine(i);
-
             for(int j=0; j<image.width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
@@ -281,10 +307,8 @@ QImage Image::setGray(QImage image, int mode)
                 //image.setPixel(j, i, qGray(image.pixel(j, i)));
             }
         }
-        return image;
-
     }
-
+    return image;
 }
 
 void Image::setStep(int value){

@@ -29,9 +29,11 @@
 
 #include <QByteArray>
 #include <QCoreApplication>
+#include <QObject>
 #include <QProgressBar>
 #include <QString>
 
+#include "audio.h"
 #include "image.h"
 #include "wininfo.h"
 
@@ -44,27 +46,45 @@
 
 using namespace std;
 
-class ComputeImage
+class ComputeImage : public QObject
 {
+    Q_OBJECT
 
 public:
     ComputeImage();
-    ComputeImage(Image);
+    void init(Image);
 
     void updateMaxSize();
-    void computeCoords(vector<QByteArray>*, QProgressBar*);
-    void computeSupport(vector<QByteArray>*);
+    void computeCoords(Audio *buffer);
+    void computeSupport();
 
     int getMinDistance();
     void setScanAngle(int);
     int getDpi();
 
+    void setJump(int value);
+    void setOffsetX(int value);
+    void setOffsetY(int value);
+
+signals:
+    void progressing(int value);
+
 private:
     void computeAngles();
-    void bresenham(int, int, int, int);
+    void bresenham(int start, int end);
     QByteArray computeCommand(char, char, int, int, char, int, char);
     void computeCommandInt(int);
     void computeCommandChar(char);
+
+    void inline swap(int a, int b){
+        int t = a;
+        a = b;
+        b = t;
+    }
+
+    //pointers to external objects
+    Audio *audio;
+    QProgressBar *progressBar;
 
     //Copies of the image values
     QImage image;
@@ -89,6 +109,12 @@ private:
     int size;
     int scanAngle;
 
+    int jump;
+    int offsetX;
+    int offsetY;
+    int offsetValueX;
+    int offsetValueY;
+
     //Values that store the max angle of the scan.
     double maxAngleX;
     double maxAngleY;
@@ -101,12 +127,12 @@ private:
     vector<int> angleValueX;
     vector<int> angleValueY;
 
-    //pointer to the serial buffer
-    vector<QByteArray>* _serialData;
+    //these two tables store the pixel number, for a coordinate given in the image box.
+    vector<int> pixForAngleX;
+    vector<int> pixForAngleY;
 
-    //values for command creation
-    QByteArray _dataToSend;
-    unsigned char _checksum;
+    //progress of computing
+    int pixelsComputed;
 
 };
 
