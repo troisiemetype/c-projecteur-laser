@@ -104,6 +104,8 @@ private slots:
 
     void on_resetButton_clicked();
 
+    void on_actionResample_triggered();
+
 private:
     Ui::ProjecteurLaser *ui;
 

@@ -48,7 +48,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="verticalWidget" native="true">
+     <widget class="QWidget" name="rightWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="spacing">
         <number>10</number>
@@ -155,7 +155,7 @@
           <item row="3" column="4">
            <widget class="QLabel" name="offsetXLabel">
             <property name="text">
-             <string>Offset width: 0</string>
+             <string>Offset width: 0%</string>
             </property>
            </widget>
           </item>
@@ -320,7 +320,7 @@
           <item row="4" column="4">
            <widget class="QLabel" name="offsetYLabel">
             <property name="text">
-             <string>Offset height: 0</string>
+             <string>Offset height: 0%</string>
             </property>
            </widget>
           </item>
@@ -458,6 +458,8 @@
      <string>Tools</string>
     </property>
     <addaction name="actionGrayScale"/>
+    <addaction name="actionCalibrate"/>
+    <addaction name="actionResample"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
@@ -586,6 +588,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Insolate</string>
    </property>
@@ -596,6 +601,9 @@
   <action name="actionPause">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -608,11 +616,24 @@
    <property name="checkable">
     <bool>false</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Stop</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionCalibrate">
+   <property name="text">
+    <string>Calibrate</string>
+   </property>
+  </action>
+  <action name="actionResample">
+   <property name="text">
+    <string>Re-sample</string>
    </property>
   </action>
  </widget>

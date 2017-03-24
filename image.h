@@ -39,6 +39,7 @@ public:
     ~Image();
 
     void initImage();
+    bool resample(int dpi);
 
     bool close();
     bool save();
@@ -57,6 +58,7 @@ public:
     int getSupportWidth();
     int getSupportHeight();
     int getBlackWhiteStep();
+    int getDpi();
 
     //setters
     void setImageWidth(int);

@@ -46,6 +46,7 @@ public:
     Audio();
     ~Audio();
     void append(int x, int y, int lValue);
+    void appendBresenham(int x0, int y0, int x1, int y1, int l);
     void clearCoords();
     void save(const QString &filename);
     void play(int value);
@@ -79,7 +80,7 @@ public slots:
 
 signals:
     void stopped();
-    void progressing(int value);
+    void progressing(int);
 
 };
 

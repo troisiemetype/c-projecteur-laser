@@ -43,8 +43,6 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->imageModeComboBox->addItem(tr("Floyd-Steinberg"));
     ui->imageModeComboBox->addItem(tr("Threshold"));
 
-    enableSends(false);
-
     repeat = 0;
 
     move(50, 50);
@@ -123,6 +121,7 @@ void ProjecteurLaser::on_actionFileNew_triggered()
     ui->actionImageCompute->setEnabled(true);
 
     ui->centralWidget->show();
+
 }
 
 void ProjecteurLaser::on_actionFileOpen_triggered()
@@ -143,7 +142,7 @@ void ProjecteurLaser::on_actionFileSave_triggered()
         return;
     }
 
-    cout << file.toStdString() << endl;
+//    cout << file.toStdString() << endl;
 
     audio->save(file);
 }
@@ -183,6 +182,8 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     //Show the progressbar area.
     ui->progressLabel->show();
     ui->progressLabel->setText(tr("Processing..."));
+    ui->progressBar->setMaximum(100);
+    ui->progressBar->setFormat("%p%");
     ui->progressBar->show();
 
     computeImage->setScanAngle(ui->angleSpinBox->value());
@@ -313,8 +314,6 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
     image = Image(dpi);
     computeImage->init(image);
 
-    audio = new Audio();
-
     populateGui();
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
@@ -328,9 +327,11 @@ void ProjecteurLaser::on_actionSend_triggered(bool checked)
     if(checked)
     {
         //Show the progressbar area.
-        ui->progressLabel->show();
         ui->progressLabel->setText(tr("Insolating..."));
+        ui->progressLabel->show();
+        ui->progressBar->setMaximum(audio->getLength());
         ui->progressBar->setValue(0);
+        ui->progressBar->setFormat(tr("%v/%m seconds"));
         ui->progressBar->show();
 
         ui->infosWidget->setEnabled(false);
@@ -353,8 +354,10 @@ void ProjecteurLaser::on_actionPause_triggered(bool checked)
 
     if(checked)
     {
+        ui->actionPause->setText(tr("resume"));
         audio->pause(true);
     } else {
+        ui->actionPause->setText(tr("pause"));
         audio->pause(false);
     }
 
@@ -410,6 +413,7 @@ void ProjecteurLaser::on_offsetXSlider_valueChanged(int value)
 {
     QString text = (tr("Offset width: "));
     text += QString::number(value);
+    text += "%";
     ui->offsetXLabel->setText(text);
     computeImage->setOffsetX(value);
     enableSends(false);
@@ -419,6 +423,7 @@ void ProjecteurLaser::on_offsetYSlider_valueChanged(int value)
 {
     QString text = (tr("Offset heigth: "));
     text += QString::number(value);
+    text += "%";
     ui->offsetYLabel->setText(text);
     computeImage->setOffsetY(value);
     enableSends(false);
@@ -428,7 +433,6 @@ void ProjecteurLaser::on_jumpSpinBox_valueChanged(int arg1)
 {
     computeImage->setJump(arg1);
     enableSends(false);
-    cout << "jump" << endl;
 }
 
 void ProjecteurLaser::on_resetButton_clicked()
@@ -439,4 +443,21 @@ void ProjecteurLaser::on_resetButton_clicked()
     ui->offsetXSlider->setValue(0);
     ui->offsetYSlider->setValue(0);
     ui->jumpSpinBox->setValue(0);
+}
+
+void ProjecteurLaser::on_actionResample_triggered()
+{
+    bool ok = false;
+    int dpi = QInputDialog::getInt(this, tr("Re-sample"), "dpi", image.getDpi(), 0, 2400, 1, &ok);
+
+    if(!ok){return;}
+
+    image.resample(dpi);
+
+    computeImage->init(image);
+
+    populateGui();
+
+    ui->actionImageCompute->setEnabled(true);
+    ui->centralWidget->show();
 }

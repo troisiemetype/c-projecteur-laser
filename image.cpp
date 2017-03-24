@@ -61,7 +61,8 @@ Image::Image(int dpi)
     //the QPainter is used to fill the image with grey squares. Set it to the image.
     QPainter *painter = new QPainter();
     painter->begin(&image);
-
+    int newWidth = widthMm;
+    int newHeight;
     //compute 64 squares
     for(int i = 0; i < 64; i++){
         int x = 500 * (i % 8);
@@ -125,6 +126,18 @@ void Image::initImage()
     }
 
     saved = 0;
+}
+
+bool Image::resample(int dpi){
+    int newWidthPix = widthMm * dpi / (float)25.4;
+    int newHeightPix = heightMm * dpi / (float)25.4;
+
+    image = image.scaled(newWidthPix, newHeightPix);
+
+    widthMm = 1000 * image.width() / image.dotsPerMeterX();
+    heightMm = 1000 * image.height() / image.dotsPerMeterY();
+
+    initImage();
 }
 
 bool Image::close()
@@ -199,6 +212,11 @@ int Image::getSupportHeight()
 
 int Image::getBlackWhiteStep(){
     return blackWhiteStep;
+}
+
+int Image::getDpi(){
+    //39.3 is the quantity of inches in a meter
+    return image.dotsPerMeterX() / (float)39.3;
 }
 
 //Update the width from GUI, adapt height.

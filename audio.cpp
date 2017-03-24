@@ -86,6 +86,10 @@ void Audio::append(int x, int y, int l){
     }
 }
 
+void Audio::appendBresenham(int x0, int y0, int x1, int y1, int l){
+
+}
+
 //Clear the file buffer
 void Audio::clearCoords(){
     image->buffer().clear();
@@ -117,7 +121,7 @@ void Audio::pause(bool value){
         timer->stop();
         audio->suspend();
     } else {
-        timer->start(200);
+        timer->start(1000);
         audio->resume();
     }
 
@@ -213,6 +217,5 @@ void Audio::handleExposureChanged(int value){
 
 void Audio::handleTimer(){
     elapsed++;
-    int progress = 100 * (float)elapsed / length;
-    emit progressing(progress);
+    emit progressing(elapsed);
 }

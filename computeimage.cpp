@@ -214,15 +214,14 @@ void ComputeImage::computeAngles()
     angleValueX.clear();
     angleValueY.clear();
 
-    time_t timer;
-    int debut = time(&timer);
-
     //Initlize some vars for computing temporary values
     double angleValue = 0;
     double angleRatio = 0;
     double halfSize = 0;
     int posValue = 0;
 
+    time_t timer;
+    int debut = time(&timer);
 
     //First get the values for width
     //
