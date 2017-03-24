@@ -23,6 +23,8 @@
 
 #include <QInputDialog>
 #include <QFileDialog>
+#include <QPoint>
+#include <QSettings>
 
 #include "audio.h"
 #include "computeimage.h"
@@ -43,6 +45,10 @@ public:
 
     void enableSends(bool);
     void populateGui();
+
+private:
+    void readSettings();
+    void saveSettings();
 
 signals:
     void exposureChanged(int);
@@ -106,12 +112,16 @@ private slots:
 
     void on_actionResample_triggered();
 
+    void on_actionCalibrate_triggered(bool checked);
+
 private:
     Ui::ProjecteurLaser *ui;
 
     ComputeImage *computeImage;
     Image image;
     Audio *audio;
+
+    QSettings *settings;
 
     int repeat;
 

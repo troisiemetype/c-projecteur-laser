@@ -19,6 +19,7 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#include <QAudioDeviceInfo>
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QBuffer>
@@ -34,9 +35,12 @@
 
 #include <cmath>
 #include <iostream>
+#include <vector>
+
 
 #include "wininfo.h"
 
+using namespace std;
 
 class Audio : public QObject
 {
@@ -46,7 +50,7 @@ public:
     Audio();
     ~Audio();
     void append(int x, int y, int lValue);
-    void appendBresenham(int x0, int y0, int x1, int y1, int l);
+    void appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, vector<int> *pix);
     void clearCoords();
     void save(const QString &filename);
     void play(int value);
@@ -59,6 +63,23 @@ public:
     void playSupport();
     void stopSupport();
 
+    void displayDeviceInfo();
+    void setFormat();
+
+    inline void swap(int a, int b){
+        int t = a;
+        a = b;
+        b = t;
+    }
+
+    inline char* wByte(int a){
+        char *data = new char();
+        for (int i = 0; i<4 ; i++){
+            data[i] = a >> (i * 8);
+        }
+        return data;
+    }
+
 protected:
     QAudioFormat format;
     QAudioOutput *audio;
@@ -66,6 +87,9 @@ protected:
     QBuffer *image;
     QBuffer *support;
     QTimer *timer;
+
+    int sampleRate;
+    int sampleSize;
 
     int exposure;
     int repeat;

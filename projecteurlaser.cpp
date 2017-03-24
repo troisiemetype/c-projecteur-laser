@@ -33,6 +33,8 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
     computeImage = NULL;
     audio = NULL;
+    settings = new QSettings("GUI.ini", QSettings::IniFormat);
+    readSettings();
 
     ui->setupUi(this);
     ui->centralWidget->hide();
@@ -45,7 +47,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
     repeat = 0;
 
-    move(50, 50);
+//    move(50, 50);
 
     computeImage = new ComputeImage();
     audio = new Audio();
@@ -59,8 +61,22 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
 ProjecteurLaser::~ProjecteurLaser()
 {
+    saveSettings();
+    delete computeImage;
+    delete audio;
+    delete settings;
     delete ui;
 }
+
+void ProjecteurLaser::readSettings(){
+    this->move(settings->value("x-pos", 50).toInt(), settings->value("y-pos", 50).toInt());
+}
+
+void ProjecteurLaser::saveSettings(){
+    settings->setValue("x-pos", this->pos().x());
+    settings->setValue("y-pos", this->pos().y());
+}
+
 
 void ProjecteurLaser::enableSends(bool state)
 {
@@ -460,4 +476,20 @@ void ProjecteurLaser::on_actionResample_triggered()
 
     ui->actionImageCompute->setEnabled(true);
     ui->centralWidget->show();
+}
+
+void ProjecteurLaser::on_actionCalibrate_triggered(bool checked)
+{
+    if(checked)
+    {
+        ui->infosWidget->setEnabled(false);
+        enableSends(false);
+        ui->actionImageCalibrate->setEnabled(true);
+        computeImage->calibrate();
+        audio->playSupport();
+    } else {
+        ui->infosWidget->setEnabled(true);
+        enableSends(true);
+        audio->stopSupport();
+    }
 }
