@@ -179,7 +179,7 @@
           <item row="5" column="4">
            <widget class="QLabel" name="jumpLabel">
             <property name="text">
-             <string>Jump</string>
+             <string>Line jump</string>
             </property>
            </widget>
           </item>
@@ -627,8 +627,11 @@
    </property>
   </action>
   <action name="actionCalibrate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Calibrate</string>
+    <string>Calibrate system</string>
    </property>
   </action>
   <action name="actionResample">
@@ -644,6 +647,15 @@
   <tabstop>supportWidthLineEdit</tabstop>
   <tabstop>supportHeightLineEdit</tabstop>
   <tabstop>distanceLineEdit</tabstop>
+  <tabstop>repeatSpinBox</tabstop>
+  <tabstop>angleSpinBox</tabstop>
+  <tabstop>exposureSlider</tabstop>
+  <tabstop>offsetXSlider</tabstop>
+  <tabstop>offsetYSlider</tabstop>
+  <tabstop>jumpSpinBox</tabstop>
+  <tabstop>imageModeComboBox</tabstop>
+  <tabstop>stepSlider</tabstop>
+  <tabstop>resetButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

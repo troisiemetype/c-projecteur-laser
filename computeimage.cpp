@@ -206,6 +206,58 @@ void ComputeImage::computeSupport()
 
 }
 
+//This is a function that displays a sight, to verify that the system is correctly setup.
+void ComputeImage::calibrate(){
+    double angleValue = 0;
+    double angleRatio = 0;
+    double halfSize = 0;
+    int widthValue = 0;
+    int heightValue = 0;
+
+    halfSize = 50;
+    angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
+    angleRatio = angleValue / maxAngleX;
+    widthValue = angleMaxValue * angleRatio;
+
+    halfSize = 50;
+    angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
+    angleRatio = angleValue / maxAngleY;
+    heightValue = angleMaxValue * angleRatio;
+
+    audio->clearSupport();
+
+    for(int i = -widthValue; i < widthValue; i+=32){
+        audio->appendSupport(i, 0);
+    }
+
+    for(int i = -heightValue; i < heightValue; i+=32){
+        audio->appendSupport(0, i);
+    }
+
+    widthValue *= 0.8;
+    heightValue *= 0.8;
+    int x = -widthValue;
+    int y = -heightValue;
+
+    for(; x<widthValue; x+=32){
+        audio->appendSupport(x, y);
+    }
+    for(;y<heightValue; y+=32){
+        audio->appendSupport(x, y);
+    }
+    for(;x>-widthValue; x-=32){
+        audio->appendSupport(x, y);
+    }
+    for(;y>-heightValue; y-=32){
+        audio->appendSupport(x, y);
+    }
+
+    for(int i = 0; i < 720; i++){
+        audio->appendSupport(widthValue * cos(i * pi / 360), heightValue * sin(i * pi / 360));
+    }
+
+}
+
 //This function precomputes the angles  corresponding to each vertical and horizontal pixel
 //That way computeCoord() can get it ready to be used in two tables, instead of asking it on each iteration
 void ComputeImage::computeAngles()
@@ -272,6 +324,13 @@ void ComputeImage::computeAngles()
 //Each of the four octant is computed differently and handles overflows
 void ComputeImage::bresenham(int x, int y){
 
+/*
+    int previousX = x;
+    int previousY = y;
+    angleValue.clear();
+    pixValue.clear();
+*/
+
     if (scanAngle > 45){
         double tanAngle = tan((90 - scanAngle) * pi / 180);
         double error = -0.5;
@@ -296,9 +355,11 @@ void ComputeImage::bresenham(int x, int y){
 
             QRgb pix = qBlue(image.pixel(x, y));
 
+            /*
             if (pix == 0){
                 continue;
             }
+            */
             //append values to audio
             audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
@@ -307,7 +368,7 @@ void ComputeImage::bresenham(int x, int y){
         double tanAngle = tan(scanAngle * pi / 180);
         double error = -0.5;
 
-        for (; x <= widthPix - 1; x++){
+        for (; x < widthPix; x++){
             error += tanAngle;
 
             if (error > 0){
@@ -315,28 +376,48 @@ void ComputeImage::bresenham(int x, int y){
                 error--;
             }
 
-            if (y >= heightPix){
+            if (y >= heightPix - 1){
+//                previousX = x;
+//                previousY = y;
                 continue;
             }
 
             pixelsComputed++;
 
-            if(y < 0){
+            if(y <= 0){
+//                cout << "pos 0: " << previousX << " * " << previousY << endl;
+//                cout << "pos 1: " << x << " * " << y << endl;
+//                cout << endl;
                 break;
             }
 
             QRgb pix = qBlue(image.pixel(x, y));
+//            angleValue.push_back(angleValueX[x]);
+//            pixValue.push_back(pix);
 
+            /*
             if (pix == 0){
                 continue;
             }
+            */
 //            cout << "x: " << x << endl;
 //            cout << "y: " << y << endl;
 //            cout << "l: " << (int)pix << endl;
             //append values to audio
             audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
-        }
 
+//            previousX = x;
+//            previousY = y;
+        }
+//        cout << "pos 0: " << previousX << " * " << previousY << endl;
+//        cout << "pos 1: " << x << " * " << y << endl;
+//        cout << endl;
+/*
+        audio->appendBresenham(angleValueX[previousX], angleValueY[previousY],
+                               angleValueX[x - 1], angleValueY[y - 1],
+                               &angleValue, &pixValue);
+
+*/
     } else if (scanAngle >= -45){
         double tanAngle = -tan(scanAngle * pi / 180);
         double error = -0.5;
@@ -361,9 +442,11 @@ void ComputeImage::bresenham(int x, int y){
 
             QRgb pix = qBlue(image.pixel(x, y));
 
+            /*
             if (pix == 0){
                 continue;
             }
+            */
             //append values to audio
             audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
@@ -392,9 +475,11 @@ void ComputeImage::bresenham(int x, int y){
 
             QRgb pix = qBlue(image.pixel(x, y));
 
+            /*
             if (pix == 0){
                 continue;
             }
+            */
             //append values to audio
             audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }

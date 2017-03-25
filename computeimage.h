@@ -58,6 +58,8 @@ public:
     void computeCoords(Audio *buffer);
     void computeSupport();
 
+    void calibrate();
+
     int getMinDistance();
     void setScanAngle(int);
     int getDpi();
@@ -127,9 +129,9 @@ private:
     vector<int> angleValueX;
     vector<int> angleValueY;
 
-    //these two tables store the pixel number, for a coordinate given in the image box.
-    vector<int> pixForAngleX;
-    vector<int> pixForAngleY;
+    //these two tables store the coordinate and pixel value
+    vector<int> angleValue;
+    vector<int> pixValue;
 
     //progress of computing
     int pixelsComputed;
