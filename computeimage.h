@@ -19,7 +19,6 @@
 #ifndef COMPUTEIMAGE_H
 #define COMPUTEIMAGE_H
 
-#include <bitset>
 #include <cmath>
 #include <cstring>
 #include <ctime>
@@ -37,13 +36,6 @@
 #include "image.h"
 #include "wininfo.h"
 
-#define FLAG_I			1 << 5
-#define FLAG_X			1 << 4
-#define FLAG_Y			1 << 3
-#define FLAG_L			1 << 2
-#define FLAG_SPEED		1 << 1
-#define FLAG_MODE		1 << 0
-
 using namespace std;
 
 class ComputeImage : public QObject
@@ -52,7 +44,8 @@ class ComputeImage : public QObject
 
 public:
     ComputeImage();
-    void init(Image);
+    ComputeImage(Image *);
+    void init();
 
     void updateMaxSize();
     void computeCoords(Audio *buffer);
@@ -74,9 +67,6 @@ signals:
 private:
     void computeAngles();
     void bresenham(int start, int end);
-    QByteArray computeCommand(char, char, int, int, char, int, char);
-    void computeCommandInt(int);
-    void computeCommandChar(char);
 
     void inline swap(int a, int b){
         int t = a;
@@ -86,10 +76,10 @@ private:
 
     //pointers to external objects
     Audio *audio;
-    QProgressBar *progressBar;
+    Image *image;
+    QImage *negative;
 
-    //Copies of the image values
-    QImage image;
+    //copies of the image values
     int widthPix;
     int heightPix;
     int widthMm;

@@ -25,12 +25,12 @@
 #include "projecteurlaser.h"
 #include "ui_projecteurlaser.h"
 
-//Contructor. Define GUI, give it a position.
+//Constructor. Define GUI.
 ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ProjecteurLaser)
 {
-
+    image = NULL;
     computeImage = NULL;
     audio = NULL;
     settings = new QSettings("GUI.ini", QSettings::IniFormat);
@@ -47,14 +47,10 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
     repeat = 0;
 
-//    move(50, 50);
-
-    computeImage = new ComputeImage();
     audio = new Audio();
 
     connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
     connect(this, SIGNAL(exposureChanged(int)), audio, SLOT(handleExposureChanged(int)));
-    connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
     connect(audio, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
 
 }
@@ -62,10 +58,9 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 ProjecteurLaser::~ProjecteurLaser()
 {
     saveSettings();
-    delete computeImage;
+    on_actionFileClose_triggered();
     delete audio;
     delete settings;
-    delete ui;
 }
 
 void ProjecteurLaser::readSettings(){
@@ -89,16 +84,16 @@ void ProjecteurLaser::enableSends(bool state)
 
 void ProjecteurLaser::populateGui()
 {
-    ui->imageLabel->setPixmap(image.getPixmap());
+    ui->imageLabel->setPixmap(image->getPixmap());
 
     //And get all the values to be displayed in the GUI.
-    ui->widthPixelsLabelEdit->setText(QString::number(image.getWidthPix()));
-    ui->heightPixelsLabelEdit->setText(QString::number(image.getHeightPix()));
-    ui->widthMmLineEdit->setText(QString::number(image.getWidthMm()));
-    ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
-    ui->supportWidthLineEdit->setText(QString::number(image.getSupportWidth()));
-    ui->supportHeightLineEdit->setText(QString::number(image.getSupportHeight()));
-    ui->distanceLineEdit->setText(QString::number(image.getDistance()));
+    ui->widthPixelsLabelEdit->setText(QString::number(image->getWidthPix()));
+    ui->heightPixelsLabelEdit->setText(QString::number(image->getHeightPix()));
+    ui->widthMmLineEdit->setText(QString::number(image->getWidthMm()));
+    ui->heightMmLineEdit->setText(QString::number(image->getHeightMm()));
+    ui->supportWidthLineEdit->setText(QString::number(image->getSupportWidth()));
+    ui->supportHeightLineEdit->setText(QString::number(image->getSupportHeight()));
+    ui->distanceLineEdit->setText(QString::number(image->getDistance()));
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
 
     ui->stepSlider->setVisible(false);
@@ -126,11 +121,18 @@ void ProjecteurLaser::on_actionFileNew_triggered()
     } else {
         typeFichier = "bmp";
 
-        //Create the image object, get it's pixmap
-        image = Image(file);
-        computeImage->init(image);
+        if(image){
+            on_actionFileClose_triggered();
+        }
+
+        //Create the image object
+        image = new Image(file);
+
+        computeImage = new ComputeImage(image);
+        connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
 
         populateGui();
+
     }
 
     //Last, enable buttons for calibrating and computing, and show the image and values area.
@@ -173,6 +175,12 @@ void ProjecteurLaser::on_actionFileClose_triggered()
     enableSends(false);
     audio->clearCoords();
     audio->clearSupport();
+
+    delete computeImage;
+    delete image;
+    image = 0;
+    computeImage = 0;
+
 }
 
 void ProjecteurLaser::on_actionHelp_triggered()
@@ -193,7 +201,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->infosWidget->setEnabled(true);
 
     //Create a new image object.
-    computeImage->init(image);
+    computeImage->init();
 
     //Show the progressbar area.
     ui->progressLabel->show();
@@ -239,30 +247,31 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
 }
 
 //Update the width of the support.
-void ProjecteurLaser::on_supportWidthLineEdit_editingFinished()
+void ProjecteurLaser::on_supportWidthLineEdit_textEdited(const QString &arg1)
 {
-    //Record the new value, hide send button, update the computeImage object
-    image.setSupportWidth(ui->supportWidthLineEdit->text().toInt());
     enableSends(false);
+    //Record the new value, hide send button, update the computeImage object
+    image->setSupportWidth(arg1.toInt());
 
-    computeImage->init(image);
+    computeImage->init();
 }
 
 //Update the height of the support.
-void ProjecteurLaser::on_supportHeightLineEdit_editingFinished()
+void ProjecteurLaser::on_supportHeightLineEdit_textEdited(const QString &arg1)
 {
-    //Record the new value, hide send button, update the computeImage object
-    image.setSupportHeight(ui->supportHeightLineEdit->text().toInt());
     enableSends(false);
+    //Record the new value, hide send button, update the computeImage object
+    image->setSupportHeight(arg1.toInt());
 
-    computeImage->init(image);
+    computeImage->init();
 }
 
 //Update the distance from laser to wall.
-void ProjecteurLaser::on_distanceLineEdit_editingFinished()
+void ProjecteurLaser::on_distanceLineEdit_textEdited(const QString &arg1)
 {
-    image.setDistance(ui->distanceLineEdit->text().toInt());
     enableSends(false);
+
+    image->setDistance(arg1.toInt());
 
 }
 
@@ -271,53 +280,57 @@ void ProjecteurLaser::on_distanceLineEdit_editingFinished()
 void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 {
     if (computeImage == NULL) return;
+
+    enableSends(false);
+
     if(index == 2){
         ui->stepSlider->setVisible(true);
     } else {
         ui->stepSlider->setVisible(false);
     }
 
-    image.setImageMode(index);
-    computeImage->init(image);
+    image->setImageMode(index);
+    computeImage->init();
 
-    ui->imageLabel->setPixmap(image.getPixmap());
-    enableSends(false);
+    ui->imageLabel->setPixmap(image->getPixmap());
 }
 
 //Set the step between black and white for thresold.
 void ProjecteurLaser::on_stepSlider_valueChanged(int value)
 {
-    int seuil = value;
-    image.setStep(seuil);
-    image.setImageMode(ui->imageModeComboBox->currentIndex());
-    ui->imageLabel->setPixmap(image.getPixmap());
     enableSends(false);
+
+    image->setStep(value);
+    image->setImageMode(ui->imageModeComboBox->currentIndex());
+    ui->imageLabel->setPixmap(image->getPixmap());
 }
 
 //Update the width of the picture.
-void ProjecteurLaser::on_widthMmLineEdit_editingFinished()
+void ProjecteurLaser::on_widthMmLineEdit_textEdited(const QString &arg1)
 {
+    enableSends(false);
+
     //Store new value, edit height that is linked.
-    image.setImageWidth(ui->widthMmLineEdit->text().toInt());
-    ui->heightMmLineEdit->setText(QString::number(image.getHeightMm()));
+    image->setImageWidth(arg1.toInt());
+    ui->heightMmLineEdit->setText(QString::number(image->getHeightMm()));
 
     //Update the computeImage object.
-    computeImage->init(image);
+    computeImage->init();
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
-    enableSends(false);
 }
 
 //Update the height of the picture.
-void ProjecteurLaser::on_heightMmLineEdit_editingFinished()
+void ProjecteurLaser::on_heightMmLineEdit_textEdited(const QString &arg1)
 {
+    enableSends(false);
+
     //Store new value, edit width that is linked.
-    image.setImageHeight(ui->heightMmLineEdit->text().toInt());
-    ui->widthMmLineEdit->setText(QString::number(image.getWidthMm()));
+    image->setImageHeight(arg1.toInt());
+    ui->widthMmLineEdit->setText(QString::number(image->getWidthMm()));
 
     //Update the computeImage object.
-    computeImage->init(image);
+    computeImage->init();
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
-    enableSends(false);
 }
 
 void ProjecteurLaser::on_actionGrayScale_triggered()
@@ -327,8 +340,8 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
 
     if(!ok){return;}
 
-    image = Image(dpi);
-    computeImage->init(image);
+//    image = Image(dpi);
+    computeImage->init();
 
     populateGui();
 
@@ -403,7 +416,7 @@ void ProjecteurLaser::handleProgress(int value){
     ui->progressBar->setValue(value);
 }
 
-void ProjecteurLaser::on_angleSpinBox_valueChanged(int arg1)
+void ProjecteurLaser::on_angleSpinBox_valueChanged()
 {
     enableSends(false);
 }
@@ -427,28 +440,31 @@ void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
 
 void ProjecteurLaser::on_offsetXSlider_valueChanged(int value)
 {
+    enableSends(false);
+
     QString text = (tr("Offset width: "));
     text += QString::number(value);
     text += "%";
     ui->offsetXLabel->setText(text);
     computeImage->setOffsetX(value);
-    enableSends(false);
 }
 
 void ProjecteurLaser::on_offsetYSlider_valueChanged(int value)
 {
+    enableSends(false);
+
     QString text = (tr("Offset heigth: "));
     text += QString::number(value);
     text += "%";
     ui->offsetYLabel->setText(text);
     computeImage->setOffsetY(value);
-    enableSends(false);
 }
 
 void ProjecteurLaser::on_jumpSpinBox_valueChanged(int arg1)
 {
-    computeImage->setJump(arg1);
     enableSends(false);
+
+    computeImage->setJump(arg1);
 }
 
 void ProjecteurLaser::on_resetButton_clicked()
@@ -464,13 +480,13 @@ void ProjecteurLaser::on_resetButton_clicked()
 void ProjecteurLaser::on_actionResample_triggered()
 {
     bool ok = false;
-    int dpi = QInputDialog::getInt(this, tr("Re-sample"), "dpi", image.getDpi(), 0, 2400, 1, &ok);
+    int dpi = QInputDialog::getInt(this, tr("Re-sample"), "dpi", image->getDpi(), 0, 2400, 1, &ok);
 
     if(!ok){return;}
 
-    image.resample(dpi);
+    image->resample(dpi);
 
-    computeImage->init(image);
+    computeImage->init();
 
     populateGui();
 

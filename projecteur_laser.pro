@@ -17,13 +17,15 @@ SOURCES += main.cpp\
            image.cpp \
            wininfo.cpp \
            computeimage.cpp \
-           audio.cpp
+           audio.cpp \
+    tools.cpp
 
 HEADERS  += projecteurlaser.h \
             image.h \
             wininfo.h \
             computeimage.h \
-            audio.h
+            audio.h \
+    tools.h
 
 FORMS    += projecteurlaser.ui
 

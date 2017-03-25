@@ -26,18 +26,24 @@
 ComputeImage::ComputeImage()
 {
     audio = NULL;
+}
+
+ComputeImage::ComputeImage(Image *file)
+{
+    image = file;
+    negative = image->getNegative();
+    audio = image->getAudio();
 
     //Initialize value for jump and offset.
     jump = 0;
     offsetX = 0;
     offsetY = 0;
-
 }
 
 //Create a new computeImage object.
 //This copies the values it needs from the image that is opened.
 //Each time the image is updated the computeImage object is created again.
-void ComputeImage::init(Image file)
+void ComputeImage::init()
 {
     //initialisation of vars and constants.
     //Positions for X and Y is coded on 16 bits.
@@ -54,19 +60,16 @@ void ComputeImage::init(Image file)
     tanYScan = tan(maxAngleY);
 
     //get the values from image.
-    image = file.getNegative();
-    widthPix = file.getWidthPix();
-    heightPix = file.getHeightPix();
+    widthPix = image->getWidthPix();
+    heightPix = image->getHeightPix();
     size = widthPix * heightPix;
-    widthMm = file.getWidthMm();
-    heightMm = file.getHeightMm();
-    speed = file.getSpeed();
-    mode = file.getMode();
+    widthMm = image->getWidthMm();
+    heightMm = image->getHeightMm();
     index = 0;
-    distance = file.getDistance();
+    distance = image->getDistance();
 
-    supportWidth = file.getSupportWidth();
-    supportHeight = file.getSupportHeight();
+    supportWidth = image->getSupportWidth();
+    supportHeight = image->getSupportHeight();
 
     //compute the minimum distance from laser to support,
     //given image size and angle value.
@@ -353,7 +356,7 @@ void ComputeImage::bresenham(int x, int y){
                 break;
             }
 
-            QRgb pix = qBlue(image.pixel(x, y));
+            QRgb pix = qBlue(negative->pixel(x, y));
 
             /*
             if (pix == 0){
@@ -391,7 +394,7 @@ void ComputeImage::bresenham(int x, int y){
                 break;
             }
 
-            QRgb pix = qBlue(image.pixel(x, y));
+            QRgb pix = qBlue(negative->pixel(x, y));
 //            angleValue.push_back(angleValueX[x]);
 //            pixValue.push_back(pix);
 
@@ -440,7 +443,7 @@ void ComputeImage::bresenham(int x, int y){
                 break;
             }
 
-            QRgb pix = qBlue(image.pixel(x, y));
+            QRgb pix = qBlue(negative->pixel(x, y));
 
             /*
             if (pix == 0){
@@ -473,7 +476,7 @@ void ComputeImage::bresenham(int x, int y){
                 break;
             }
 
-            QRgb pix = qBlue(image.pixel(x, y));
+            QRgb pix = qBlue(negative->pixel(x, y));
 
             /*
             if (pix == 0){

@@ -70,19 +70,19 @@ private slots:
 
     void on_actionImageCalibrate_triggered(bool checked);
 
-    void on_supportWidthLineEdit_editingFinished();
+    void on_supportWidthLineEdit_textEdited(const QString &arg1);
 
-    void on_supportHeightLineEdit_editingFinished();
+    void on_supportHeightLineEdit_textEdited(const QString &arg1);
 
-    void on_distanceLineEdit_editingFinished();
+    void on_distanceLineEdit_textEdited(const QString &arg1);
 
     void on_imageModeComboBox_currentIndexChanged(int index);
 
     void on_stepSlider_valueChanged(int value);
 
-    void on_widthMmLineEdit_editingFinished();
+    void on_widthMmLineEdit_textEdited(const QString &arg1);
 
-    void on_heightMmLineEdit_editingFinished();
+    void on_heightMmLineEdit_textEdited(const QString &arg1);
 
     void on_actionGrayScale_triggered();
 
@@ -96,7 +96,7 @@ private slots:
 
     void handleProgress(int value);
 
-    void on_angleSpinBox_valueChanged(int arg1);
+    void on_angleSpinBox_valueChanged();
 
     void on_exposureSlider_sliderMoved(int position);
 
@@ -118,7 +118,7 @@ private:
     Ui::ProjecteurLaser *ui;
 
     ComputeImage *computeImage;
-    Image image;
+    Image *image;
     Audio *audio;
 
     QSettings *settings;

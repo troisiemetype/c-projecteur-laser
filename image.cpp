@@ -34,20 +34,24 @@ using namespace std;
 
 Image::Image()
 {
-
+    original = NULL;
 }
 
 //The Image constructor. Called by the GUI when a file is opened.
-Image::Image(QString const& file)
+Image::Image(const QString& file)
 {
     //Create the image from an image file
-    image = QImage(file);
-
-    //Get the size in mm from the size in pixels and the dpi ratio.
-    widthMm = 1000 * image.width() / image.dotsPerMeterX();
-    heightMm = 1000 * image.height() / image.dotsPerMeterY();
+    original = new QImage(file);
 
     initImage();
+}
+
+Image::Image(QImage *image){
+    //Create the image from an image file
+    original = image;
+
+    initImage();
+
 }
 
 //This is the contructor for a gray scale image, which goal is to set the speed needed.
@@ -56,11 +60,11 @@ Image::Image(int dpi)
     int sizeMm = 80;
 
     //create an empty image, of great size. Fill with white
-    image = QImage(4000, 4000, QImage::Format_RGB32);
-    image.fill(Qt::white);
+    original = new QImage(4000, 4000, QImage::Format_RGB32);
+    original->fill(Qt::white);
     //the QPainter is used to fill the image with grey squares. Set it to the image.
     QPainter *painter = new QPainter();
-    painter->begin(&image);
+    painter->begin(original);
     int newWidth = widthMm;
     int newHeight;
     //compute 64 squares
@@ -76,7 +80,7 @@ Image::Image(int dpi)
 
     //resize the image to the dpi ratio needed.
     int newSize = sizeMm * dpi / (float)25.4;
-    image = image.scaled(newSize, newSize);
+    *original = original->scaled(newSize, newSize);
 
     widthMm = sizeMm;
     heightMm = sizeMm;
@@ -86,7 +90,7 @@ Image::Image(int dpi)
 
 Image::~Image()
 {
-
+    //delete original;
 }
 
 void Image::initImage()
@@ -97,14 +101,17 @@ void Image::initImage()
     //thumbnail is the thumbnail version of the original.
     //thumbnailBW, is computed from the above, each time needed.
 
-    width = image.width();
-    height = image.height();
+    //Get the size in mm from the size in pixels and the dpi ratio.
+    widthMm = 1000 * original->width() / original->dotsPerMeterX();
+    heightMm = 1000 * original->height() / original->dotsPerMeterY();
+
+    width = original->width();
+    height = original->height();
 
     ratio = (float)width / (float)height;
 
     //defaut speed and distance
     distance = 475;
-    speed = 100;
 
     //default support size = image size.
     supportWidth = widthMm;
@@ -115,27 +122,26 @@ void Image::initImage()
     blackWhiteStep = 127;
 
     //The negative object, whom computings are made on.
-    negative = setGray(image, blackWhiteMode);
+    negative = setGray(original, blackWhiteMode);
     negative.invertPixels();
 
-    if(image.height() > image.width())
+    if(original->height() > original->width())
     {
-        thumbnail = image.scaledToHeight(500);
+        thumbnail = original->scaledToHeight(500);
     } else {
-        thumbnail = image.scaledToWidth(500);
+        thumbnail = original->scaledToWidth(500);
     }
 
-    saved = 0;
 }
 
 bool Image::resample(int dpi){
     int newWidthPix = widthMm * dpi / (float)25.4;
     int newHeightPix = heightMm * dpi / (float)25.4;
 
-    image = image.scaled(newWidthPix, newHeightPix);
+    *original = original->scaled(newWidthPix, newHeightPix);
 
-    widthMm = 1000 * image.width() / image.dotsPerMeterX();
-    heightMm = 1000 * image.height() / image.dotsPerMeterY();
+    widthMm = 1000 * original->width() / original->dotsPerMeterX();
+    heightMm = 1000 * original->height() / original->dotsPerMeterY();
 
     initImage();
 }
@@ -148,7 +154,7 @@ bool Image::close()
 //Get an updated pixmap for displaying in GUI.
 QPixmap Image::getPixmap()
 {
-    thumbnailBW = setGray(thumbnail, blackWhiteMode);
+    thumbnailBW = setGray(&thumbnail, blackWhiteMode);
 
     QPixmap pixmap;
     pixmap.convertFromImage(thumbnailBW);
@@ -156,67 +162,19 @@ QPixmap Image::getPixmap()
     return pixmap;
 }
 
-QImage Image::getNegative()
+QImage *Image::getNegative()
 {
-    return setGray(negative, blackWhiteMode);
+    setGray(&negative, blackWhiteMode);
+    return &negative;
 }
 
-bool Image::isSaved()
-{
-    return saved;
-}
-
-int Image::getWidthPix()
-{
-    return width;
-}
-
-int Image::getHeightPix()
-{
-    return height;
-}
-
-int Image::getWidthMm()
-{
-    return widthMm;
-}
-
-int Image::getHeightMm()
-{
-    return heightMm;
-}
-
-int Image::getDistance()
-{
-    return distance;
-}
-
-int Image::getSpeed()
-{
-    return speed;
-}
-
-int Image::getMode(){
-    return mode;
-}
-
-int Image::getSupportWidth()
-{
-    return supportWidth;
-}
-
-int Image::getSupportHeight()
-{
-    return supportHeight;
-}
-
-int Image::getBlackWhiteStep(){
-    return blackWhiteStep;
+Audio *Image::getAudio(){
+    return audio;
 }
 
 int Image::getDpi(){
     //39.3 is the quantity of inches in a meter
-    return image.dotsPerMeterX() / (float)39.3;
+    return original->dotsPerMeterX() / inchesPerMeter;
 }
 
 //Update the width from GUI, adapt height.
@@ -248,67 +206,58 @@ void Image::setDistance(int value)
     distance = value;
 }
 
-void Image::setSpeed(int value)
-{
-    speed = value;
-}
-
-void Image::setMode(int value){
-    mode = value;
-}
-
 void Image::setImageMode(int value)
 {
     blackWhiteMode = value;
-    negative = setGray(image, blackWhiteMode);
+    negative = setGray(original, blackWhiteMode);
     negative.invertPixels();
 
 }
 
 //convert the image into black and white, in the mode wanted,
 //i.e. grayscale, floyd-teinberg or threshold
-QImage Image::setGray(QImage image, int mode)
+QImage Image::setGray(QImage *image, int mode)
 {
     //mode == 0: grayscale image
     if(mode == 0)
     {
-        for(int i=0; i<image.height(); i++)
+        for(int i=0; i<image->height(); i++)
         {
             //TODO: See why scanLine() gives a different color than access by pixel().
-            //uchar * line = image.scanLine(i);
+            //uchar * line = image->scanLine(i);
 
-            for(int j=0; j<image.width(); j++)
+            for(int j=0; j<image->width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
-                QRgb color = image.pixel(j, i);
+                QRgb color = image->pixel(j, i);
                 int gray = qGray(color);
-                image.setPixel(j, i, qRgb(gray, gray, gray));
-                //image.setPixel(j, i, qGray(image.pixel(j, i)));
+                image->setPixel(j, i, qRgb(gray, gray, gray));
+                //image->setPixel(j, i, qGray(image->pixel(j, i)));
             }
         }
     //mode == 1: Floyd-Steinberg image
     } else if(mode == 1){
-        image = image.convertToFormat(QImage::Format_Mono);
+        *image = image->convertToFormat(QImage::Format_Mono);
 
     //mode == 2: Threshold image
     } else if(mode == 2){
-        for(int i=0; i<image.height(); i++)
+        for(int i=0; i<image->height(); i++)
         {
-            for(int j=0; j<image.width(); j++)
+            for(int j=0; j<image->width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
-                QRgb color = image.pixel(j, i);
+                QRgb color = image->pixel(j, i);
                 int gray = qGray(color);
                 if(gray > blackWhiteStep){
-                    image.setPixel(j, i, qRgb(255, 255, 255));
+                    image->setPixel(j, i, qRgb(255, 255, 255));
                 } else {
-                    image.setPixel(j, i, qRgb(0, 0, 0));
+                    image->setPixel(j, i, qRgb(0, 0, 0));
                 }
-                //image.setPixel(j, i, qGray(image.pixel(j, i)));
+                //image->setPixel(j, i, qGray(image->pixel(j, i)));
             }
         }
     }
-    return image;
+    return *image;
 }
 
 void Image::setStep(int value){

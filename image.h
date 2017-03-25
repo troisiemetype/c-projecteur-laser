@@ -26,6 +26,7 @@
 
 #include <iostream>
 
+#include "audio.h"
 #include "wininfo.h"
 
 
@@ -34,7 +35,8 @@ class Image
 
 public:
     Image();
-    Image(QString const&);
+    Image(const QString &);
+    Image(QImage *image);
     Image(int);
     ~Image();
 
@@ -46,18 +48,16 @@ public:
 
     //getters
     QPixmap getPixmap();
-    QImage getNegative();
-    bool isSaved();
-    int getWidthPix();
-    int getHeightPix();
-    int getWidthMm();
-    int getHeightMm();
-    int getDistance();
-    int getSpeed();
-    int getMode();
-    int getSupportWidth();
-    int getSupportHeight();
-    int getBlackWhiteStep();
+    QImage *getNegative();
+    Audio *getAudio();
+    inline int getWidthPix() const{return width;}
+    inline int getHeightPix() const{return height;}
+    inline int getWidthMm() const{return widthMm;}
+    inline int getHeightMm() const{return heightMm;}
+    inline int getDistance() const{return distance;}
+    inline int getSupportWidth() const{return supportWidth;}
+    inline int getSupportHeight() const{return supportHeight;}
+    inline int getBlackWhiteStep() const{return blackWhiteStep;}
     int getDpi();
 
     //setters
@@ -66,19 +66,19 @@ public:
     void setSupportWidth(int);
     void setSupportHeight(int);
     void setDistance(int);
-    void setSpeed(int);
     void setImageMode(int);
-    void setMode(int);
 
     void setStep(int);
 
 private:
-    QImage setGray(QImage, int);
+    QImage setGray(QImage*, int);
 
-    QImage image;
+    QImage *original;
     QImage negative;
     QImage thumbnail;
     QImage thumbnailBW;
+
+    Audio *audio;
 
     int blackWhiteMode;
     int blackWhiteStep;
@@ -91,15 +91,11 @@ private:
     int heightMm;
 
     int distance;
-    int speed;
-    int mode;
 
     int supportWidth;
     int supportHeight;
 
-    bool saved;
-
-
+    float inchesPerMeter = 39.37;
 };
 
 #endif // IMAGE_H
