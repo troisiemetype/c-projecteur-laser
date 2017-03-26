@@ -301,7 +301,7 @@ void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 
     enableSends(false);
 
-    if(index == 2){
+    if(index == Image::Threshold){
         ui->stepSlider->setVisible(true);
     } else {
         ui->stepSlider->setVisible(false);

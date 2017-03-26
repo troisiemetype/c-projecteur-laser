@@ -64,8 +64,14 @@ public:
 
     void setStep(int);
 
+    enum imageMode{
+        Grey,
+        FloydSteinberg,
+        Threshold,
+    };
+
 private:
-    QImage setGray(QImage*, int);
+    QImage setGray(const QImage&, int);
 
     QImage *original;
     QImage negative;

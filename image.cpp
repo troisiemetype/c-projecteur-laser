@@ -106,11 +106,11 @@ void Image::initImage()
     ratio = (float)width / (float)height;
 
     //The type of image we use. grayscale, thresold, etc.
-    blackWhiteMode = 0;
+    blackWhiteMode = Grey;
     blackWhiteStep = 127;
 
     //The negative object, whom computings are made on.
-    negative = setGray(original, blackWhiteMode);
+    negative = setGray(*original, blackWhiteMode);
     negative.invertPixels();
 
     if(original->height() > original->width())
@@ -142,7 +142,7 @@ bool Image::close()
 //Get an updated pixmap for displaying in GUI.
 QPixmap Image::getPixmap()
 {
-    thumbnailBW = setGray(&thumbnail, blackWhiteMode);
+    thumbnailBW = setGray(thumbnail, blackWhiteMode);
 
     QPixmap pixmap;
     pixmap.convertFromImage(thumbnailBW);
@@ -152,7 +152,7 @@ QPixmap Image::getPixmap()
 
 QImage *Image::getNegative()
 {
-    setGray(&negative, blackWhiteMode);
+    setGray(negative, blackWhiteMode);
     return &negative;
 }
 
@@ -168,55 +168,56 @@ int Image::getDpi(){
 void Image::setImageMode(int value)
 {
     blackWhiteMode = value;
-    negative = setGray(original, blackWhiteMode);
+    negative = setGray(*original, blackWhiteMode);
     negative.invertPixels();
 
 }
 
 //convert the image into black and white, in the mode wanted,
 //i.e. grayscale, floyd-teinberg or threshold
-QImage Image::setGray(QImage *image, int mode)
+QImage Image::setGray(const QImage &image, int mode)
 {
+    QImage result = QImage(image);
     //mode == 0: grayscale image
-    if(mode == 0)
+    if(mode == Grey)
     {
-        for(int i=0; i<image->height(); i++)
+        for(int i=0; i<result.height(); i++)
         {
             //TODO: See why scanLine() gives a different color than access by pixel().
-            //uchar * line = image->scanLine(i);
+            //uchar * line = result.scanLine(i);
 
-            for(int j=0; j<image->width(); j++)
+            for(int j=0; j<result.width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
-                QRgb color = image->pixel(j, i);
+                QRgb color = result.pixel(j, i);
                 int gray = qGray(color);
-                image->setPixel(j, i, qRgb(gray, gray, gray));
-                //image->setPixel(j, i, qGray(image->pixel(j, i)));
+                result.setPixel(j, i, qRgb(gray, gray, gray));
+                //result.setPixel(j, i, qGray(result.pixel(j, i)));
             }
         }
     //mode == 1: Floyd-Steinberg image
-    } else if(mode == 1){
-        *image = image->convertToFormat(QImage::Format_Mono);
+    } else if(mode == FloydSteinberg){
+        result = result.convertToFormat(QImage::Format_Mono);
 
     //mode == 2: Threshold image
-    } else if(mode == 2){
-        for(int i=0; i<image->height(); i++)
+    } else if(mode == Threshold){
+        for(int i=0; i<result.height(); i++)
         {
-            for(int j=0; j<image->width(); j++)
+            for(int j=0; j<result.width(); j++)
             {
                 //QRgb color = (QRgb)*(line + j * 4);
-                QRgb color = image->pixel(j, i);
+                QRgb color = result.pixel(j, i);
                 int gray = qGray(color);
                 if(gray > blackWhiteStep){
-                    image->setPixel(j, i, qRgb(255, 255, 255));
+                    result.setPixel(j, i, qRgb(255, 255, 255));
                 } else {
-                    image->setPixel(j, i, qRgb(0, 0, 0));
+                    result.setPixel(j, i, qRgb(0, 0, 0));
                 }
-                //image->setPixel(j, i, qGray(image->pixel(j, i)));
+                //result.setPixel(j, i, qGray(result.pixel(j, i)));
             }
         }
     }
-    return *image;
+    return result;
 }
 
 void Image::setStep(int value){
