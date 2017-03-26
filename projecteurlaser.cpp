@@ -358,8 +358,18 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
 
     if(!ok){return;}
 
-//    image = Image(dpi);
+    if(image){
+        on_actionFileClose_triggered();
+    }
+
+    //Create the image object
+    image = new Image(Tools::greyChart(dpi));
+
+    computeImage = new ComputeImage(image);
+    computeImage->setDistance(ui->distanceLineEdit->text().toInt());
     computeImage->init();
+
+    connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
 
     populateGui();
 

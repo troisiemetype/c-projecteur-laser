@@ -35,8 +35,7 @@ class Image
 
 public:
     Image(const QString &);
-    Image(QImage *image);
-    Image(int);
+    Image(const QImage &image);
     ~Image();
 
     void initImage();

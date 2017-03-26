@@ -41,51 +41,17 @@ Image::Image(const QString& file)
     initImage();
 }
 
-Image::Image(QImage *image){
+Image::Image(const QImage &image){
     //Create the image from an image file
-    original = image;
+    original = new QImage(image);
 
     initImage();
 
-}
-
-//This is the contructor for a gray scale image, which goal is to set the speed needed.
-Image::Image(int dpi)
-{
-    int sizeMm = 80;
-
-    //create an empty image, of great size. Fill with white
-    original = new QImage(4000, 4000, QImage::Format_RGB32);
-    original->fill(Qt::white);
-    //the QPainter is used to fill the image with grey squares. Set it to the image.
-    QPainter *painter = new QPainter();
-    painter->begin(original);
-    int newWidth = widthMm;
-    int newHeight;
-    //compute 64 squares
-    for(int i = 0; i < 64; i++){
-        int x = 500 * (i % 8);
-        int y = 500 * (i / 8);
-        int pix = 255 - 4*i;
-
-        painter->fillRect(x, y, 500, 500, QColor(pix, pix, pix));
-    }
-
-    delete painter;
-
-    //resize the image to the dpi ratio needed.
-    int newSize = sizeMm * dpi / (float)25.4;
-    *original = original->scaled(newSize, newSize);
-
-    widthMm = sizeMm;
-    heightMm = sizeMm;
-
-    initImage();
 }
 
 Image::~Image()
 {
-    //delete original;
+    delete original;
 }
 
 void Image::initImage()

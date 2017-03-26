@@ -29,6 +29,7 @@
 #include "audio.h"
 #include "computeimage.h"
 #include "image.h"
+#include "tools.h"
 #include "wininfo.h"
 
 namespace Ui {

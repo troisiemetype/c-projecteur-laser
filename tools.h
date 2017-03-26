@@ -1,13 +1,20 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include <iostream>
+
+#include <QFont>
+#include <QImage>
+#include <QPainter>
+#include <QStaticText>
+
 
 class Tools
 {
 public:
     Tools();
 
-    void greyChart(int dpi);
+    static QImage greyChart(const int& dpi);
     void sight();
 };
 
