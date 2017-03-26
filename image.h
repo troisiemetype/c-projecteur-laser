@@ -41,7 +41,6 @@ public:
     void initImage();
     bool resample(int dpi);
 
-    bool close();
     bool save();
 
     //getters
@@ -75,7 +74,7 @@ private:
     QImage *original;
     QImage negative;
     QImage thumbnail;
-    QImage thumbnailBW;
+//    QImage thumbnailBW;
 
     Audio *audio;
 

@@ -363,7 +363,7 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
     }
 
     //Create the image object
-    image = new Image(Tools::greyChart(dpi));
+    image = new Image(Tools::greyChart(dpi, 80));
 
     computeImage = new ComputeImage(image);
     computeImage->setDistance(ui->distanceLineEdit->text().toInt());

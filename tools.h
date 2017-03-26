@@ -14,7 +14,7 @@ class Tools
 public:
     Tools();
 
-    static QImage greyChart(const int& dpi);
+    static QImage greyChart(const int& dpi, const int& sizeMm);
     void sight();
 };
 

@@ -34,10 +34,13 @@ ComputeImage::ComputeImage()
 //On each image openning, a compute object is created, and deleted when image is closed.
 ComputeImage::ComputeImage(Image *file)
 {
+    //set a pointer to the image; get its negative. Set pointer to audio
+    //TODO: link audio to the image.
     image = file;
     negative = image->getNegative();
     audio = image->getAudio();
 
+    //Get laser settings
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     readSettings();
 
@@ -72,6 +75,7 @@ ComputeImage::ComputeImage(Image *file)
     offsetY = 0;
 }
 
+//read the settings from the setting file.
 void ComputeImage::readSettings(){
     maxAngleX = maxAngleY = settings->value("laser/maxangle").toInt();
 }
@@ -112,6 +116,7 @@ void ComputeImage::updateMaxSize()
 
 //Look at each pixel value of the image to create a string
 //that will be sent to the laser.
+//This method will compute a start point for each line composing the image, using the scan angle set by user.
 void ComputeImage::computeCoords(Audio *buffer)
 {
 
@@ -119,6 +124,7 @@ void ComputeImage::computeCoords(Audio *buffer)
     updateMaxSize();
     computeAngles();
 
+    //Display a message box if the intended size is beyond the limits of the laser, asking to increase size.
     if(widthMm > maxSizeX || heightMm > maxSizeY){
 //        QString text = tr("Max size for this distance is %n x %nmm. Please decrease size or increase distance.");
         QString text = tr("Max size for this distance is ");
@@ -130,13 +136,22 @@ void ComputeImage::computeCoords(Audio *buffer)
         return;
     }
 
+   // Clear coords in buffer before to populate it
     audio = buffer;
     audio->clearCoords();
 
+    //This is used to update progress bar.
     pixelsComputed = 0;
 
+    //precompute tangente to speed up computing.
     float tanAngle = 0;
 
+    //According to scan angle, find the start point for each scna line, then call bresenham from it.
+    //Starting point may be out of the image for every scan angle that is not horizontal or vertical.
+    //It's needed to have consistency spacing between lines while insolating.
+    //Starting from the border of the picture induce different exposure values
+    //when passing from a vertical to a horizontal border.
+    //Bresenham method simply discards points that are outside image.
     if (scanAngle > 45){
         tanAngle = tan((90 - scanAngle) * pi / 180);
         for (int i = -tanAngle * heightPix; i < widthPix; i++){
@@ -179,14 +194,19 @@ void ComputeImage::computeCoords(Audio *buffer)
     }
 }
 
+//generate four lines according to support size
 void ComputeImage::computeSupport()
 {
+    //Somes values used t ocompute the support border.
     double angleValue = 0;
     double angleRatio = 0;
     double halfSize = 0;
     int widthValue = 0;
     int heightValue = 0;
 
+    //Compute the values of extremum.
+    //TODO: this is grossly the same function as in computeAngles.
+    //This two methods should be refactor to use one another.
     halfSize = (supportWidth / 2);
     angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
     angleRatio = angleValue / maxAngleX;
@@ -200,8 +220,10 @@ void ComputeImage::computeSupport()
     int x = -widthValue;
     int y = -heightValue;
 
+    //Clear support audio buffer
     audio->clearSupport();
 
+    //Draw each border line.
     for(;x<widthValue; x+=32){
         audio->appendSupport(x, y);
     }
@@ -218,6 +240,8 @@ void ComputeImage::computeSupport()
 }
 
 //This is a function that displays a sight, to verify that the system is correctly setup.
+//TODO: probably this should be taken out of ComputeImage, and implement into Tools.
+//This should also benefit from computeAngles instead of using the same amlgorithms.
 void ComputeImage::calibrate(){
     double angleValue = 0;
     double angleRatio = 0;
@@ -225,6 +249,7 @@ void ComputeImage::calibrate(){
     int widthValue = 0;
     int heightValue = 0;
 
+    //compute extremums.
     halfSize = 50;
     angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
     angleRatio = angleValue / maxAngleX;
@@ -237,6 +262,7 @@ void ComputeImage::calibrate(){
 
     audio->clearSupport();
 
+    //Draw the two axis.
     for(int i = -widthValue; i < widthValue; i+=32){
         audio->appendSupport(i, 0);
     }
@@ -245,6 +271,7 @@ void ComputeImage::calibrate(){
         audio->appendSupport(0, i);
     }
 
+    //Draw a square
     widthValue *= 0.8;
     heightValue *= 0.8;
     int x = -widthValue;
@@ -263,6 +290,7 @@ void ComputeImage::calibrate(){
         audio->appendSupport(x, y);
     }
 
+    //Draw a circle
     for(int i = 0; i < 720; i++){
         audio->appendSupport(widthValue * cos(i * pi / 360), heightValue * sin(i * pi / 360));
     }
@@ -282,9 +310,6 @@ void ComputeImage::computeAngles()
     double angleRatio = 0;
     double halfSize = 0;
     int posValue = 0;
-
-    time_t timer;
-    int debut = time(&timer);
 
     //First get the values for width
     //
@@ -317,22 +342,17 @@ void ComputeImage::computeAngles()
     }
 
     //get the number of points for a pixel increment.
+    //That's used to offset each point from its theorical position when insolating, and is set in the GUI.
     offsetValueX = abs((float)angleValueX[0] / (widthPix / 2));
     offsetValueX *= (float)offsetX / 100;
     offsetValueY = abs((float)angleValueY[0] / (heightPix / 2));
     offsetValueY *= (float)offsetY / 100;
 
-    int duree = time(&timer) - debut;
-    QString message = tr("Angles computed in ");
-    message += QString::number(duree);
-    message += tr(" seconds");
-
-   // WinInfo::info(message);
-
 }
 
 //compute the points with Bresenham algorithm
 //Each of the four octant is computed differently and handles overflows
+//TODO: these four cases should be condensed into one.
 void ComputeImage::bresenham(int x, int y){
 
 /*
@@ -519,28 +539,34 @@ void ComputeImage::setImageHeight(const int &value)
     widthMm = (float)value * (float)ratio;
 }
 
+//Update the support width from GUI
 void ComputeImage::setSupportWidth(const int &value)
 {
     supportWidth = value;
 }
 
+//Update the support height from GUI
 void ComputeImage::setSupportHeight(const int &value)
 {
     supportHeight = value;
 }
 
+//Update the scan angle from the GUI
 void ComputeImage::setScanAngle(const int &value){
     scanAngle = value;
 }
 
+//Update the jump value from the GUI. This is used to jump a scanning line when insolating.
 void ComputeImage::setJump(const int &value){
     jump = value;
 }
 
+//Set offset from the GUI. Used to move point position from its theorical value
 void ComputeImage::setOffsetX(const int &value){
     offsetX = value;
 }
 
+//Set offset from the GUI. Used to move point position from its theorical value
 void ComputeImage::setOffsetY(const int &value){
     offsetY = value;
 }

@@ -37,26 +37,32 @@ Image::Image(const QString& file)
 {
     //Create the image from an image file
     original = new QImage(file);
+    audio = new Audio();
 
     initImage();
 }
 
+//Second constructor. called from the GUI for tools, construct an image from an image given to it.
 Image::Image(const QImage &image){
-    //Create the image from an image file
+    //Create the image from a given QImage
     original = new QImage(image);
+    audio = new Audio();
 
     initImage();
 
 }
 
+//Destructor
 Image::~Image()
 {
     delete original;
+    delete audio;
 }
 
+//Init image. Get its size, dpi, ratio. Create a negative and a thumbnail from it.
 void Image::initImage()
 {
-    //image always contains the original file.
+    //original always contains the original file.
     //There are other QImage object used, i.e.:
     //negative is the negative version of this image. Computed again on blackWitheMode change.
     //thumbnail is the thumbnail version of the original.
@@ -71,14 +77,12 @@ void Image::initImage()
 
     ratio = (float)width / (float)height;
 
-    //The type of image we use. grayscale, thresold, etc.
-    blackWhiteMode = Grey;
-    blackWhiteStep = 127;
+    //Sets the right image mode, and also generate the negative.
+    setStep(127);
+    setImageMode(Grey);
 
-    //The negative object, whom computings are made on.
-    negative = setGray(*original, blackWhiteMode);
-    negative.invertPixels();
-
+    //Create a thumbnail of 500 pix max.
+    //TODO: images smaller than 500 pix should not be resized.
     if(original->height() > original->width())
     {
         thumbnail = original->scaledToHeight(500);
@@ -88,6 +92,8 @@ void Image::initImage()
 
 }
 
+//Resample function. Used to change image size, given dpi.
+//TODO: doesn't work as expected. Some work to do here again.
 bool Image::resample(int dpi){
     int newWidthPix = widthMm * dpi / (float)25.4;
     int newHeightPix = heightMm * dpi / (float)25.4;
@@ -100,37 +106,38 @@ bool Image::resample(int dpi){
     initImage();
 }
 
-bool Image::close()
-{
-    return 0;
-}
-
 //Get an updated pixmap for displaying in GUI.
 QPixmap Image::getPixmap()
 {
-    thumbnailBW = setGray(thumbnail, blackWhiteMode);
+    //Create a black and white thumbnail from original one.
+    //This is created as a local variable, as it's just used by the GUI, and computed on each setting change.
+    QImage thumbnailBW = setGray(thumbnail, blackWhiteMode);
 
+    //Create pixmap from it, then return it to the caller.
     QPixmap pixmap;
     pixmap.convertFromImage(thumbnailBW);
 
     return pixmap;
 }
 
+//Give pointer to negative. Called by ComputeImage.
 QImage *Image::getNegative()
 {
-    setGray(negative, blackWhiteMode);
     return &negative;
 }
 
+//Give pointer to audio. Called by ComputeImage
 Audio *Image::getAudio(){
     return audio;
 }
 
+//Get the dpi ratio.
+//TODO: may probably be suppress, and implemented elsewhere.
 int Image::getDpi(){
-    //39.3 is the quantity of inches in a meter
     return original->dotsPerMeterX() / inchesPerMeter;
 }
 
+//Set image mode, i.e. grey, Floyd-Steinberg, etc. Also compute a new negative.
 void Image::setImageMode(int value)
 {
     blackWhiteMode = value;
@@ -144,17 +151,17 @@ void Image::setImageMode(int value)
 QImage Image::setGray(const QImage &image, int mode)
 {
     QImage result = QImage(image);
+
+    //For each column in each row, get the pixel value, convert it to gray, then set it again on pixel.
+    //Floyd-Steinberg uses a dedicate method from Qt library.
+    //Threshold test the pixel value against limit value, the nset pixel to white, or black.
     //mode == 0: grayscale image
     if(mode == Grey)
     {
         for(int i=0; i<result.height(); i++)
         {
-            //TODO: See why scanLine() gives a different color than access by pixel().
-            //uchar * line = result.scanLine(i);
-
             for(int j=0; j<result.width(); j++)
             {
-                //QRgb color = (QRgb)*(line + j * 4);
                 QRgb color = result.pixel(j, i);
                 int gray = qGray(color);
                 result.setPixel(j, i, qRgb(gray, gray, gray));
@@ -186,6 +193,7 @@ QImage Image::setGray(const QImage &image, int mode)
     return result;
 }
 
+//Get the tep value from the GUI.
 void Image::setStep(int value){
     blackWhiteStep = value;
 }

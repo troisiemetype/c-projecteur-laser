@@ -29,15 +29,15 @@ using namespace std;
 Audio::Audio()
 {
 
+    //Set sample rate and sample size.
+    //TODO: get it from the setting file.
     sampleRate = 48000;
     sampleSize = 16;
     //set audio format.
     setFormat();
 //    displayDeviceInfo();
 
-    //    cout << format.isValid() << endl;
-
-    //set the default value for expoure and repeat
+    //set the default value for exposure and repeat
     exposure = 100;
     repeat = 0;
 
@@ -77,8 +77,12 @@ void Audio::setFormat(){
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setSampleType(QAudioFormat::SignedInt);
     format.setCodec("audio/pcm");
+
+//    cout << format.isValid() << endl;
 }
 
+//This is a convenience function for debugging or setting purpose.
+//Display caracteristic of the system default device.
 void Audio::displayDeviceInfo(){
 
     QAudioDeviceInfo device = QAudioDeviceInfo::defaultOutputDevice();
@@ -117,9 +121,8 @@ void Audio::displayDeviceInfo(){
 //Each step of intenity is tranlated to a sample at the same place,
 //i.e. for intenity of 35, the laser will stay at the same place for 35 frames
 void Audio::append(int x, int y, int l){
+    //This is used to add exposure ratio (set in the GUI) to the exposure speed.
     int limit = l * (float)exposure / 100;
-
-//    cout << "appending" << endl;
 
     //Use >> instead of / to avoid zero doubling.
     for(int i = 0; i < limit; i++){
@@ -127,12 +130,16 @@ void Audio::append(int x, int y, int l){
         image->putChar(x >> 8);
         image->putChar(y);
         image->putChar(y >> 8);
-
-//        cout << "i: " << i << endl;
     }
 }
 
-void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, vector<int> *pix){
+//Populates buffer using a bresenham algorithm.
+//The idea behind this method is to use full resolution of the system when scanning line,
+//instead of being limited to pixels. It has yet to be made usable.
+//For now it can only draw smooth lines, but doesn't take care of pixel value.
+void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, vector<int> *pix)
+{
+    //If data sent is less than two values, escape.
     if(angle->size() < 2) return;
 
     int max = angle->size() - 1;
@@ -150,32 +157,42 @@ void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, 
     cout << endl;
 
 
+    //Steep is used to know if the line is above 45° (or under -45°), and so how we need to compute points.
+    //For angle comprised between -45 and 45°, y is computed from x. x from y in the other case.
     int steep = abs(y1 - y0) > abs(x1 - x0);
 
+    //swap x and y, according to the above.
+    //It enables us to do just one compute, and then invert x and y again when needed.
     if (steep){
         swap(x0, y0);
         swap(x1, y1);
     }
 
+    //invert line direction if going from positive to negative. Used to compute always ascending.
     if (x0 > x1){
         swap(x0, x1);
         swap(y0, y1);
     }
 
+    //Compute the delta on both axis.
     int dx = x1 - x0;
     int dy = abs(y1 - y0);
 
+    //The base error is equal to dX/2. Using this value instead of a float speeds up the computing by using just ints.
     int error = dx/2;
     int step;
 
+    //Ascending or descending route of the line, set step accordingly.
     if(y0 < y1){
         step = 1;
     } else {
         step = -1;
     }
 
+    //compute each point.
     for(; x0 < x1; x0++){
 //        cout << limit << endl;
+        //Add dY to error. correct y value if needed
         error -= dy;
         if(error < 0){
             y0 += step;
@@ -196,6 +213,7 @@ void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, 
             }
         }
 */
+        //Then draw a new point. X is always incremented by one en each step, Y is function of error.
         if(steep){
             for(int i = 0; i <= limit; i++){
                 image->putChar(y0%256);
@@ -221,7 +239,7 @@ void Audio::clearCoords(){
 
 //Save the buffer to a wav file.
 //The file name is sent from GUI when the button "save" is pressed.
-//TODO: doesn't work yet.
+//Construct the header of a wave file, then add data to it.
 void Audio::save(const QString &filename){
     //Create a file, open it in read mode.
     QFile file(filename);
@@ -257,6 +275,7 @@ void Audio::save(const QString &filename){
     file.write("data");
     //data size
     file.write(wByte(image->buffer().size()), 4);
+    //Finally write data!
     file.write(image->buffer());
     file.close();
 }
@@ -371,6 +390,7 @@ void Audio::handleExposureChanged(int value){
     exposure = value;
 }
 
+//Emit signal when the timer ticks.
 void Audio::handleTimer(){
     elapsed++;
     emit progressing(elapsed);
