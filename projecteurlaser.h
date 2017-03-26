@@ -48,6 +48,7 @@ public:
     void populateGui();
 
 private:
+    void newFile();
     void readSettings();
     void saveSettings();
 

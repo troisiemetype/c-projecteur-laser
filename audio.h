@@ -58,7 +58,7 @@ public:
     void stop();
     int getLength();
 
-    void appendSupport(int x, int y);
+    void appendSupport(const int &x, const int &y);
     void clearSupport();
     void playSupport();
     void stopSupport();
@@ -80,6 +80,10 @@ public:
         return data;
     }
 
+    //Setters
+
+    void setExposure(const int&);
+
 protected:
     QAudioFormat format;
     QAudioOutput *audio;
@@ -99,7 +103,6 @@ protected:
 public slots:
     void handleAudioStateChanged(QAudio::State);
     void handleSupportStateChanged(QAudio::State);
-    void handleExposureChanged(int);
     void handleTimer();
 
 signals:

@@ -46,7 +46,7 @@ class ComputeImage : public QObject
 public:
 //    ComputeImage();
     ComputeImage(Image *);
-    void init();
+    void update();
 
     void updateMaxSize();
     void computeCoords(Audio *buffer);

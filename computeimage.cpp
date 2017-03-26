@@ -81,7 +81,7 @@ void ComputeImage::readSettings(){
 }
 
 //Create a new computeImage object.
-void ComputeImage::init()
+void ComputeImage::update()
 {
     //compute the minimum distance from laser to support,
     //given image size and angle value.

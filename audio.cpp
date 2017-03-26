@@ -319,7 +319,7 @@ int Audio::getLength(){
 }
 
 //Populate support buffer.
-void Audio::appendSupport(int x, int y){
+void Audio::appendSupport(const int &x, const int &y){
     support->putChar(x%256);
     support->putChar(x >> 8);
     support->putChar(y%256);
@@ -385,8 +385,8 @@ void Audio::handleSupportStateChanged(QAudio::State state){
     }
 }
 
-//Save the value of exposure when it's changed int othe GUI.
-void Audio::handleExposureChanged(int value){
+//Save the value of exposure when it's changed into the GUI.
+void Audio::setExposure(const int &value){
     exposure = value;
 }
 

@@ -30,6 +30,10 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ProjecteurLaser)
 {
+    //Set pointers to NULL
+    //Image and ComputeImage are created each time a file is opened
+    //Deleted each time it's closed, or another file reopened.
+    //Audio is created by Image, and pass to ProjecteurLaser, that's why it's not newed or deleted in this class.
     image = NULL;
     computeImage = NULL;
     audio = NULL;
@@ -47,21 +51,38 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
 
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     readSettings();
-
-    audio = new Audio();
-
-    connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
-    connect(this, SIGNAL(exposureChanged(int)), audio, SLOT(handleExposureChanged(int)));
-    connect(audio, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
-
 }
 
+//Save settings and delete setting object before to close.
 ProjecteurLaser::~ProjecteurLaser()
 {
     saveSettings();
     on_actionFileClose_triggered();
-    delete audio;
+//    delete audio;
     delete settings;
+}
+
+void ProjecteurLaser::newFile()
+{
+    //Create and init ComputeImage
+    computeImage = new ComputeImage(image);
+    computeImage->setDistance(ui->distanceLineEdit->text().toInt());
+    computeImage->update();
+
+    //Get pointer to Audio
+    audio = image->getAudio();
+
+    //Set connection between signals and slots.
+    connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
+    connect(audio, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
+    connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
+
+    populateGui();
+    //Last, enable buttons for calibrating and computing, and show the image and values area.
+    ui->actionImageCompute->setEnabled(true);
+
+    ui->centralWidget->show();
+
 }
 
 void ProjecteurLaser::readSettings(){
@@ -112,6 +133,7 @@ void ProjecteurLaser::populateGui()
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
 
     ui->stepSlider->setVisible(false);
+    ui->stepLabel->setVisible(false);
 
 }
 
@@ -136,27 +158,14 @@ void ProjecteurLaser::on_actionFileNew_triggered()
     } else {
         typeFichier = "bmp";
 
+        //Verify that image isn't yet set, else delete it
         if(image){
             on_actionFileClose_triggered();
         }
-
         //Create the image object
         image = new Image(file);
-
-        computeImage = new ComputeImage(image);
-        computeImage->setDistance(ui->distanceLineEdit->text().toInt());
-        computeImage->init();
-
-        connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
-
-        populateGui();
-
+        newFile();
     }
-
-    //Last, enable buttons for calibrating and computing, and show the image and values area.
-    ui->actionImageCompute->setEnabled(true);
-
-    ui->centralWidget->show();
 
 }
 
@@ -178,8 +187,6 @@ void ProjecteurLaser::on_actionFileSave_triggered()
         return;
     }
 
-//    cout << file.toStdString() << endl;
-
     audio->save(file);
 }
 
@@ -191,14 +198,27 @@ void ProjecteurLaser::on_actionFileClose_triggered()
 
     ui->actionImageCompute->setEnabled(false);
     enableSends(false);
-    audio->clearCoords();
-    audio->clearSupport();
 
-    delete computeImage;
-    delete image;
-    image = 0;
-    computeImage = 0;
+    ui->actionImageCalibrate->setChecked(false);
+    ui->actionSend->setChecked(false);
+    ui->infosWidget->setEnabled(true);
 
+
+    //Unset connection between signals and slots.
+    if(computeImage){
+        disconnect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
+        delete computeImage;
+        computeImage = NULL;
+    }
+    if(audio){
+        disconnect(audio, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
+        disconnect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
+        audio = NULL;
+    }
+    if(image){
+        delete image;
+        image = NULL;
+    }
 }
 
 void ProjecteurLaser::on_actionHelp_triggered()
@@ -218,8 +238,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->actionSend->setChecked(false);
     ui->infosWidget->setEnabled(true);
 
-    //Create a new image object.
-    computeImage->init();
+    computeImage->update();
 
     //Show the progressbar area.
     ui->progressLabel->show();
@@ -271,7 +290,7 @@ void ProjecteurLaser::on_supportWidthLineEdit_textEdited(const QString &arg1)
     //Record the new value, hide send button, update the computeImage object
     computeImage->setSupportWidth(arg1.toInt());
 
-    computeImage->init();
+    computeImage->update();
 }
 
 //Update the height of the support.
@@ -281,7 +300,7 @@ void ProjecteurLaser::on_supportHeightLineEdit_textEdited(const QString &arg1)
     //Record the new value, hide send button, update the computeImage object
     computeImage->setSupportHeight(arg1.toInt());
 
-    computeImage->init();
+    computeImage->update();
 }
 
 //Update the distance from laser to wall.
@@ -303,12 +322,14 @@ void ProjecteurLaser::on_imageModeComboBox_currentIndexChanged(int index)
 
     if(index == Image::Threshold){
         ui->stepSlider->setVisible(true);
+        ui->stepLabel->setVisible(true);
     } else {
         ui->stepSlider->setVisible(false);
+        ui->stepLabel->setVisible(false);
     }
 
     image->setImageMode(index);
-    computeImage->init();
+    computeImage->update();
 
     ui->imageLabel->setPixmap(image->getPixmap());
 }
@@ -318,8 +339,11 @@ void ProjecteurLaser::on_stepSlider_valueChanged(int value)
 {
     enableSends(false);
 
+    ui->stepLabel->setText(tr("Threshold: ") + QString::number(value));
+
     image->setStep(value);
     image->setImageMode(ui->imageModeComboBox->currentIndex());
+
     ui->imageLabel->setPixmap(image->getPixmap());
 }
 
@@ -333,7 +357,7 @@ void ProjecteurLaser::on_widthMmLineEdit_textEdited(const QString &arg1)
     ui->heightMmLineEdit->setText(QString::number(computeImage->getHeightMm()));
 
     //Update the computeImage object.
-    computeImage->init();
+    computeImage->update();
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
 }
 
@@ -347,7 +371,7 @@ void ProjecteurLaser::on_heightMmLineEdit_textEdited(const QString &arg1)
     ui->widthMmLineEdit->setText(QString::number(computeImage->getWidthMm()));
 
     //Update the computeImage object.
-    computeImage->init();
+    computeImage->update();
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
 }
 
@@ -365,18 +389,7 @@ void ProjecteurLaser::on_actionGrayScale_triggered()
     //Create the image object
     image = new Image(Tools::greyChart(dpi, 80));
 
-    computeImage = new ComputeImage(image);
-    computeImage->setDistance(ui->distanceLineEdit->text().toInt());
-    computeImage->init();
-
-    connect(computeImage, SIGNAL(progressing(int)), this, SLOT(handleProgress(int)));
-
-    populateGui();
-
-    //Last, enable buttons for calibrating and computing, and show the image and values area.
-    ui->actionImageCompute->setEnabled(true);
-    ui->centralWidget->show();
-
+    newFile();
 }
 
 void ProjecteurLaser::on_actionSend_triggered(bool checked)
@@ -457,7 +470,8 @@ void ProjecteurLaser::on_exposureSlider_sliderMoved(int position)
     ui->speedLabel->setText(text);
     enableSends(false);
 
-    emit exposureChanged(position);
+    audio->setExposure(position);
+
 }
 
 void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
@@ -503,6 +517,7 @@ void ProjecteurLaser::on_resetButton_clicked()
     ui->offsetXSlider->setValue(0);
     ui->offsetYSlider->setValue(0);
     ui->jumpSpinBox->setValue(0);
+    ui->stepSlider->setValue(127);
 }
 
 void ProjecteurLaser::on_actionResample_triggered()
@@ -514,7 +529,7 @@ void ProjecteurLaser::on_actionResample_triggered()
 
     image->resample(dpi);
 
-    computeImage->init();
+    computeImage->update();
 
     populateGui();
 
