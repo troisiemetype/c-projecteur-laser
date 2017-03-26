@@ -34,7 +34,6 @@ class Image
 {
 
 public:
-    Image();
     Image(const QString &);
     Image(QImage *image);
     Image(int);
@@ -54,18 +53,13 @@ public:
     inline int getHeightPix() const{return height;}
     inline int getWidthMm() const{return widthMm;}
     inline int getHeightMm() const{return heightMm;}
-    inline int getDistance() const{return distance;}
-    inline int getSupportWidth() const{return supportWidth;}
-    inline int getSupportHeight() const{return supportHeight;}
+
     inline int getBlackWhiteStep() const{return blackWhiteStep;}
     int getDpi();
 
     //setters
     void setImageWidth(int);
     void setImageHeight(int);
-    void setSupportWidth(int);
-    void setSupportHeight(int);
-    void setDistance(int);
     void setImageMode(int);
 
     void setStep(int);
@@ -89,11 +83,6 @@ private:
 
     int widthMm;
     int heightMm;
-
-    int distance;
-
-    int supportWidth;
-    int supportHeight;
 
     float inchesPerMeter = 39.37;
 };

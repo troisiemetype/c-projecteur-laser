@@ -96,7 +96,7 @@ private slots:
 
     void handleProgress(int value);
 
-    void on_angleSpinBox_valueChanged();
+    void on_angleSpinBox_valueChanged(int arg1);
 
     void on_exposureSlider_sliderMoved(int position);
 

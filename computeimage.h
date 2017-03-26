@@ -30,6 +30,7 @@
 #include <QCoreApplication>
 #include <QObject>
 #include <QProgressBar>
+#include <QSettings>
 #include <QString>
 
 #include "audio.h"
@@ -43,7 +44,7 @@ class ComputeImage : public QObject
     Q_OBJECT
 
 public:
-    ComputeImage();
+//    ComputeImage();
     ComputeImage(Image *);
     void init();
 
@@ -53,18 +54,33 @@ public:
 
     void calibrate();
 
-    int getMinDistance();
-    void setScanAngle(int);
-    int getDpi();
+    //getters
+    inline int getMinDistance() const{return minDistance;}
+    inline int getDpi() const{return float(25.4) / ratioPixMm;}
+    inline int getWidthMm() const{return widthMm;}
+    inline int getHeightMm() const{return heightMm;}
+    inline int getSupportWidth() const{return supportWidth;}
+    inline int getSupportHeight() const{return supportHeight;}
 
-    void setJump(int value);
-    void setOffsetX(int value);
-    void setOffsetY(int value);
+    //setters
+    void setDistance(const int &value);
+
+    void setImageWidth(const int &value);
+    void setImageHeight(const int &value);
+    void setSupportWidth(const int &value);
+    void setSupportHeight(const int &value);
+
+    void setScanAngle(const int &value);
+    void setJump(const int &value);
+    void setOffsetX(const int &value);
+    void setOffsetY(const int &value);
 
 signals:
     void progressing(int value);
 
 private:
+
+    void readSettings();
     void computeAngles();
     void bresenham(int start, int end);
 
@@ -79,14 +95,14 @@ private:
     Image *image;
     QImage *negative;
 
+    QSettings *settings;
+
     //copies of the image values
     int widthPix;
     int heightPix;
     int widthMm;
     int heightMm;
-    char index;
-    int speed;
-    int mode;
+    float ratio;
     int distance;
     int supportWidth;
     int supportHeight;

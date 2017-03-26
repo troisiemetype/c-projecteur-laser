@@ -23,16 +23,48 @@
 
 #include "computeimage.h"
 
+/*
 ComputeImage::ComputeImage()
 {
     audio = NULL;
 }
+*/
 
+//Create a compute object for an image.
+//On each image openning, a compute object is created, and deleted when image is closed.
 ComputeImage::ComputeImage(Image *file)
 {
     image = file;
     negative = image->getNegative();
     audio = image->getAudio();
+
+    settings = new QSettings("settings.ini", QSettings::IniFormat);
+    readSettings();
+
+    //get the values from image.
+    widthPix = image->getWidthPix();
+    heightPix = image->getHeightPix();
+    size = widthPix * heightPix;
+    ratio = (float)widthPix / (float)heightPix;
+    widthMm = image->getWidthMm();
+    heightMm = image->getHeightMm();
+
+    supportWidth = widthMm;
+    supportHeight = heightMm;
+
+    //initialisation of vars and constants.
+    //Positions for X and Y is coded on 16 bits.
+    angleMaxValue = pow(2, 15);
+    pi = atan(1) * 4;
+
+    //The max angle in cfg file is store as degrees; converting it to radians.
+    maxAngleX *= pi / 180;
+    maxAngleY *= pi / 180;
+
+    //Prepare the tan of the scan max angle.
+    //With python it speeds up the calculus, but it seems C++ doesn't care!
+    tanXScan = tan(maxAngleX);
+    tanYScan = tan(maxAngleY);
 
     //Initialize value for jump and offset.
     jump = 0;
@@ -40,37 +72,13 @@ ComputeImage::ComputeImage(Image *file)
     offsetY = 0;
 }
 
+void ComputeImage::readSettings(){
+    maxAngleX = maxAngleY = settings->value("laser/maxangle").toInt();
+}
+
 //Create a new computeImage object.
-//This copies the values it needs from the image that is opened.
-//Each time the image is updated the computeImage object is created again.
 void ComputeImage::init()
 {
-    //initialisation of vars and constants.
-    //Positions for X and Y is coded on 16 bits.
-    angleMaxValue = pow(2, 15);
-    pi = atan(1) * 4;
-
-    //The max angle in cfg file is store as degrees; converting it to radians.
-    maxAngleX = 12 * pi / 180;
-    maxAngleY = 12 * pi / 180;
-
-    //Prepare the tan of the scan max angle.
-    //With python it speeds up the calculus, but it seems C++ doesn't care!
-    tanXScan = tan(maxAngleX);
-    tanYScan = tan(maxAngleY);
-
-    //get the values from image.
-    widthPix = image->getWidthPix();
-    heightPix = image->getHeightPix();
-    size = widthPix * heightPix;
-    widthMm = image->getWidthMm();
-    heightMm = image->getHeightMm();
-    index = 0;
-    distance = image->getDistance();
-
-    supportWidth = image->getSupportWidth();
-    supportHeight = image->getSupportHeight();
-
     //compute the minimum distance from laser to support,
     //given image size and angle value.
     if(widthPix > heightPix){
@@ -492,27 +500,48 @@ void ComputeImage::bresenham(int x, int y){
     emit progressing(progress);
 }
 
-int ComputeImage::getMinDistance(){
-    return minDistance;
+//Update the distance from GUI
+void ComputeImage::setDistance(const int &value){
+    distance = value;
 }
 
-void ComputeImage::setScanAngle(int angle){
-    scanAngle = angle;
+//Update the width from GUI, adapt height.
+void ComputeImage::setImageWidth(const int &value)
+{
+    widthMm = value;
+    heightMm = (float)value / (float)ratio;
 }
 
-int ComputeImage::getDpi(){
-    return float(25.4) / ratioPixMm;
+//Update the height from GUI, adapt width.
+void ComputeImage::setImageHeight(const int &value)
+{
+    heightMm = value;
+    widthMm = (float)value * (float)ratio;
 }
 
-void ComputeImage::setJump(int value){
+void ComputeImage::setSupportWidth(const int &value)
+{
+    supportWidth = value;
+}
+
+void ComputeImage::setSupportHeight(const int &value)
+{
+    supportHeight = value;
+}
+
+void ComputeImage::setScanAngle(const int &value){
+    scanAngle = value;
+}
+
+void ComputeImage::setJump(const int &value){
     jump = value;
 }
 
-void ComputeImage::setOffsetX(int value){
+void ComputeImage::setOffsetX(const int &value){
     offsetX = value;
 }
 
-void ComputeImage::setOffsetY(int value){
+void ComputeImage::setOffsetY(const int &value){
     offsetY = value;
 }
 

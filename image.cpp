@@ -32,11 +32,6 @@
 
 using namespace std;
 
-Image::Image()
-{
-    original = NULL;
-}
-
 //The Image constructor. Called by the GUI when a file is opened.
 Image::Image(const QString& file)
 {
@@ -101,21 +96,14 @@ void Image::initImage()
     //thumbnail is the thumbnail version of the original.
     //thumbnailBW, is computed from the above, each time needed.
 
-    //Get the size in mm from the size in pixels and the dpi ratio.
-    widthMm = 1000 * original->width() / original->dotsPerMeterX();
-    heightMm = 1000 * original->height() / original->dotsPerMeterY();
-
     width = original->width();
     height = original->height();
 
+    //Get the size in mm from the size in pixels and the dpi ratio.
+    widthMm = 1000 * width / original->dotsPerMeterX();
+    heightMm = 1000 * height / original->dotsPerMeterY();
+
     ratio = (float)width / (float)height;
-
-    //defaut speed and distance
-    distance = 475;
-
-    //default support size = image size.
-    supportWidth = widthMm;
-    supportHeight = heightMm;
 
     //The type of image we use. grayscale, thresold, etc.
     blackWhiteMode = 0;
@@ -175,35 +163,6 @@ Audio *Image::getAudio(){
 int Image::getDpi(){
     //39.3 is the quantity of inches in a meter
     return original->dotsPerMeterX() / inchesPerMeter;
-}
-
-//Update the width from GUI, adapt height.
-void Image::setImageWidth(int value)
-{
-    widthMm = value;
-    heightMm = (float)value / (float)ratio;
-}
-
-//Update the height from GUI, adapt width.
-void Image::setImageHeight(int value)
-{
-    heightMm = value;
-    widthMm = (float)value * (float)ratio;
-}
-
-void Image::setSupportWidth(int value)
-{
-    supportWidth = value;
-}
-
-void Image::setSupportHeight(int value)
-{
-    supportHeight = value;
-}
-
-void Image::setDistance(int value)
-{
-    distance = value;
 }
 
 void Image::setImageMode(int value)
