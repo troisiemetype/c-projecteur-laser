@@ -27,6 +27,7 @@
 #include <QFile>
 #include <QIODevice>
 #include <QObject>
+#include <QSettings>
 #include <QString>
 #include <QTimer>
 
@@ -83,6 +84,8 @@ public:
     //Setters
 
     void setExposure(const int&);
+    inline int getExposure() const{return exposure;}
+    inline int getRepeat() const{}
 
 protected:
     QAudioFormat format;
@@ -91,6 +94,7 @@ protected:
     QBuffer *image;
     QBuffer *support;
     QTimer *timer;
+    QSettings *settings;
 
     int sampleRate;
     int sampleSize;

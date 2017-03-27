@@ -666,6 +666,11 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
+  <tabstop>widthMmLineEdit</tabstop>
+  <tabstop>heightMmLineEdit</tabstop>
+  <tabstop>supportWidthLineEdit</tabstop>
+  <tabstop>supportHeightLineEdit</tabstop>
+  <tabstop>distanceLineEdit</tabstop>
   <tabstop>repeatSpinBox</tabstop>
   <tabstop>angleSpinBox</tabstop>
   <tabstop>exposureSlider</tabstop>
@@ -674,6 +679,7 @@
   <tabstop>jumpSpinBox</tabstop>
   <tabstop>imageModeComboBox</tabstop>
   <tabstop>stepSlider</tabstop>
+  <tabstop>resetButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

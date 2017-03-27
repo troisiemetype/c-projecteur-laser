@@ -78,6 +78,11 @@ void ProjecteurLaser::newFile()
     connect(audio, SIGNAL(stopped()), this, SLOT(handleAudioStopped()));
 
     populateGui();
+    computeImage->setRepeat(ui->repeatSpinBox->value());
+    computeImage->setExposure(ui->exposureSlider->value());
+
+    ui->exposureRatioValue->setText(QString::number(computeImage->getExposureRatio()));
+
     //Last, enable buttons for calibrating and computing, and show the image and values area.
     ui->actionImageCompute->setEnabled(true);
 
@@ -309,7 +314,6 @@ void ProjecteurLaser::on_distanceLineEdit_textEdited(const QString &arg1)
     enableSends(false);
 
     computeImage->setDistance(arg1.toInt());
-
 }
 
 //Temporary: Change the image mode.
@@ -359,6 +363,8 @@ void ProjecteurLaser::on_widthMmLineEdit_textEdited(const QString &arg1)
     //Update the computeImage object.
     computeImage->update();
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
+
+    ui->exposureRatioValue->setText(QString::number(computeImage->getExposureRatio()));
 }
 
 //Update the height of the picture.
@@ -373,6 +379,9 @@ void ProjecteurLaser::on_heightMmLineEdit_textEdited(const QString &arg1)
     //Update the computeImage object.
     computeImage->update();
     ui->resolutionLabelEdit->setText(QString::number(computeImage->getDpi()));
+
+    ui->exposureRatioValue->setText(QString::number(computeImage->getExposureRatio()));
+
 }
 
 void ProjecteurLaser::on_actionGrayScale_triggered()
@@ -471,13 +480,18 @@ void ProjecteurLaser::on_exposureSlider_sliderMoved(int position)
     enableSends(false);
 
     audio->setExposure(position);
+    computeImage->setExposure(position);
 
+    ui->exposureRatioValue->setText(QString::number(computeImage->getExposureRatio()));
 }
 
 void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
 {
     repeat = arg1;
+    computeImage->setRepeat(arg1);
     enableSends(false);
+
+    ui->exposureRatioValue->setText(QString::number(computeImage->getExposureRatio()));
 }
 
 void ProjecteurLaser::on_offsetXSlider_valueChanged(int value)

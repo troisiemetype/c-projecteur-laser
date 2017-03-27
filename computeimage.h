@@ -61,6 +61,9 @@ public:
     inline int getHeightMm() const{return heightMm;}
     inline int getSupportWidth() const{return supportWidth;}
     inline int getSupportHeight() const{return supportHeight;}
+    inline int getExposureRatio() const{
+        return (pow(getDpi(), 2) * repeat * exposure * coefExp) / (sampleRate * 100);
+    }
 
     //setters
     void setDistance(const int &value);
@@ -74,6 +77,8 @@ public:
     void setJump(const int &value);
     void setOffsetX(const int &value);
     void setOffsetY(const int &value);
+    void setRepeat(const int &value);
+    void setExposure(const int &value);
 
 signals:
     void progressing(int value);
@@ -116,12 +121,17 @@ private:
     int halfMaxSizeY;
     int size;
     int scanAngle;
+    int sampleSize;
+    int sampleRate;
+    float coefExp;
 
     int jump;
     int offsetX;
     int offsetY;
     int offsetValueX;
     int offsetValueY;
+    int repeat;
+    int exposure;
 
     //Values that store the max angle of the scan.
     double maxAngleX;

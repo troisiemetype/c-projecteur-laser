@@ -30,9 +30,9 @@ Audio::Audio()
 {
 
     //Set sample rate and sample size.
-    //TODO: get it from the setting file.
-    sampleRate = 48000;
-    sampleSize = 16;
+    settings = new QSettings("settings.ini", QSettings::IniFormat);
+    sampleRate = settings->value("audio/samplerate").toInt();
+    sampleSize = settings->value("audio/samplesize").toInt();
     //set audio format.
     setFormat();
 //    displayDeviceInfo();
@@ -67,6 +67,7 @@ Audio::~Audio(){
     delete audioSupport;
     delete image;
     delete support;
+    delete settings;
 }
 
 //Set the format of the audio output
@@ -123,13 +124,16 @@ void Audio::displayDeviceInfo(){
 void Audio::append(int x, int y, int l){
     //This is used to add exposure ratio (set in the GUI) to the exposure speed.
     int limit = l * (float)exposure / 100;
-
     //Use >> instead of / to avoid zero doubling.
     for(int i = 0; i < limit; i++){
         image->putChar(x);
-        image->putChar(x >> 8);
+        if(sampleSize>8)image->putChar(x >> 8);
+        if(sampleSize>16)image->putChar(x >> 16);
+        if(sampleSize>24)image->putChar(x >> 24);
         image->putChar(y);
-        image->putChar(y >> 8);
+        if(sampleSize>8)image->putChar(y >> 8);
+        if(sampleSize>16)image->putChar(y >> 16);
+        if(sampleSize>24)image->putChar(y >> 24);
     }
 }
 
@@ -315,15 +319,20 @@ void Audio::stop(){
 
 //return insolation length, in seconds.
 int Audio::getLength(){
-    return length = (repeat + 1) * image->buffer().size() / 4 / format.sampleRate();
+    length = (repeat + 1) * image->buffer().size() / format.sampleRate();
+    return length /= (format.bytesPerFrame());
 }
 
 //Populate support buffer.
 void Audio::appendSupport(const int &x, const int &y){
-    support->putChar(x%256);
-    support->putChar(x >> 8);
-    support->putChar(y%256);
-    support->putChar(y >> 8);
+    support->putChar(x);
+    if(sampleSize>8)support->putChar(x >> 8);
+    if(sampleSize>16)support->putChar(x >> 16);
+    if(sampleSize>24)support->putChar(x >> 24);
+    support->putChar(y);
+    if(sampleSize>8)support->putChar(y >> 8);
+    if(sampleSize>16)support->putChar(y >> 16);
+    if(sampleSize>24)support->putChar(y >> 24);
 }
 
 //Clear support buffer.

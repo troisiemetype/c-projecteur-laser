@@ -35,7 +35,6 @@ ComputeImage::ComputeImage()
 ComputeImage::ComputeImage(Image *file)
 {
     //set a pointer to the image; get its negative. Set pointer to audio
-    //TODO: link audio to the image.
     image = file;
     negative = image->getNegative();
     audio = image->getAudio();
@@ -43,6 +42,11 @@ ComputeImage::ComputeImage(Image *file)
     //Get laser settings
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     readSettings();
+
+    //exposure coefficient
+    //TODO: store it in setting file.
+    //Eventually store several for different processes
+//    coefExp = 550;//At 333 black seems to be obtained for pix value around 160.
 
     //get the values from image.
     widthPix = image->getWidthPix();
@@ -57,7 +61,8 @@ ComputeImage::ComputeImage(Image *file)
 
     //initialisation of vars and constants.
     //Positions for X and Y is coded on 16 bits.
-    angleMaxValue = pow(2, 15);
+    angleMaxValue = pow(2, sampleSize - 1) - 1;
+//    cout << "max angle value " << angleMaxValue << endl;
     pi = atan(1) * 4;
 
     //The max angle in cfg file is store as degrees; converting it to radians.
@@ -77,7 +82,11 @@ ComputeImage::ComputeImage(Image *file)
 
 //read the settings from the setting file.
 void ComputeImage::readSettings(){
-    maxAngleX = maxAngleY = settings->value("laser/maxangle").toInt();
+    maxAngleX = settings->value("laser/maxangleX", 12).toInt();
+    maxAngleY = settings->value("laser/maxangleY", 12).toInt();
+    coefExp = settings->value("process/exposurecoef", 550).toInt();
+    sampleSize = settings->value("audio/samplesize").toInt();
+    sampleRate = settings->value("audio/samplerate").toInt();
 }
 
 //Create a new computeImage object.
@@ -211,7 +220,12 @@ void ComputeImage::computeSupport()
     angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
     angleRatio = angleValue / maxAngleX;
     widthValue = angleMaxValue * angleRatio;
-
+/*
+    cout << "half size" << halfSize << endl;
+    cout << "angle value" << angleValue << endl;
+    cout << "angle ratio" << angleRatio << endl;
+    cout << "width value" << widthValue << endl;
+*/
     halfSize = (supportHeight / 2);
     angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
     angleRatio = angleValue / maxAngleY;
@@ -223,17 +237,28 @@ void ComputeImage::computeSupport()
     //Clear support audio buffer
     audio->clearSupport();
 
+    int increment;
+    if(sampleSize > 24){
+        increment = pow(2, 20);
+    } else if(sampleSize > 16){
+        increment = pow(2, 14);
+    } else if(sampleSize > 8){
+        increment = pow(2, 5);
+    } else {
+        increment = 1;
+    }
+
     //Draw each border line.
-    for(;x<widthValue; x+=32){
+    for(;x<widthValue; x+=increment){
         audio->appendSupport(x, y);
     }
-    for(;y<heightValue; y+=32){
+    for(;y<heightValue; y+=increment){
         audio->appendSupport(x, y);
     }
-    for(;x>-widthValue; x-=32){
+    for(;x>-widthValue; x-=increment){
         audio->appendSupport(x, y);
     }
-    for(;y>-heightValue; y-=32){
+    for(;y>-heightValue; y-=increment){
         audio->appendSupport(x, y);
     }
 
@@ -569,5 +594,15 @@ void ComputeImage::setOffsetX(const int &value){
 //Set offset from the GUI. Used to move point position from its theorical value
 void ComputeImage::setOffsetY(const int &value){
     offsetY = value;
+}
+
+//Set repeat from the GUI. Used to compute the inolation ratio
+void ComputeImage::setRepeat(const int & value){
+    repeat = value + 1;
+}
+
+//Set repeat from the GUI. Used to compute the inolation ratio
+void ComputeImage::setExposure(const int & value){
+    exposure = value;
 }
 
