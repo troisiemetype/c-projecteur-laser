@@ -87,7 +87,10 @@ private:
 
     void readSettings();
     void computeAngles();
+    int computePos(const double &value, const int &axis);
     void bresenham(int start, int end);
+
+    int checkForSize(const int &, const int &);
 
     void inline swap(int a, int b){
         int t = a;
@@ -101,6 +104,11 @@ private:
     QImage *negative;
 
     QSettings *settings;
+
+    enum axis{
+        X,
+        Y,
+    };
 
     //copies of the image values
     int widthPix;

@@ -118,7 +118,7 @@ void ProjecteurLaser::enableSends(bool state)
     ui->actionSend->setEnabled(state);
     ui->actionPause->setEnabled(state);
     ui->actionStop->setEnabled(state);
-    ui->actionImageCalibrate->setEnabled(state);
+//    ui->actionImageCalibrate->setEnabled(state);
 
 }
 
@@ -170,6 +170,7 @@ void ProjecteurLaser::on_actionFileNew_triggered()
         //Create the image object
         image = new Image(file);
         newFile();
+        ui->actionImageCalibrate->setEnabled(true);
     }
 
 }
@@ -203,6 +204,8 @@ void ProjecteurLaser::on_actionFileClose_triggered()
 
     ui->actionImageCompute->setEnabled(false);
     enableSends(false);
+    ui->actionImageCalibrate->setEnabled(false);
+
 
     ui->actionImageCalibrate->setChecked(false);
     ui->actionSend->setChecked(false);
@@ -264,6 +267,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
     ui->actionImageCalibrate->setEnabled(true);
     enableSends(true);
     ui->actionSend->setEnabled(true);
+    ui->actionCalibrate->setEnabled(true);
     QString text = tr("Insolation time: ");
     text += QString::number(audio->getLength());
     text += tr(" seconds.");
@@ -279,6 +283,7 @@ void ProjecteurLaser::on_actionImageCalibrate_triggered(bool checked)
         ui->infosWidget->setEnabled(false);
         enableSends(false);
         ui->actionImageCalibrate->setEnabled(true);
+        computeImage->update();
         computeImage->computeSupport();
         audio->playSupport();
     } else {

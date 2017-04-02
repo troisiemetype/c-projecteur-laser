@@ -51,7 +51,7 @@ public:
     Audio();
     ~Audio();
     void append(int x, int y, int lValue);
-    void appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, vector<int> *pix);
+    void appendBresenham(int x0, int y0, int x1, int y1, vector<int>*, vector<int>*);
     void clearCoords();
     void save(const QString &filename);
     void play(int value);
@@ -85,7 +85,7 @@ public:
 
     void setExposure(const int&);
     inline int getExposure() const{return exposure;}
-    inline int getRepeat() const{}
+    inline int getRepeat() const{return repeat;}
 
 protected:
     QAudioFormat format;

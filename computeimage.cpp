@@ -70,7 +70,6 @@ ComputeImage::ComputeImage(Image *file)
     maxAngleY *= pi / 180;
 
     //Prepare the tan of the scan max angle.
-    //With python it speeds up the calculus, but it seems C++ doesn't care!
     tanXScan = tan(maxAngleX);
     tanYScan = tan(maxAngleY);
 
@@ -133,17 +132,8 @@ void ComputeImage::computeCoords(Audio *buffer)
     updateMaxSize();
     computeAngles();
 
-    //Display a message box if the intended size is beyond the limits of the laser, asking to increase size.
-    if(widthMm > maxSizeX || heightMm > maxSizeY){
-//        QString text = tr("Max size for this distance is %n x %nmm. Please decrease size or increase distance.");
-        QString text = tr("Max size for this distance is ");
-        text += QString::number(maxSizeX);
-        text += "x";
-        text += QString::number(maxSizeY);
-        text += tr("mm. Please decrease size or increase distance.");
-        WinInfo::info(text, tr("Size error"));
-        return;
-    }
+    //Check if size isn't beyond laser limits
+    if(checkForSize(widthMm, heightMm)) return;
 
    // Clear coords in buffer before to populate it
     audio = buffer;
@@ -206,30 +196,19 @@ void ComputeImage::computeCoords(Audio *buffer)
 //generate four lines according to support size
 void ComputeImage::computeSupport()
 {
+    //
+    updateMaxSize();
+
+    //Check if size isn't beyond laser limits
+    if(checkForSize(supportWidth, supportHeight)) return;
+
     //Somes values used t ocompute the support border.
-    double angleValue = 0;
-    double angleRatio = 0;
-    double halfSize = 0;
     int widthValue = 0;
     int heightValue = 0;
 
     //Compute the values of extremum.
-    //TODO: this is grossly the same function as in computeAngles.
-    //This two methods should be refactor to use one another.
-    halfSize = (supportWidth / 2);
-    angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
-    angleRatio = angleValue / maxAngleX;
-    widthValue = angleMaxValue * angleRatio;
-/*
-    cout << "half size" << halfSize << endl;
-    cout << "angle value" << angleValue << endl;
-    cout << "angle ratio" << angleRatio << endl;
-    cout << "width value" << widthValue << endl;
-*/
-    halfSize = (supportHeight / 2);
-    angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
-    angleRatio = angleValue / maxAngleY;
-    heightValue = angleMaxValue * angleRatio;
+    widthValue = computePos(supportWidth / 2, X);
+    heightValue = computePos(supportHeight / 2, Y);
 
     int x = -widthValue;
     int y = -heightValue;
@@ -331,10 +310,7 @@ void ComputeImage::computeAngles()
     angleValueY.clear();
 
     //Initlize some vars for computing temporary values
-    double angleValue = 0;
-    double angleRatio = 0;
     double halfSize = 0;
-    int posValue = 0;
 
     //First get the values for width
     //
@@ -347,23 +323,14 @@ void ComputeImage::computeAngles()
     for(int i = 0; i<widthPix; i++)
     {
         halfSize = (i - widthPix / 2) * ratioPixMm;
-        angleValue = atan(halfSize * tanXScan / halfMaxSizeX);
-        angleRatio = angleValue / maxAngleX;
-//        posValue = round(angleMaxValue * angleRatio);
-        posValue = angleMaxValue * angleRatio;
-        angleValueX.push_back(posValue);
+        angleValueX.push_back(computePos(halfSize, X));
     }
 
     //Then get the values for height
     for(int i = 0; i<heightPix; i++)
     {
         halfSize = (i - heightPix / 2) * ratioPixMm;
-        angleValue = atan(halfSize * tanYScan / halfMaxSizeY);
-        angleRatio = angleValue / maxAngleY;
-//        posValue = round(angleMaxValue * angleRatio);
-        posValue = angleMaxValue * angleRatio;
-        angleValueY.push_back(posValue);
-
+        angleValueY.push_back(computePos(halfSize, Y));
     }
 
     //get the number of points for a pixel increment.
@@ -375,17 +342,35 @@ void ComputeImage::computeAngles()
 
 }
 
+int ComputeImage::computePos(const double &value, const int &axis){
+    double angleValue = 0;
+    double angleRatio = 0;
+    int posValue = 0;
+
+    if(axis == X){
+        angleValue = atan(value * tanXScan / halfMaxSizeX);
+        angleRatio = angleValue / maxAngleX;
+        posValue = angleMaxValue * angleRatio;
+    } else if( axis == Y){
+        angleValue = atan(value * tanYScan / halfMaxSizeY);
+        angleRatio = angleValue / maxAngleY;
+        posValue = angleMaxValue * angleRatio;
+    }
+
+    return posValue;
+}
+
 //compute the points with Bresenham algorithm
 //Each of the four octant is computed differently and handles overflows
 //TODO: these four cases should be condensed into one.
 void ComputeImage::bresenham(int x, int y){
 
-/*
+
     int previousX = x;
     int previousY = y;
     angleValue.clear();
     pixValue.clear();
-*/
+
 
     if (scanAngle > 45){
         double tanAngle = tan((90 - scanAngle) * pi / 180);
@@ -433,23 +418,21 @@ void ComputeImage::bresenham(int x, int y){
             }
 
             if (y >= heightPix - 1){
-//                previousX = x;
-//                previousY = y;
+                previousX = x;
+                previousY = y;
                 continue;
             }
 
             pixelsComputed++;
 
-            if(y <= 0){
-//                cout << "pos 0: " << previousX << " * " << previousY << endl;
-//                cout << "pos 1: " << x << " * " << y << endl;
-//                cout << endl;
+            if(y < 0){
+                y = 0;
                 break;
             }
 
             QRgb pix = qBlue(negative->pixel(x, y));
-//            angleValue.push_back(angleValueX[x]);
-//            pixValue.push_back(pix);
+            angleValue.push_back(angleValueX[x]);
+            pixValue.push_back(pix);
 
             /*
             if (pix == 0){
@@ -460,20 +443,25 @@ void ComputeImage::bresenham(int x, int y){
 //            cout << "y: " << y << endl;
 //            cout << "l: " << (int)pix << endl;
             //append values to audio
-            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
+//            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
 
-//            previousX = x;
-//            previousY = y;
         }
-//        cout << "pos 0: " << previousX << " * " << previousY << endl;
-//        cout << "pos 1: " << x << " * " << y << endl;
-//        cout << endl;
-/*
-        audio->appendBresenham(angleValueX[previousX], angleValueY[previousY],
-                               angleValueX[x - 1], angleValueY[y - 1],
-                               &angleValue, &pixValue);
 
+        if(x == widthPix) x--;
+/*
+        cout << previousX << endl;
+        cout << previousY << endl;
+        cout << x << endl;
+        cout << y << endl;
+        cout << angleValue.size() << endl << endl;
 */
+        if(angleValue.size() > 0){
+            audio->appendBresenham(angleValueX[previousX], angleValueY[previousY],
+                                   angleValueX[x], angleValueY[y],
+                                   &angleValue, &pixValue);
+        }
+
+
     } else if (scanAngle >= -45){
         double tanAngle = -tan(scanAngle * pi / 180);
         double error = -0.5;
@@ -543,6 +531,24 @@ void ComputeImage::bresenham(int x, int y){
 
     int progress = 100 * (float)pixelsComputed / size;
     emit progressing(progress);
+}
+
+//check if the given size isn't beyond max angle
+int ComputeImage::checkForSize(const int &xValue, const int &yValue){
+    //Display a message box if the intended size is beyond the limits of the laser, asking to increase size.
+    if(xValue > maxSizeX || yValue > maxSizeY){
+//        QString text = tr("Max size for this distance is %n x %nmm. Please decrease size or increase distance.");
+        QString text = tr("Max size for this distance is ");
+        text += QString::number(maxSizeX);
+        text += "x";
+        text += QString::number(maxSizeY);
+        text += tr("mm. Please decrease size or increase distance.");
+        WinInfo::info(text, tr("Size error"));
+        return 1;
+    } else {
+        return 0;
+    }
+
 }
 
 //Update the distance from GUI

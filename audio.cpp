@@ -143,23 +143,26 @@ void Audio::append(int x, int y, int l){
 //For now it can only draw smooth lines, but doesn't take care of pixel value.
 void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, vector<int> *pix)
 {
-    //If data sent is less than two values, escape.
-    if(angle->size() < 2) return;
-
     int max = angle->size() - 1;
-
+/*
+    cout << x0 << endl;
+    cout << y0 << endl;
+    cout << x1 << endl;
+    cout << y1 << endl;
+    cout << "size " << max << endl << endl;
+*/
     int current = 0;
     int pixValue = pix->at(current);
     int delta = (abs(angle->at(0) - angle->at(angle->size() - 1)) / angle->size() - 1);
     float durationStepPix = 256 / (float)delta;
     int limit = 1;
 
-
+/*
     cout << "size: " << angle->size() << endl;
     cout << "delta: " << delta << endl;
     cout << "step: " << durationStepPix << endl;
     cout << endl;
-
+*/
 
     //Steep is used to know if the line is above 45° (or under -45°), and so how we need to compute points.
     //For angle comprised between -45 and 45°, y is computed from x. x from y in the other case.
@@ -187,14 +190,15 @@ void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, 
     int step;
 
     //Ascending or descending route of the line, set step accordingly.
+    //TODO: setup step according to sample size.
     if(y0 < y1){
-        step = 1;
+        step = 15;
     } else {
-        step = -1;
+        step = -15;
     }
 
     //compute each point.
-    for(; x0 < x1; x0++){
+    for(; x0 < x1; x0 += abs(step)){
 //        cout << limit << endl;
         //Add dY to error. correct y value if needed
         error -= dy;
@@ -202,35 +206,37 @@ void Audio::appendBresenham(int x0, int y0, int x1, int y1, vector<int> *angle, 
             y0 += step;
             error += dx;
         }
-/*
-        if(step == 1){
-            if((current < max) && (x0 > angle->at(current))){
-                pixValue = pix->at(current);
-                limit = (float)pixValue / durationStepPix;
-                current++;
-            }
-        } else {
-            if((current < max) && (x0 < angle->at(current))){
-                pixValue = pix->at(current);
+
+        if(current < max){
+            if((x0 > angle->at(current))){
+                pixValue = pix->at(current) / 8;
                 limit = (float)pixValue / durationStepPix;
                 current++;
             }
         }
-*/
+
         //Then draw a new point. X is always incremented by one en each step, Y is function of error.
         if(steep){
-            for(int i = 0; i <= limit; i++){
-                image->putChar(y0%256);
-                image->putChar(y0 >> 8);
-                image->putChar(x0%256);
-                image->putChar(x0 >> 8);
+            for(int i = 0; i < pixValue; i++){
+                image->putChar(y0);
+                if(sampleSize>8)image->putChar(y0 >> 8);
+                if(sampleSize>16)image->putChar(y0 >> 16);
+                if(sampleSize>24)image->putChar(y0 >> 24);
+                image->putChar(x0);
+                if(sampleSize>8)image->putChar(x0 >> 8);
+                if(sampleSize>16)image->putChar(x0 >> 16);
+                if(sampleSize>24)image->putChar(x0 >> 24);
             }
         } else {
-            for(int i = 0; i <= limit; i++){
-                image->putChar(x0%256);
-                image->putChar(x0 >> 8);
-                image->putChar(y0%256);
-                image->putChar(y0 >> 8);
+            for(int i = 0; i < pixValue; i++){
+                image->putChar(x0);
+                if(sampleSize>8)image->putChar(x0 >> 8);
+                if(sampleSize>16)image->putChar(x0 >> 16);
+                if(sampleSize>24)image->putChar(x0 >> 24);
+                image->putChar(y0);
+                if(sampleSize>8)image->putChar(y0 >> 8);
+                if(sampleSize>16)image->putChar(y0 >> 16);
+                if(sampleSize>24)image->putChar(y0 >> 24);
             }
         }
     }

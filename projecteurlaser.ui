@@ -504,8 +504,8 @@
    <addaction name="actionFileSave"/>
    <addaction name="actionFileClose"/>
    <addaction name="separator"/>
-   <addaction name="actionImageCompute"/>
    <addaction name="actionImageCalibrate"/>
+   <addaction name="actionImageCompute"/>
    <addaction name="separator"/>
    <addaction name="actionSend"/>
    <addaction name="actionPause"/>
