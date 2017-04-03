@@ -57,7 +57,10 @@ public:
     void play(int value);
     void pause(bool value);
     void stop();
+
     int getLength();
+
+    void setRepeat(const int & value);
 
     void appendSupport(const int &x, const int &y);
     void clearSupport();
@@ -101,6 +104,7 @@ protected:
 
     int exposure;
     int repeat;
+    int repeatCount;
     int length;
     int elapsed;
 

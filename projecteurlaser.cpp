@@ -42,7 +42,6 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->centralWidget->hide();
     ui->progressBar->hide();
     ui->progressLabel->hide();
-    ui->actionCalibrate_angles->setEnabled(false);
 
     ui->imageModeComboBox->addItem(tr("Grayscale"));
     ui->imageModeComboBox->addItem(tr("Floyd-Steinberg"));
@@ -89,6 +88,7 @@ void ProjecteurLaser::newFile()
 
     ui->centralWidget->show();
     ui->actionCalibrate_angles->setEnabled(true);
+    ui->actionSystem_informations->setEnabled(true);
 
 }
 
@@ -204,6 +204,7 @@ void ProjecteurLaser::on_actionFileClose_triggered()
     //Hide the image and values area, hide calibrate, compute and send buttons.
     ui->centralWidget->hide();
     ui->actionCalibrate_angles->setEnabled(false);
+    ui->actionSystem_informations->setEnabled(false);
 
     ui->actionImageCompute->setEnabled(false);
     enableSends(false);
@@ -497,6 +498,7 @@ void ProjecteurLaser::on_repeatSpinBox_valueChanged(int arg1)
 {
     repeat = arg1;
     computeImage->setRepeat(arg1);
+    audio->setRepeat(arg1);
     enableSends(false);
 
     ui->exposureRatioValue->setText(QString::number(computeImage->getExposureRatio()));
@@ -593,4 +595,9 @@ void ProjecteurLaser::on_actionCalibrate_angles_triggered()
         computeImage->setRefAngle(height, ComputeImage::Y);
     }
     audio->stopSupport();
+}
+
+void ProjecteurLaser::on_actionSystem_informations_triggered()
+{
+    audio->displayDeviceInfo();
 }

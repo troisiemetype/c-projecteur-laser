@@ -93,6 +93,46 @@ void Audio::displayDeviceInfo(){
     QList<int> sampleRates = device.supportedSampleRates();
     QList<int> sampleSizes = device.supportedSampleSizes();
 
+    QString message = "codecs:";
+
+    message.append('\r');
+    for (int i = 0; i < codecs.size(); i++){
+        message.append('\t');
+        message.append("- ");
+        message.append(codecs.at(i));
+        message.append('\r');
+    }
+
+    message.append("channels:");
+    message.append('\r');
+    for (int i = 0; i < channels.size(); i++){
+        message.append('\t');
+        message.append("- ");
+        message.append(QString::number(channels.at(i)));
+        message.append('\r');
+    }
+
+    message.append("sample rates:");
+    message.append('\r');
+    for (int i = 0; i < sampleRates.size(); i++){
+        message.append('\t');
+        message.append("- ");
+        message.append(QString::number(sampleRates.at(i)));
+        message.append('\r');
+    }
+
+    message.append("sample sizes:");
+    message.append('\r');
+    for (int i = 0; i < sampleSizes.size(); i++){
+        message.append('\t');
+        message.append("- ");
+        message.append(QString::number(sampleSizes.at(i)));
+        message.append('\r');
+    }
+
+    WinInfo::info(message, "Device info");
+
+/*
     cout << "codecs" << endl;
     for (int i = 0; i < codecs.size(); i++){
         cout << "- " << codecs.at(i).toStdString() << endl;
@@ -112,7 +152,7 @@ void Audio::displayDeviceInfo(){
     for (int i = 0; i < sampleSizes.size(); i++){
         cout << "- " << sampleSizes.at(i) << endl;
     }
-
+*/
 
 
 }
@@ -293,7 +333,7 @@ void Audio::save(const QString &filename){
 //Play the file, so that the laser can insolate it.
 //Value is sent from  the GUI, it's the number of times the file must be looped.
 void Audio::play(int value){
-    repeat = value;
+    repeatCount = value;
     getLength();
     elapsed = 0;
     timer->start(1000);
@@ -327,6 +367,10 @@ void Audio::stop(){
 int Audio::getLength(){
     length = (repeat + 1) * image->buffer().size() / format.sampleRate();
     return length /= (format.bytesPerFrame());
+}
+
+void Audio::setRepeat(const int &value){
+    repeat = value;
 }
 
 //Populate support buffer.
@@ -370,9 +414,9 @@ void Audio::handleAudioStateChanged(QAudio::State state){
         case QAudio::ActiveState:
             break;
         case QAudio::IdleState:
-            if (repeat != 0){
+            if (repeatCount != 0){
                 image->reset();
-                repeat--;
+                repeatCount--;
             } else {
                 timer->stop();
                 audio->stop();
@@ -407,6 +451,5 @@ void Audio::setExposure(const int &value){
 
 //Emit signal when the timer ticks.
 void Audio::handleTimer(){
-    elapsed++;
-    emit progressing(elapsed);
+    emit progressing(++elapsed);
 }

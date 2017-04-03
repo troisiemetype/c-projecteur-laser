@@ -119,6 +119,8 @@ private slots:
 
     void on_actionCalibrate_angles_triggered();
 
+    void on_actionSystem_informations_triggered();
+
 private:
     Ui::ProjecteurLaser *ui;
 

@@ -241,10 +241,10 @@
           <item row="4" column="5">
            <widget class="QSlider" name="offsetXSlider">
             <property name="minimum">
-             <number>-100</number>
+             <number>-500</number>
             </property>
             <property name="maximum">
-             <number>100</number>
+             <number>500</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -323,10 +323,10 @@
           <item row="6" column="5">
            <widget class="QSlider" name="offsetYSlider">
             <property name="minimum">
-             <number>-100</number>
+             <number>-500</number>
             </property>
             <property name="maximum">
-             <number>100</number>
+             <number>500</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -505,6 +505,8 @@
     </property>
     <addaction name="actionGrayScale"/>
     <addaction name="actionResample"/>
+    <addaction name="separator"/>
+    <addaction name="actionSystem_informations"/>
     <addaction name="actionCalibrate_angles"/>
     <addaction name="actionCalibrate"/>
    </widget>
@@ -677,6 +679,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Calibrate system</string>
    </property>
@@ -687,8 +692,19 @@
    </property>
   </action>
   <action name="actionCalibrate_angles">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Calibrate angles</string>
+   </property>
+  </action>
+  <action name="actionSystem_informations">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>System informations</string>
    </property>
   </action>
  </widget>

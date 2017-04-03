@@ -145,7 +145,7 @@ void ComputeImage::computeCoords(Audio *buffer)
     //precompute tangente to speed up computing.
     float tanAngle = 0;
 
-    //According to scan angle, find the start point for each scna line, then call bresenham from it.
+    //According to scan angle, find the start point for each scan line, then call bresenham from it.
     //Starting point may be out of the image for every scan angle that is not horizontal or vertical.
     //It's needed to have consistency spacing between lines while insolating.
     //Starting from the border of the picture induce different exposure values
@@ -231,7 +231,7 @@ void ComputeImage::computeRect(int width, int height)
     } else if(sampleSize > 16){
         increment = pow(2, 14);
     } else if(sampleSize > 8){
-        increment = pow(2, 5);
+        increment = pow(2, 4);
     } else {
         increment = 1;
     }
@@ -518,6 +518,10 @@ int ComputeImage::checkForSize(const int &xValue, const int &yValue){
 //Update the distance from GUI
 void ComputeImage::setDistance(const int &value){
     distance = value;
+    settings->beginGroup("laser");
+    settings->setValue("distance", distance);
+    settings->endGroup();
+
 }
 
 //Update the width from GUI, adapt height.
@@ -579,7 +583,6 @@ void ComputeImage::setExposure(const int & value){
 //Compute max angle from user mesure
 void ComputeImage::setRefAngle(const int & value, const int & angle){
     settings->beginGroup("laser");
-    settings->setValue("distance", distance);
     if(angle == X){
         settings->setValue("maxangleX", (float)atan((float)value / 2 /distance) * 180 / pi);
     } else if(angle == Y){
