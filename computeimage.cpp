@@ -385,16 +385,21 @@ void ComputeImage::bresenham(int x, int y){
             }
 
             if(x < 0){
+                previousX = 0;
+                previousY = y;
                 continue;
             }
 
             pixelsComputed++;
 
             if(x >= widthPix){
+                x = widthPix - 1;
                 break;
             }
 
             QRgb pix = qBlue(negative->pixel(x, y));
+            angleValue.push_back(angleValueY[y]);
+            pixValue.push_back(pix);
 
             /*
             if (pix == 0){
@@ -402,7 +407,7 @@ void ComputeImage::bresenham(int x, int y){
             }
             */
             //append values to audio
-            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
+//            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
 
     } else if (scanAngle >= 0){
@@ -419,7 +424,7 @@ void ComputeImage::bresenham(int x, int y){
 
             if (y >= heightPix - 1){
                 previousX = x;
-                previousY = y;
+                previousY = heightPix - 1;
                 continue;
             }
 
@@ -447,21 +452,6 @@ void ComputeImage::bresenham(int x, int y){
 
         }
 
-        if(x == widthPix) x--;
-/*
-        cout << previousX << endl;
-        cout << previousY << endl;
-        cout << x << endl;
-        cout << y << endl;
-        cout << angleValue.size() << endl << endl;
-*/
-        if(angleValue.size() > 0){
-            audio->appendBresenham(angleValueX[previousX], angleValueY[previousY],
-                                   angleValueX[x], angleValueY[y],
-                                   &angleValue, &pixValue);
-        }
-
-
     } else if (scanAngle >= -45){
         double tanAngle = -tan(scanAngle * pi / 180);
         double error = -0.5;
@@ -475,16 +465,21 @@ void ComputeImage::bresenham(int x, int y){
             }
 
             if (y < 0){
+                previousX = x;
+                previousY = y;
                 continue;
             }
 
             pixelsComputed++;
 
             if(y >= heightPix){
+                y = heightPix;
                 break;
             }
 
             QRgb pix = qBlue(negative->pixel(x, y));
+            angleValue.push_back(angleValueX[x]);
+            pixValue.push_back(pix);
 
             /*
             if (pix == 0){
@@ -492,7 +487,7 @@ void ComputeImage::bresenham(int x, int y){
             }
             */
             //append values to audio
-            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
+//            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
 
     } else {
@@ -508,16 +503,21 @@ void ComputeImage::bresenham(int x, int y){
             }
 
             if (x < 0){
+                previousX = x;
+                previousY = y;
                 continue;
             }
 
             pixelsComputed++;
 
             if(x >= widthPix){
+                x = widthPix;
                 break;
             }
 
             QRgb pix = qBlue(negative->pixel(x, y));
+            angleValue.push_back(angleValueY[y]);
+            pixValue.push_back(pix);
 
             /*
             if (pix == 0){
@@ -525,9 +525,28 @@ void ComputeImage::bresenham(int x, int y){
             }
             */
             //append values to audio
-            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
+//            audio->append(angleValueX[x] + offsetValueX, angleValueY[y] + offsetValueY, pix);
         }
     }
+
+    if(x >= widthPix) x = widthPix - 1;
+    if(y >= heightPix) y = heightPix - 1;
+    if(x < 0) x = 0;
+    if(y < 0) y = 0;
+/*
+    cout << previousX << endl;
+    cout << previousY << endl;
+    cout << x << endl;
+    cout << y << endl;
+    cout << angleValue.size() << endl << endl;
+*/
+
+    if(angleValue.size() > 0){
+        audio->appendBresenham(angleValueX[previousX], angleValueY[previousY],
+                               angleValueX[x], angleValueY[y],
+                               &angleValue, &pixValue);
+    }
+
 
     int progress = 100 * (float)pixelsComputed / size;
     emit progressing(progress);
