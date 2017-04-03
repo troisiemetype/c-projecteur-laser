@@ -42,6 +42,7 @@ ProjecteurLaser::ProjecteurLaser(QWidget *parent) :
     ui->centralWidget->hide();
     ui->progressBar->hide();
     ui->progressLabel->hide();
+    ui->actionCalibrate_angles->setEnabled(false);
 
     ui->imageModeComboBox->addItem(tr("Grayscale"));
     ui->imageModeComboBox->addItem(tr("Floyd-Steinberg"));
@@ -87,6 +88,7 @@ void ProjecteurLaser::newFile()
     ui->actionImageCompute->setEnabled(true);
 
     ui->centralWidget->show();
+    ui->actionCalibrate_angles->setEnabled(true);
 
 }
 
@@ -201,6 +203,7 @@ void ProjecteurLaser::on_actionFileClose_triggered()
 {
     //Hide the image and values area, hide calibrate, compute and send buttons.
     ui->centralWidget->hide();
+    ui->actionCalibrate_angles->setEnabled(false);
 
     ui->actionImageCompute->setEnabled(false);
     enableSends(false);
@@ -570,4 +573,24 @@ void ProjecteurLaser::on_actionCalibrate_triggered(bool checked)
         enableSends(true);
         audio->stopSupport();
     }
+}
+
+void ProjecteurLaser::on_actionCalibrate_angles_triggered()
+{
+    SetupAngle setup(this);
+    setup.setDistance(ui->distanceLineEdit->text().toInt());
+    computeImage->computeMax();
+    audio->playSupport();
+
+    if(setup.exec()){
+        int distance = setup.getDistance();
+        int width = setup.getWidth();
+        int height = setup.getHeight();
+
+        ui->distanceLineEdit->setText(QString::number(distance));
+        computeImage->setDistance(distance);
+        computeImage->setRefAngle(width, ComputeImage::X);
+        computeImage->setRefAngle(height, ComputeImage::Y);
+    }
+    audio->stopSupport();
 }

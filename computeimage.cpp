@@ -81,8 +81,8 @@ ComputeImage::ComputeImage(Image *file)
 
 //read the settings from the setting file.
 void ComputeImage::readSettings(){
-    maxAngleX = settings->value("laser/maxangleX", 12).toInt();
-    maxAngleY = settings->value("laser/maxangleY", 12).toInt();
+    maxAngleX = settings->value("laser/maxangleX", 12).toFloat();
+    maxAngleY = settings->value("laser/maxangleY", 12).toFloat();
     coefExp = settings->value("process/exposurecoef", 550).toInt();
     sampleSize = settings->value("audio/samplesize").toInt();
     sampleRate = settings->value("audio/samplerate").toInt();
@@ -193,22 +193,31 @@ void ComputeImage::computeCoords(Audio *buffer)
     }
 }
 
-//generate four lines according to support size
 void ComputeImage::computeSupport()
 {
-    //
     updateMaxSize();
 
     //Check if size isn't beyond laser limits
     if(checkForSize(supportWidth, supportHeight)) return;
 
-    //Somes values used t ocompute the support border.
-    int widthValue = 0;
-    int heightValue = 0;
+    computeRect(supportWidth, supportHeight);
 
+}
+
+void ComputeImage::computeMax()
+{
+    updateMaxSize();
+
+    computeRect(maxSizeX - 1, maxSizeY - 1);
+
+}
+
+//generate four lines according to support size
+void ComputeImage::computeRect(int width, int height)
+{
     //Compute the values of extremum.
-    widthValue = computePos(supportWidth / 2, X);
-    heightValue = computePos(supportHeight / 2, Y);
+    int widthValue = computePos(width / 2, X);
+    int heightValue = computePos(height / 2, Y);
 
     int x = -widthValue;
     int y = -heightValue;
@@ -567,3 +576,14 @@ void ComputeImage::setExposure(const int & value){
     exposure = value;
 }
 
+//Compute max angle from user mesure
+void ComputeImage::setRefAngle(const int & value, const int & angle){
+    settings->beginGroup("laser");
+    settings->setValue("distance", distance);
+    if(angle == X){
+        settings->setValue("maxangleX", (float)atan((float)value / 2 /distance) * 180 / pi);
+    } else if(angle == Y){
+        settings->setValue("maxangleY", (float)atan((float)value / 2 /distance) * 180 / pi);
+    }
+    settings->endGroup();
+}

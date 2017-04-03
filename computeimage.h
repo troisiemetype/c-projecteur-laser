@@ -51,6 +51,8 @@ public:
     void updateMaxSize();
     void computeCoords(Audio *buffer);
     void computeSupport();
+    void computeMax();
+    void computeRect(int, int);
 
     void calibrate();
 
@@ -80,6 +82,14 @@ public:
     void setRepeat(const int &value);
     void setExposure(const int &value);
 
+    void setRefAngle(const int &value, const int &angle);
+
+    enum axis{
+        X,
+        Y,
+    };
+
+
 signals:
     void progressing(int value);
 
@@ -104,11 +114,6 @@ private:
     QImage *negative;
 
     QSettings *settings;
-
-    enum axis{
-        X,
-        Y,
-    };
 
     //copies of the image values
     int widthPix;

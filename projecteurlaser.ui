@@ -142,10 +142,18 @@
            </widget>
           </item>
           <item row="7" column="3">
-           <widget class="QLineEdit" name="heightMmLineEdit"/>
+           <widget class="QLineEdit" name="heightMmLineEdit">
+            <property name="inputMask">
+             <string/>
+            </property>
+           </widget>
           </item>
           <item row="10" column="3">
-           <widget class="QLineEdit" name="supportHeightLineEdit"/>
+           <widget class="QLineEdit" name="supportHeightLineEdit">
+            <property name="inputMask">
+             <string/>
+            </property>
+           </widget>
           </item>
           <item row="4" column="3">
            <widget class="QLabel" name="exposureRatioValue">
@@ -162,10 +170,18 @@
            </widget>
           </item>
           <item row="8" column="3">
-           <widget class="QLineEdit" name="supportWidthLineEdit"/>
+           <widget class="QLineEdit" name="supportWidthLineEdit">
+            <property name="inputMask">
+             <string/>
+            </property>
+           </widget>
           </item>
           <item row="6" column="3">
-           <widget class="QLineEdit" name="widthMmLineEdit"/>
+           <widget class="QLineEdit" name="widthMmLineEdit">
+            <property name="inputMask">
+             <string/>
+            </property>
+           </widget>
           </item>
           <item row="0" column="4">
            <widget class="QLabel" name="repeatLabel">
@@ -352,6 +368,12 @@
               <height>0</height>
              </size>
             </property>
+            <property name="inputMask">
+             <string/>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item row="7" column="1">
@@ -482,8 +504,9 @@
      <string>Tools</string>
     </property>
     <addaction name="actionGrayScale"/>
-    <addaction name="actionCalibrate"/>
     <addaction name="actionResample"/>
+    <addaction name="actionCalibrate_angles"/>
+    <addaction name="actionCalibrate"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
@@ -661,6 +684,11 @@
   <action name="actionResample">
    <property name="text">
     <string>Re-sample</string>
+   </property>
+  </action>
+  <action name="actionCalibrate_angles">
+   <property name="text">
+    <string>Calibrate angles</string>
    </property>
   </action>
  </widget>

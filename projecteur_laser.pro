@@ -18,16 +18,19 @@ SOURCES += main.cpp\
            wininfo.cpp \
            computeimage.cpp \
            audio.cpp \
-    tools.cpp
+    tools.cpp \
+    setupangle.cpp
 
 HEADERS  += projecteurlaser.h \
             image.h \
             wininfo.h \
             computeimage.h \
             audio.h \
-    tools.h
+    tools.h \
+    setupangle.h
 
-FORMS    += projecteurlaser.ui
+FORMS    += projecteurlaser.ui \
+    setupangle.ui
 
 TRANSLATIONS = projecteurlaser_en.ts \
                projecteurlaser_fr.ts

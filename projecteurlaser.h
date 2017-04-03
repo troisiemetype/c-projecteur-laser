@@ -29,6 +29,7 @@
 #include "audio.h"
 #include "computeimage.h"
 #include "image.h"
+#include "setupangle.h"
 #include "tools.h"
 #include "wininfo.h"
 
@@ -115,6 +116,8 @@ private slots:
     void on_actionResample_triggered();
 
     void on_actionCalibrate_triggered(bool checked);
+
+    void on_actionCalibrate_angles_triggered();
 
 private:
     Ui::ProjecteurLaser *ui;
