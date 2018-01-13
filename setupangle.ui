@@ -64,6 +64,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>distanceLineEdit</tabstop>
+  <tabstop>widthLineEdit</tabstop>
+  <tabstop>heightLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -381,6 +381,29 @@ void ComputeImage::bresenham(int x, int y){
     pixValue.clear();
 */
 
+    double tanAngle;
+    double error = -0.5;
+    int incr;
+    int limit;
+
+    if(scanAngle > 45){
+        limit = 0;
+        tanAngle = tan((90 - scanAngle) * pi / 180);
+
+    } else if(scanAngle >=0){
+        limit = widthPix;
+        tanAngle = tan(scanAngle * pi / 180);
+
+    } else if(scanAngle >= -45){
+        limit = widthPix;
+        tanAngle = -tan(scanAngle * pi / 180);
+
+    } else {
+        limit = heightPix;
+        tanAngle = -tan((90 - scanAngle) * pi / 180);
+
+    }
+
     if (scanAngle > 45){
         double tanAngle = tan((90 - scanAngle) * pi / 180);
         double error = -0.5;

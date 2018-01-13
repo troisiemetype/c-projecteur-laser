@@ -263,6 +263,7 @@ void ProjecteurLaser::on_actionImageCompute_triggered()
 
     //Call the computeCoord function, give it a pointer to the audio processor.
     computeImage->computeCoords(audio);
+    computeImage->computeSupport();
     audio->stop();
 
     //Hide the progressbar area.

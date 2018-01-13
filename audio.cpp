@@ -46,6 +46,9 @@ Audio::Audio()
     image = new QBuffer;
     image->open(QIODevice::ReadWrite);
 
+    imageSent = new QBuffer;
+    imageSent->open(QIODevice::ReadWrite);
+
     audioSupport = new QAudioOutput(format);
     support = new QBuffer;
     support->open(QIODevice::ReadWrite);
@@ -79,7 +82,7 @@ void Audio::setFormat(){
     format.setSampleType(QAudioFormat::SignedInt);
     format.setCodec("audio/pcm");
 
-//    cout << format.isValid() << endl;
+    cout << format.isValid() << endl;
 }
 
 //This is a convenience function for debugging or setting purpose.
@@ -132,7 +135,7 @@ void Audio::displayDeviceInfo(){
 
     WinInfo::info(message, "Device info");
 
-/*
+
     cout << "codecs" << endl;
     for (int i = 0; i < codecs.size(); i++){
         cout << "- " << codecs.at(i).toStdString() << endl;
@@ -152,7 +155,7 @@ void Audio::displayDeviceInfo(){
     for (int i = 0; i < sampleSizes.size(); i++){
         cout << "- " << sampleSizes.at(i) << endl;
     }
-*/
+
 
 
 }
@@ -397,6 +400,7 @@ void Audio::playSupport(){
     support->reset();
     audioSupport->start(support);
     connect(audioSupport, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleSupportStateChanged(QAudio::State)));
+    audio->stop();
 }
 
 //Stop send support.
@@ -422,7 +426,7 @@ void Audio::handleAudioStateChanged(QAudio::State state){
                 audio->stop();
                 emit stopped();
                 image->reset();
-//                cout << "stop" << endl;
+                playSupport();
             }
             break;
         default:

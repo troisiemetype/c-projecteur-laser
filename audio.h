@@ -95,6 +95,7 @@ protected:
     QAudioOutput *audio;
     QAudioOutput *audioSupport;
     QBuffer *image;
+    QBuffer *imageSent;
     QBuffer *support;
     QTimer *timer;
     QSettings *settings;
